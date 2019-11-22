@@ -127,8 +127,8 @@ func TestStructToMap(t *testing.T) {
 		FreeCapacity:     int64(50),
 		AvailabilityZone: "az1",
 		Extras: model.StoragePoolExtraSpec{
-			DataStorage:    model.DataStorageLoS{ProvisioningPolicy: "Thin", IsSpaceEfficient: false},
-			IOConnectivity: model.IOConnectivityLoS{AccessProtocol: "iscsi", MaxIOPS: 700000, MaxBWS: 600},
+			DataStorage:    model.DataStorageLoS{ProvisioningPolicy: "Thin", Compression: false, Deduplication: false},
+			IOConnectivity: model.IOConnectivityLoS{AccessProtocol: "iscsi", MaxIOPS: 700000, MaxBWS: 600, MinIOPS: 100000, MinBWS: 100, Latency: 100},
 			DataProtection: model.DataProtectionLoS{IsIsolated: true, ReplicaType: "Mirror"},
 			Advanced:       map[string]interface{}{"diskType": "SSD", "latency": 5},
 		},

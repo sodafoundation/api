@@ -34,12 +34,16 @@ var fp = map[string]PoolProperties{
 		Extras: model.StoragePoolExtraSpec{
 			DataStorage: model.DataStorageLoS{
 				ProvisioningPolicy: "Thin",
-				IsSpaceEfficient:   false,
+				Compression:   false,
+				Deduplication: false,
 			},
 			IOConnectivity: model.IOConnectivityLoS{
 				AccessProtocol: "iscsi",
 				MaxIOPS:        7000000,
 				MaxBWS:         600,
+				MinIOPS:        1000000,
+				MinBWS:         100,
+				Latency:        100,
 			},
 			Advanced: map[string]interface{}{
 				"diskType": "SSD",
@@ -117,6 +121,7 @@ func TestCreateVolume(t *testing.T) {
 		Name:        "test001",
 		Description: "volume for testing",
 		Size:        int64(1),
+		Identifier:  &model.Identifier{DurableName: "61bb066c5ce746eb933625508cee9f71", DurableNameFormat: "NAA"},
 		Metadata: map[string]string{
 			"lvPath": "/dev/vg001/volume-e1bb066c-5ce7-46eb-9336-25508cee9f71",
 		},
@@ -157,6 +162,7 @@ func TestCreateVolumeFromSnapshot(t *testing.T) {
 		Name:        "test001",
 		Description: "volume for testing",
 		Size:        int64(1),
+		Identifier:  &model.Identifier{DurableName: "61bb066c5ce746eb933625508cee9f71", DurableNameFormat: "NAA"},
 		Metadata: map[string]string{
 			"lvPath": "/dev/vg001/volume-e1bb066c-5ce7-46eb-9336-25508cee9f71",
 		},
@@ -322,12 +328,16 @@ func TestListPools(t *testing.T) {
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
-					IsSpaceEfficient:   false,
+					Compression:   false,
+					Deduplication: false,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "iscsi",
 					MaxIOPS:        7000000,
 					MaxBWS:         600,
+					MinIOPS:        1000000,
+					MinBWS:         100,
+					Latency:        100,
 				},
 				Advanced: map[string]interface{}{
 					"diskType": "SSD",

@@ -34,19 +34,19 @@ type Client interface {
 	Close()
 }
 
-// client structure is one implementation of Client interface and will be
+// DockClient structure is one implementation of Client interface and will be
 // called in real environment. There would be more other kind of connection
 // in the long run.
-type client struct {
+type DockClient struct {
 	pb.ProvisionDockClient
 	pb.AttachDockClient
 	pb.FileShareDockClient
 	*grpc.ClientConn
 }
 
-func NewClient() Client { return &client{} }
+func NewClient() Client { return &DockClient{} }
 
-func (c *client) Connect(edp string) error {
+func (c *DockClient) Connect(edp string) error {
 	// Set up a connection to the Dock server.
 	conn, err := grpc.Dial(edp, grpc.WithInsecure())
 	if err != nil {
@@ -62,6 +62,6 @@ func (c *client) Connect(edp string) error {
 	return nil
 }
 
-func (c *client) Close() {
+func (c *DockClient) Close() {
 	c.ClientConn.Close()
 }

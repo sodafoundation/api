@@ -23,10 +23,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net"
 
 	log "github.com/golang/glog"
-	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	osdsCtx "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/dr"
 	"github.com/opensds/opensds/pkg/controller/fileshare"
@@ -38,7 +36,6 @@ import (
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"github.com/opensds/opensds/pkg/utils"
-	"google.golang.org/grpc"
 )
 
 const (
@@ -49,7 +46,7 @@ const (
 	EXTEND_LIFECIRCLE_FLAG
 )
 
-func NewController(port string) *Controller {
+func NewController() *Controller {
 	volCtrl := volume.NewController()
 	fileShareCtrl := fileshare.NewController()
 	metricsCtrl := metrics.NewController()
@@ -59,7 +56,6 @@ func NewController(port string) *Controller {
 		fileshareController: fileShareCtrl,
 		metricsController:   metricsCtrl,
 		drController:        dr.NewController(volCtrl),
-		Port:                port,
 	}
 }
 
@@ -70,30 +66,6 @@ type Controller struct {
 	metricsController   metrics.Controller
 	drController        dr.Controller
 	policyController    policy.Controller
-
-	Port string
-}
-
-// Run method would start the listen mechanism of controller module.
-func (c *Controller) Run() error {
-	// New Grpc Server
-	s := grpc.NewServer()
-	// Register controller service.
-	pb.RegisterControllerServer(s, c)
-	pb.RegisterFileShareControllerServer(s, c)
-
-	// Listen the controller server port.
-	lis, err := net.Listen("tcp", c.Port)
-	if err != nil {
-		log.Fatalf("failed to listen: %+v", err)
-		return err
-	}
-
-	log.Info("Controller server initialized! Start listening on port:", lis.Addr())
-
-	// Start controller server watching loop.
-	defer s.Stop()
-	return s.Serve(lis)
 }
 
 // CreateVolume implements pb.ControllerServer.CreateVolume
@@ -322,31 +294,7 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 	log.Info("Controller server receive create volume attachment request, vr =", opt)
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
-	if err != nil {
-		msg := fmt.Sprintf("get volume failed in create volume attachment method: %v", err)
-		log.Error(msg)
-		return pb.GenericResponseError(msg), err
-	}
-
-	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
-
-	pol, err := db.C.GetPool(ctx, vol.PoolId)
-	if err != nil {
-		msg := fmt.Sprintf("get pool failed in create volume attachment method: %v", err)
-		log.Error(msg)
-		return pb.GenericResponseError(msg), err
-	}
-
-	var protocol = pol.Extras.IOConnectivity.AccessProtocol
-	if protocol == "" {
-		// Default protocol is iscsi
-		protocol = config.ISCSIProtocol
-	}
-
-	opt.AccessProtocol = protocol
-
-	dockInfo, err := db.C.GetDock(ctx, pol.DockId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, opt.PoolId)
 	if err != nil {
 		msg := fmt.Sprintf("when search supported dock resource: %v", err)
 		log.Error(msg)
@@ -358,13 +306,18 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 	result, err := c.volumeController.CreateVolumeAttachment(opt)
 	if err != nil {
 		db.UpdateVolumeAttachmentStatus(ctx, db.C, opt.Id, model.VolumeAttachError)
-		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAvailable)
+		db.UpdateVolumeStatus(ctx, db.C, opt.VolumeId, model.VolumeAvailable)
 		msg := fmt.Sprintf("create volume attachment failed: %v", err)
 		log.Error(msg)
 		return pb.GenericResponseError(msg), err
 	}
 
-	result.AccessProtocol = protocol
+	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
+	if err != nil {
+		log.Error("get volume failed in CreateVolumeAttachment method: ", err.Error())
+		return pb.GenericResponseError(err), err
+	}
+
 	if vol.Status == model.VolumeAttaching {
 		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeInUse)
 	} else {
@@ -372,7 +325,7 @@ func (c *Controller) CreateVolumeAttachment(contx context.Context, opt *pb.Creat
 		log.Error(msg)
 		return pb.GenericResponseError(msg), err
 	}
-
+	result.AccessProtocol = opt.AccessProtocol
 	result.Status = model.VolumeAttachAvailable
 
 	log.V(8).Infof("Create volume attachment successfully, the info is %v", result)
@@ -388,15 +341,7 @@ func (c *Controller) DeleteVolumeAttachment(contx context.Context, opt *pb.Delet
 	log.Info("Controller server receive delete volume attachment request, vr =", opt)
 
 	ctx := osdsCtx.NewContextFromJson(opt.GetContext())
-	vol, err := db.C.GetVolume(ctx, opt.VolumeId)
-	if err != nil {
-		msg := fmt.Sprintf("get volume failed in delete volume attachment method: %v", err)
-		log.Error(msg)
-		return pb.GenericResponseError(msg), err
-	}
-	opt.Metadata = utils.MergeStringMaps(opt.Metadata, vol.Metadata)
-
-	dockInfo, err := db.C.GetDockByPoolId(ctx, vol.PoolId)
+	dockInfo, err := db.C.GetDockByPoolId(ctx, opt.PoolId)
 	if err != nil {
 		msg := fmt.Sprintf("when search supported dock resource: %v", err)
 		log.Error(msg)
@@ -419,7 +364,7 @@ func (c *Controller) DeleteVolumeAttachment(contx context.Context, opt *pb.Delet
 		return pb.GenericResponseError(msg), err
 	}
 
-	db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAvailable)
+	db.UpdateVolumeStatus(ctx, db.C, opt.VolumeId, model.VolumeAvailable)
 
 	return pb.GenericResponseResult(nil), nil
 }
@@ -901,14 +846,36 @@ func (c *Controller) CreateFileShare(contx context.Context, opt *pb.CreateFileSh
 
 	log.V(5).Infof("controller create fileshare: get fileshare from db %+v", fileshare)
 
-	polInfo, err := c.selector.SelectSupportedPoolForFileShare(fileshare)
-
-	if err != nil {
-		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
-		return pb.GenericResponseError(err), err
+	// If snapshot is given in parameter then select the pool info
+	// from existing filesystem from where snapshot was created.
+	// If snapshot not given then select the appropriate pool based on profile
+	//(i.e its a new fileshare creation)
+	var polInfo *model.StoragePoolSpec
+	if opt.SnapshotId != "" {
+		snapshot, _err := db.C.GetFileShareSnapshot(ctx, fileshare.SnapshotId)
+		if _err != nil {
+			log.V(5).Infof("unable to get fileshare snapshot details %+v.", _err)
+			return pb.GenericResponseError(_err), _err
+		}
+		existingFs, _err := db.C.GetFileShare(ctx, snapshot.FileShareId)
+		if _err != nil {
+			log.V(5).Infof("unable to get fileshare details %+v.", _err)
+			return pb.GenericResponseError(_err), _err
+		}
+		polInfo, err = db.C.GetPool(ctx, existingFs.PoolId)
+		log.V(5).Infof("controller get get previous created fileshare poolInfo detail%+v", polInfo)
+		if err != nil {
+			log.V(5).Infof("unable to get previous created fileshare poolInfo detail %+v", err)
+			return pb.GenericResponseError(err), err
+		}
+	} else {
+		polInfo, err = c.selector.SelectSupportedPoolForFileShare(fileshare)
+		if err != nil {
+			db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+			return pb.GenericResponseError(err), err
+		}
+		log.V(5).Infof("controller create fileshare: selected poolInfo %+v", polInfo)
 	}
-
-	log.V(5).Infof("controller create fileshare: selected poolInfo %+v", polInfo)
 	// whether specify a pool or not, opt's poolid and pool name should be
 	// assigned by polInfo
 	opt.PoolId = polInfo.Id
@@ -980,13 +947,13 @@ func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFil
 
 	fileshare, err := db.C.GetFileShare(ctx, opt.FileshareId)
 	if err != nil {
-		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		db.UpdateFileShareAclStatus(ctx, db.C, opt.Id, model.FileShareAclError)
 		return pb.GenericResponseError(err), err
 	}
 
 	dockInfo, err := db.C.GetDockByPoolId(ctx, fileshare.PoolId)
 	if err != nil {
-		db.UpdateFileShareStatus(ctx, db.C, opt.Id, model.FileShareError)
+		db.UpdateFileShareAclStatus(ctx, db.C, opt.Id, model.FileShareAclError)
 		log.Error("when search supported dock resource:", err.Error())
 		return pb.GenericResponseError(err), err
 	}
@@ -997,12 +964,12 @@ func (c *Controller) CreateFileShareAcl(contx context.Context, opt *pb.CreateFil
 	result, err := c.fileshareController.CreateFileShareAcl((*pb.CreateFileShareAclOpts)(opt))
 	if err != nil {
 		// Change the status of the file share acl to error when the creation faild
-		defer db.UpdateFileShareStatus(ctx, db.C, fileshare.Id, model.FileShareError)
+		defer db.UpdateFileShareAclStatus(ctx, db.C, opt.Id, model.FileShareAclError)
 		log.Error("when create file share acl:", err.Error())
 		return pb.GenericResponseError(err), err
 	}
 
-	db.C.UpdateFileShareAcl(ctx, result)
+	db.C.UpdateStatus(ctx, result, model.FileShareAclAvailable)
 	return pb.GenericResponseResult(result), nil
 }
 
@@ -1014,10 +981,13 @@ func (c *Controller) DeleteFileShareAcl(contx context.Context, opt *pb.DeleteFil
 
 	fileshare, err := db.C.GetFileShare(ctx, opt.FileshareId)
 	if err != nil {
+		defer db.UpdateFileShareAclStatus(ctx, db.C, opt.Id, model.FileShareAclErrorDeleting)
+		log.Error("when delete file share acl:", err.Error())
 		return pb.GenericResponseError(err), err
 	}
 	dockInfo, err := db.C.GetDockByPoolId(ctx, fileshare.PoolId)
 	if err != nil {
+		defer db.UpdateFileShareAclStatus(ctx, db.C, opt.Id, model.FileShareAclErrorDeleting)
 		log.Error("when search supported dock resource:", err.Error())
 		return pb.GenericResponseError(err), err
 	}
@@ -1026,11 +996,13 @@ func (c *Controller) DeleteFileShareAcl(contx context.Context, opt *pb.DeleteFil
 	opt.Name = fileshare.Name
 
 	if err = c.fileshareController.DeleteFileShareAcl((*pb.DeleteFileShareAclOpts)(opt)); err != nil {
-		// Change the status of the file share acl to error when the creation faild
+		// Change the status of the file share acl to error when the creation failed
+		defer db.UpdateFileShareAclStatus(ctx, db.C, opt.Id, model.FileShareAclErrorDeleting)
 		log.Error("when delete file share acl:", err.Error())
 		return pb.GenericResponseError(err), err
 	}
 	if err = db.C.DeleteFileShareAcl(ctx, opt.Id); err != nil {
+		defer db.UpdateFileShareAclStatus(ctx, db.C, opt.Id, model.FileShareAclErrorDeleting)
 		log.Error("error occurred in controller module when delete file share acl in db: ", err)
 		return pb.GenericResponseError(err), err
 	}

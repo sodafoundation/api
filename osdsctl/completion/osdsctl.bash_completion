@@ -14,39 +14,49 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# bash completion for openstack nova-manage
 _osdsctl() {
     COMPREPLY=()
     local cur=${COMP_WORDS[COMP_CWORD]};
     local pre=${COMP_WORDS[COMP_CWORD-1]};
     case "$COMP_CWORD $pre" in
-    '1 osdsctl')
-          COMPREPLY=($(compgen -W 'dock pool profile version volume replication' -- $cur)) ;;
-    '2 dock')
+    "1 osdsctl")
+          COMPREPLY=($(compgen -W 'dock pool profile version volume fileshare host' -- $cur)) ;;
+    "2 dock")
           COMPREPLY=($(compgen -W 'list show' -- $cur)) ;;
-    '2 pool')
+    "2 pool")
           COMPREPLY=($(compgen -W 'list show' -- $cur)) ;;
-    '2 profile')
+    "2 profile")
           COMPREPLY=($(compgen -W 'create delete list show' -- $cur)) ;;
-    '2 version')
+    "2 version")
           COMPREPLY=($(compgen -W 'list show' -- $cur)) ;;
-    '2 volume')
-          COMPREPLY=($(compgen -W 'attachment create delete list show extend snapshot update group' -- $cur)) ;;
-    '2 replication')
-          COMPREPLY=($(compgen -W 'create delete list show update enable disable failover' -- $cur)) ;;
-    '3 snapshot')
-          COMPREPLY=($(compgen -W 'create delete list show update' -- $cur)) ;;
-    '3 attachment')
-          COMPREPLY=($(compgen -W 'create delete list show update' -- $cur)) ;;
-    '3 group')
-        COMPREPLY=($(compgen -W 'create delete list show update' -- $cur)) ;;
+    "2 volume")
+          COMPREPLY=($(compgen -W 'attachment create delete list show extend snapshot update group replication' -- $cur)) ;;
+    "2 fileshare")
+          COMPREPLY=($(compgen -W 'create delete list show acl snapshot' -- $cur)) ;;
+    "2 host")
+          COMPREPLY=($(compgen -W 'create delete list show update initiator' -- $cur)) ;;
     '*')
           ;;
     esac
 
-    [ $COMP_CWORD == 1 ] && {
-        COMPREPLY=($(compgen -W 'dock pool profile version volume replication' -- $cur))
-    }
+    # differentiate volume and fileshare
+    if [[ $COMP_CWORD == 3 ]]; then
+        local ppre=${COMP_WORDS[COMP_CWORD-2]};
+        case "$ppre $pre" in
+        "volume replication")
+          COMPREPLY=($(compgen -W 'create delete list show update enable disable failover' -- $cur)) ;;
+        "volume snapshot" | "fileshare snapshot")
+              COMPREPLY=($(compgen -W 'create delete list show update' -- $cur)) ;;
+        "volume attachment")
+              COMPREPLY=($(compgen -W 'create delete list show update' -- $cur)) ;;
+        "volume group")
+            COMPREPLY=($(compgen -W 'create delete list show update' -- $cur)) ;;
+        "fileshare acl")
+              COMPREPLY=($(compgen -W 'create delete list show' -- $cur)) ;;
+        "host initiator")
+              COMPREPLY=($(compgen -W 'add remove' -- $cur)) ;;
+    esac
+    fi
     return 0
 }
 complete -o bashdefault -o default -F _osdsctl osdsctl

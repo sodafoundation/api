@@ -155,6 +155,29 @@ func TestDeleteFileShareSnapshot(t *testing.T) {
 	}
 }
 
+func TestCreateFileShareAcl(t *testing.T) {
+	fc := NewFakeController()
+	var expected = &SampleFileSharesAcl[0]
+
+	result, err := fc.CreateFileShareAcl(&pb.CreateFileShareAclOpts{})
+	if err != nil {
+		t.Errorf("failed to create fileshare acl, err is %v\n", err)
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("expected %v, got %v\n", expected, result)
+	}
+}
+
+func TestDeleteFileShareAcl(t *testing.T) {
+	fc := NewFakeController()
+
+	result := fc.DeleteFileShareAcl(&pb.DeleteFileShareAclOpts{})
+	if result != nil {
+		t.Errorf("expected %v, got %v\n", nil, result)
+	}
+}
+
 func (fc *fakefileshareClient) CreateVolume(ctx context.Context, in *pb.CreateVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return nil, nil
 }
@@ -224,5 +247,13 @@ func (fc *fakefileshareClient) AttachVolume(ctx context.Context, in *pb.AttachVo
 }
 
 func (fc *fakefileshareClient) DetachVolume(ctx context.Context, in *pb.DetachVolumeOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return nil, nil
+}
+
+func (fc *fakefileshareClient) GetMetrics(ctx context.Context, in *pb.GetMetricsOpts, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
+	return nil, nil
+}
+
+func (fc *fakefileshareClient) GetUrls(ctx context.Context, in *pb.NoParams, opts ...grpc.CallOption) (*pb.GenericResponse, error) {
 	return nil, nil
 }

@@ -19,24 +19,24 @@ import (
 )
 
 type CmsVolume struct {
-	VolumeId string
+	VolumeId   string
 	VolumeName string
 }
 
 type CmsTask struct {
-	bandwidth int64
-	cdpFlag bool
+	bandwidth   int64
+	cdpFlag     bool
 	taskVolumes map[string]string
-	volumeList map[string]CmsVolume
+	volumeList  map[string]CmsVolume
 }
 
 func NewCmsTask(bandwidth int64, cdpFlag bool) *CmsTask {
 	return &CmsTask{
-		bandwidth: bandwidth,
-		cdpFlag: cdpFlag,
+		bandwidth:   bandwidth,
+		cdpFlag:     cdpFlag,
 		taskVolumes: make(map[string]string),
-		volumeList: make(map[string]CmsVolume),
-    }
+		volumeList:  make(map[string]CmsVolume),
+	}
 }
 
 func checkVolume(c *CmsTask, volumeId string) bool {

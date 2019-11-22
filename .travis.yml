@@ -10,12 +10,8 @@ go:
   - tip
 
 env:
-  matrix:
   - TARGET=amd64
-  # - TARGET=arm64
-  # - TARGET=arm
-  # - TARGET=386
-  # - TARGET=ppc64le
+    GO111MODULE=on
 
 services:
   - docker
@@ -25,20 +21,15 @@ before_install:
   - sudo apt-get install -y build-essential gcc
   - sudo apt-get install -y librados-dev librbd-dev
   - sudo apt-get install -y lvm2 tgt open-iscsi
+  - sudo docker pull p1c2u/openapi-spec-validator
+
 
 matrix:
   fast_finish: true
   allow_failures:
   - go: tip
   exclude:
-  # - go: tip
-  #   env: TARGET=arm
-  # - go: tip
-  #   env: TARGET=arm64
-  # - go: tip
-  #   env: TARGET=386
-  # - go: tip
-  #   env: TARGET=ppc64le
+
 
 install:
   # Build OpenSDS Controller source code

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"regexp"
 	"strings"
 	"time"
 
@@ -39,12 +40,18 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
 	}
-
 	if in.CreatedAt == "" {
 		in.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 	if in.UpdatedAt == "" {
 		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	// validate profileId
+	if in.ProfileId == "" {
+		errMsg := "profile id can not be empty when creating fileshare acl in db!"
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
 	}
 	// validate type
 	if in.Type != "ip" {
@@ -96,26 +103,42 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 		log.Error("file shareid is not valid: ", err)
 		return nil, err
 	}
-
 	if fileshare.Status != model.FileShareAvailable {
 		var errMsg = "only the status of file share is available, the acl can be created"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
 
-	// Store the fileshare meadata into database.
 	return db.C.CreateFileShareAcl(ctx, in)
 }
 
 func DeleteFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) error {
-	// If fileshare id is invalid, it would mean that fileshare snapshot
+	// If fileshare id is invalid, it would mean that fileshare acl
 	// creation failed before the create method in storage driver was
 	// called, and delete its db entry directly.
-	if _, err := db.C.GetFileShare(ctx, in.FileShareId); err != nil {
+	validStatus := []string{model.FileShareAclAvailable, model.FileShareAclError,
+		model.FileShareAclErrorDeleting}
+	if !utils.Contained(in.Status, validStatus) {
+		errMsg := fmt.Sprintf("only the file share acl with the status available, error, error_deleting can be deleted, the fileshare status is %s", in.Status)
+		log.Error(errMsg)
+		return errors.New(errMsg)
+	}
+
+	// If fileshare id is invalid, it would mean that file share acl creation failed before the create method
+	// in storage driver was called, and delete its db entry directly.
+	_, err := db.C.GetFileShare(ctx, in.FileShareId)
+	if err != nil {
 		if err := db.C.DeleteFileShareAcl(ctx, in.Id); err != nil {
-			log.Error("when delete fileshare acl in db:", err)
+			log.Error("failed delete fileshare acl in db:", err)
 			return err
 		}
+		return nil
+	}
+
+	in.Status = model.FileShareAclDeleting
+	_, err = db.C.UpdateFileShareAcl(ctx, in)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -124,6 +147,12 @@ func DeleteFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) error
 func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.FileShareSpec, error) {
 	if in.Id == "" {
 		in.Id = uuid.NewV4().String()
+	}
+	// validate profileId
+	if in.ProfileId == "" {
+		errMsg := "profile id can not be empty when creating fileshare in db!"
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
 	}
 	// validate the size
 	if in.Size <= 0 {
@@ -147,11 +176,25 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	if len(in.Name) > 128 {
-		errMsg := fmt.Sprintf("fileshare name length should not more than 128 characters. current length is : %d", len(in.Name))
+	if len(in.Name) > 255 {
+		errMsg := fmt.Sprintf("fileshare name length should not be more than 255 characters. input name length is : %d", len(in.Name))
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
+
+	// validate the description
+	reg, err := regexp.Compile("[^a-zA-Z0-9 ]+")
+	if err != nil {
+		errMsg := fmt.Sprintf("regex compilation for file share description validation failed")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	if reg.MatchString(in.Description) {
+		errMsg := fmt.Sprintf("invalid fileshare description and it has some special characters")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+
 	in.UserId = ctx.UserId
 	in.Status = model.FileShareCreating
 	// Store the fileshare meadata into database.
@@ -208,6 +251,28 @@ func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotS
 		var errMsg = "only the status of fileshare is available or in-use, the snapshot can be created"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
+	}
+	// validate profileId
+	if in.ProfileId == "" {
+		errMsg := "profile id can not be empty when creating fileshare snapshot in db!"
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+
+	// Check existence of fileshare snapshot name #931
+	filesnaps, err := db.C.ListFileShareSnapshots(ctx)
+	if err != nil {
+		errMsg := fmt.Sprintf("get list of fileshare snapshot failed: %s", err.Error())
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	} else {
+		for _, filesnap := range filesnaps {
+			if filesnap.Name == in.Name {
+				errMsg := fmt.Sprintf("file share snapshot name already exists")
+				log.Error(errMsg)
+				return nil, errors.New(errMsg)
+			}
+		}
 	}
 
 	if in.Id == "" {
@@ -267,6 +332,11 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 	}
 	if in.Size <= 0 {
 		errMsg := fmt.Sprintf("invalid volume size: %d", in.Size)
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	if in.ProfileId == "" {
+		errMsg := "profile id can not be empty when creating volume in db"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -363,93 +433,22 @@ func ExtendVolumeDBEntry(ctx *c.Context, volID string, in *model.ExtendVolumeSpe
 	return db.C.ExtendVolume(ctx, volume)
 }
 
-// CreateVolumeAttachmentDBEntry just modifies the state of the volume attachment
-// to be creating in the DB, the real operation would be executed in another new
-// thread.
-func CreateVolumeAttachmentDBEntry(ctx *c.Context, volAttachment *model.VolumeAttachmentSpec) (
-	*model.VolumeAttachmentSpec, error) {
-	vol, err := db.C.GetVolume(ctx, volAttachment.VolumeId)
-	if err != nil {
-		msg := fmt.Sprintf("get volume failed in create volume attachment method: %v", err)
-		log.Error(msg)
-		return nil, errors.New(msg)
-	}
-
-	if vol.Status == model.VolumeAvailable {
-		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAttaching)
-	} else if vol.Status == model.VolumeInUse {
-		if vol.MultiAttach {
-			db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAttaching)
-		} else {
-			msg := "volume is already attached or volume multiattach must be true if attach more than once"
-			log.Error(msg)
-			return nil, errors.New(msg)
-		}
-	} else {
-		errMsg := "only the status of volume is available, attachment can be created"
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
-
-	if volAttachment.Id == "" {
-		volAttachment.Id = uuid.NewV4().String()
-	}
-
-	if volAttachment.CreatedAt == "" {
-		volAttachment.CreatedAt = time.Now().Format(constants.TimeFormat)
-	}
-
-	if volAttachment.AttachMode != "ro" && volAttachment.AttachMode != "rw" {
-		volAttachment.AttachMode = "rw"
-	}
-
-	volAttachment.Status = model.VolumeAttachCreating
-	volAttachment.Metadata = utils.MergeStringMaps(volAttachment.Metadata, vol.Metadata)
-	return db.C.CreateVolumeAttachment(ctx, volAttachment)
-}
-
-// DeleteVolumeAttachmentDBEntry just modifies the state of the volume attachment to
-// be deleting in the DB, the real deletion operation would be executed in
-// another new thread.
-func DeleteVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpec) error {
-	validStatus := []string{model.VolumeAttachAvailable, model.VolumeAttachError,
-		model.VolumeAttachErrorDeleting}
-	if !utils.Contained(in.Status, validStatus) {
-		errMsg := fmt.Sprintf("only the volume attachment with the status available, error, error_deleting can be deleted, the volume status is %s", in.Status)
-		log.Error(errMsg)
-		return errors.New(errMsg)
-	}
-
-	// If volume id is invalid, it would mean that volume attachment creation failed before the create method
-	// in storage driver was called, and delete its db entry directly.
-	_, err := db.C.GetVolume(ctx, in.VolumeId)
-	if err != nil {
-		if err := db.C.DeleteVolumeAttachment(ctx, in.Id); err != nil {
-			log.Error("when delete volume attachment in db:", err)
-			return err
-		}
-		return nil
-	}
-
-	in.Status = model.VolumeAttachDeleting
-	_, err = db.C.UpdateVolumeAttachment(ctx, in.Id, in)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 // CreateVolumeSnapshotDBEntry just modifies the state of the volume snapshot
 // to be creating in the DB, the real operation would be executed in another new
 // thread.
 func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (*model.VolumeSnapshotSpec, error) {
+	if in.ProfileId == "" {
+		errMsg := "profile id can not be empty when creating volume snapshot in db"
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	vol, err := db.C.GetVolume(ctx, in.VolumeId)
 	if err != nil {
 		log.Error("get volume failed in create volume snapshot method: ", err)
 		return nil, err
 	}
 	if vol.Status != model.VolumeAvailable && vol.Status != model.VolumeInUse {
-		var errMsg = "only the status of volume is available or in-use, the snapshot can be created"
+		errMsg := "only the status of volume is available or in-use, the snapshot can be created"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -462,6 +461,7 @@ func CreateVolumeSnapshotDBEntry(ctx *c.Context, in *model.VolumeSnapshotSpec) (
 	}
 
 	in.Status = model.VolumeSnapCreating
+	in.Metadata = utils.MergeStringMaps(in.Metadata, vol.Metadata)
 	return db.C.CreateVolumeSnapshot(ctx, in)
 }
 

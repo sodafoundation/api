@@ -292,7 +292,7 @@ func TestClientExtendVolume(t *testing.T) {
 func TestClientCreateVolumeAttachment(t *testing.T) {
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: model.HostInfo{},
+		HostId:   "202964b5-8e73-46fd-b41b-a8e403f3c30b",
 	}
 
 	if _, err := c.CreateVolumeAttachment(body); err != nil {

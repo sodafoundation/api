@@ -63,6 +63,10 @@ func NewFakeClient(config *Config) *Client {
 				Receiver: NewFakeFileShareReceiver(),
 				Endpoint: config.Endpoint,
 			},
+			HostMgr: &HostMgr{
+				Receiver: NewFakeHostReceiver(),
+				Endpoint: config.Endpoint,
+			},
 		}
 	})
 	return fakeClient
@@ -427,6 +431,50 @@ func (*fakeFileShareReceiver) Recv(
 			}
 		case *[]*model.FileShareAclSpec:
 			if err := json.Unmarshal([]byte(ByteFileSharesAcls), out); err != nil {
+				return err
+			}
+		default:
+			return errors.New("output format not supported")
+		}
+	case "DELETE":
+		break
+	default:
+		return errors.New("inputed method format not supported")
+	}
+
+	return nil
+}
+
+func NewFakeHostReceiver() Receiver {
+	return &fakeHostReceiver{}
+}
+
+type fakeHostReceiver struct{}
+
+func (*fakeHostReceiver) Recv(
+	string,
+	method string,
+	in interface{},
+	out interface{},
+) error {
+	switch strings.ToUpper(method) {
+	case "POST", "PUT":
+		switch out.(type) {
+		case *model.HostSpec:
+			if err := json.Unmarshal([]byte(ByteHost), out); err != nil {
+				return err
+			}
+		default:
+			return errors.New("output format not supported")
+		}
+	case "GET":
+		switch out.(type) {
+		case *model.HostSpec:
+			if err := json.Unmarshal([]byte(ByteHost), out); err != nil {
+				return err
+			}
+		case *[]*model.HostSpec:
+			if err := json.Unmarshal([]byte(ByteHosts), out); err != nil {
 				return err
 			}
 		default:

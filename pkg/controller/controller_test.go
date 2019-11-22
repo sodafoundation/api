@@ -16,10 +16,13 @@ package controller
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"testing"
 
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/controller/dr"
+	"github.com/opensds/opensds/pkg/controller/fileshare"
 	"github.com/opensds/opensds/pkg/controller/volume"
 	"github.com/opensds/opensds/pkg/db"
 	"github.com/opensds/opensds/pkg/model"
@@ -320,6 +323,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	var req = &pb.CreateVolumeAttachmentOpts{
 		Id:       "f2dda3d2-bf79-11e7-8665-f750b088f63e",
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		PoolId:   "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		HostInfo: &pb.HostInfo{},
 		Context:  c.NewAdminContext().ToJson(),
 	}
@@ -327,7 +331,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", c.NewAdminContext(), req.VolumeId).Return(vol, nil)
 	mockClient.On("GetPool", c.NewAdminContext(), vol.PoolId).Return(&SamplePools[0], nil)
-	mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
 	mockClient.On("UpdateStatus", c.NewAdminContext(), volatm, volatm.Status).Return(nil)
 	mockClient.On("UpdateStatus", c.NewAdminContext(), vol, model.VolumeInUse).Return(nil)
 
@@ -346,6 +350,7 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 	var req = &pb.DeleteVolumeAttachmentOpts{
 		Id:       "f2dda3d2-bf79-11e7-8665-f750b088f63e",
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		PoolId:   "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		HostInfo: &pb.HostInfo{},
 		Context:  c.NewAdminContext().ToJson(),
 	}
@@ -642,4 +647,445 @@ func TestDeleteVolumeGroup(t *testing.T) {
 	if _, err := ctrl.DeleteVolumeGroup(context.Background(), req); err != nil {
 		t.Errorf("Failed to delete volume group: %v\n", err)
 	}
+}
+
+func NewFakeFileShareController() fileshare.Controller {
+	return &fakeFileShareController{}
+}
+
+type fakeFileShareController struct{}
+
+func (fakeFileShareController) SetDock(dockInfo *model.DockSpec) { return }
+
+func (fakeFileShareController) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileShareSpec, error) {
+	return &SampleFileShares[0], nil
+}
+
+func (fakeFileShareController) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.FileShareAclSpec, error) {
+	return &SampleFileSharesAcl[2], nil
+}
+
+func (fakeFileShareController) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error { return nil }
+
+func (fakeFileShareController) DeleteFileShare(opt *pb.DeleteFileShareOpts) error { return nil }
+
+func (fakeFileShareController) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts) (*model.FileShareSnapshotSpec, error) {
+	return &SampleFileShareSnapshots[0], nil
+}
+
+func (fakeFileShareController) DeleteFileShareSnapshot(opts *pb.DeleteFileShareSnapshotOpts) error {
+	return nil
+}
+
+func TestCreateFileShare(t *testing.T) {
+	prf := &SampleFileShareProfiles[0]
+	var req = &pb.CreateFileShareOpts{
+		Id:          "d2975ebe-d82c-430f-b28e-f373746a71ca",
+		Name:        "sample-fileshare-01",
+		Description: "This is a sample fileshare for testing",
+		Size:        int64(1),
+		Profile:     prf.ToJson(),
+		Context:     c.NewAdminContext().ToJson(),
+	}
+	var fileshare = &SampleFileShares[0]
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetFileShare", c.NewAdminContext(), req.Id).Return(&SampleFileShares[0], nil)
+	mockClient.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
+	mockClient.On("GetFileShareDefaultProfile", c.NewAdminContext()).Return(&SampleFileShareProfiles[0], nil)
+	mockClient.On("GetProfile", c.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleFileShareProfiles[0], nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), fileshare, fileshare.Status).Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{
+				BaseModel: &model.BaseModel{
+					Id: "bdd44c8e-b8a9-488a-89c0-d1e5beb902dg",
+				},
+				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
+			err: nil,
+		},
+		fileshareController: NewFakeFileShareController(),
+	}
+	if _, err := ctrl.CreateFileShare(context.Background(), req); err != nil {
+		t.Errorf("failed to create fileshare, err is %v\n", err)
+	}
+	mockClient1 := new(dbtest.Client)
+	mockClient1.On("GetFileShare", c.NewAdminContext(), req.Id).Return(&SampleFileShares[0], fmt.Errorf("specified fileshare(%s) can't find", req.Id))
+	mockClient1.On("UpdateStatus", c.NewAdminContext(), fileshare, "error").Return(nil)
+	db.C = mockClient1
+
+	var ctrl1 = &Controller{
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{
+				BaseModel: &model.BaseModel{
+					Id: "bdd44c8e-b8a9-488a-89c0-d1e5beb902dg",
+				},
+				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
+			err: nil,
+		},
+		fileshareController: NewFakeFileShareController(),
+	}
+
+	t1, _ := ctrl1.CreateFileShare(context.Background(), req)
+	err_desc := t1.GetError().Description
+	expectedError := fmt.Sprintf("specified fileshare(%s) can't find", fileshare.Id)
+	if err_desc != expectedError {
+		t.Errorf("specified fileshare(%s) can't find\n", fileshare.Id)
+	}
+
+	mockClient2 := new(dbtest.Client)
+	mockClient2.On("GetFileShare", c.NewAdminContext(), req.Id).Return(&SampleFileShares[0], nil)
+	mockClient2.On("UpdateStatus", c.NewAdminContext(), fileshare, "error").Return(nil)
+	db.C = mockClient2
+
+	var ctrl2 = &Controller{
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{
+				BaseModel: &model.BaseModel{
+					Id: "bdd44c8e-b8a9-488a-89c0-d1e5beb902dg",
+				},
+				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
+			err: errors.New("filter supported pools failed: no available pool to meet user's requirement"),
+		},
+		fileshareController: NewFakeFileShareController(),
+	}
+
+	t2, _ := ctrl2.CreateFileShare(context.Background(), req)
+	err_desc2 := t2.GetError().Description
+	expectedError2 := fmt.Sprintf("filter supported pools failed: no available pool to meet user's requirement")
+	if err_desc2 != expectedError2 {
+		t.Errorf("filter supported pools failed: no available pool to meet user's requirement\n")
+	}
+
+	mockClientd := new(dbtest.Client)
+	mockClientd.On("GetFileShare", c.NewAdminContext(), req.Id).Return(&SampleFileShares[0], nil)
+	mockClientd.On("GetDock", c.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(nil, fmt.Errorf("when search supported dock resource:when get dock in db:"))
+	mockClientd.On("GetFileShareDefaultProfile", c.NewAdminContext()).Return(&SampleFileShareProfiles[0], nil)
+	mockClientd.On("GetProfile", c.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleFileShareProfiles[0], nil)
+	mockClientd.On("UpdateStatus", c.NewAdminContext(), fileshare, "error").Return(nil)
+	db.C = mockClientd
+
+	var ctrld = &Controller{
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{
+				BaseModel: &model.BaseModel{
+					Id: "bdd44c8e-b8a9-488a-89c0-d1e5beb902dg",
+				},
+				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
+			err: nil,
+		},
+		fileshareController: NewFakeFileShareController(),
+	}
+	td, _ := ctrld.CreateFileShare(context.Background(), req)
+	err_descd := td.GetError().Description
+	expectedErrord := fmt.Sprintf("when search supported dock resource:when get dock in db:")
+	if err_descd != expectedErrord {
+		t.Errorf("when search supported dock resource:when get dock in db\n")
+	}
+
+}
+
+func TestDeleteFileShare(t *testing.T) {
+	prf := &SampleFileShareProfiles[0]
+	var req = &pb.DeleteFileShareOpts{
+		Id:      "d2975ebe-d82c-430f-b28e-f373746a71ca",
+		Profile: prf.ToJson(),
+		PoolId:  "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Context: c.NewAdminContext().ToJson(),
+	}
+	profile_out := model.NewProfileFromJson(prf.ToJson())
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetProfile", c.NewAdminContext(), profile_out.Id).Return(&SampleFileShareProfiles[0], nil)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), req.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("DeleteFileShare", c.NewAdminContext(), req.Id).Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{
+				BaseModel: &model.BaseModel{
+					Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
+				},
+				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
+			err: nil,
+		},
+		fileshareController: NewFakeFileShareController(),
+	}
+	if _, err := ctrl.DeleteFileShare(context.Background(), req); err != nil {
+		t.Errorf("failed to delete volume, err is %v\n", err)
+	}
+
+	mockClientd := new(dbtest.Client)
+	mockClientd.On("GetFileShare", c.NewAdminContext(), req.Id).Return(&SampleFileShares[0], nil)
+	mockClientd.On("GetDockByPoolId", c.NewAdminContext(), req.PoolId).Return(nil, fmt.Errorf("when search dock in db by pool id: Get dock failed by pool id:"))
+	mockClientd.On("GetFileShare", c.NewAdminContext(), req.Id).Return(&SampleFileShares[0], nil)
+	mockClientd.On("UpdateStatus", c.NewAdminContext(), &SampleFileShares[0], "errorDeleting").Return(nil)
+	db.C = mockClientd
+
+	var ctrld = &Controller{
+		selector: &fakeSelector{
+			res: &model.StoragePoolSpec{
+				BaseModel: &model.BaseModel{
+					Id: "bdd44c8e-b8a9-488a-89c0-d1e5beb902dg",
+				},
+				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
+			},
+			err: nil,
+		},
+		fileshareController: NewFakeFileShareController(),
+	}
+	td, _ := ctrld.DeleteFileShare(context.Background(), req)
+	err_descd := td.GetError().Description
+	expectedErrord := fmt.Sprintf("when search dock in db by pool id: Get dock failed by pool id:")
+	if err_descd != expectedErrord {
+		t.Errorf("when search supported dock dock in db by pool id: Get dock failed by pool id: failed\n")
+	}
+
+}
+
+func TestCreateFileShareSnapshot(t *testing.T) {
+	var req = &pb.CreateFileShareSnapshotOpts{
+		Id:          "3769855c-a102-11e7-b772-17b880d2f537",
+		FileshareId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		Name:        "sample-snapshot-01",
+		Description: "This is the first sample snapshot for testing",
+		Size:        int64(1),
+		Context:     c.NewAdminContext().ToJson(),
+	}
+	var fileshare = &SampleFileShares[0]
+	var snp = &SampleFileShareSnapshots[0]
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetFileShare", c.NewAdminContext(), req.FileshareId).Return(fileshare, nil)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), fileshare.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("GetProfile", c.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleFileShareProfiles[0], nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), snp, "available").Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+
+	if _, err := ctrl.CreateFileShareSnapshot(context.Background(), req); err != nil {
+		t.Errorf("failed to create file share snapshot: %v\n", err)
+	}
+
+	mockClient1 := new(dbtest.Client)
+	mockClient1.On("GetFileShare", c.NewAdminContext(), req.FileshareId).Return(nil, errors.New("get file share failed in create file share snapshot method:"))
+	mockClient1.On("UpdateFileShareSnapshotStatus", c.NewAdminContext(), req.Id, "error").Return(&SampleFileShareSnapshots[0], nil)
+	mockClient1.On("GetFileShareSnapshot", c.NewAdminContext(), req.Id).Return(&SampleFileShareSnapshots[0], nil)
+	mockClient1.On("UpdateStatus", c.NewAdminContext(), snp, "error").Return(nil)
+	db.C = mockClient1
+
+	var ctrl1 = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+	t1, _ := ctrl1.CreateFileShareSnapshot(context.Background(), req)
+	err_desc := t1.GetError().Description
+	expectedError := fmt.Sprintf("get file share failed in create file share snapshot method:")
+	if err_desc != expectedError {
+		t.Errorf("test of create file share snapshot failed, didn't get %v instead got %v\n", expectedError, err_desc)
+	}
+
+	mockClient2 := new(dbtest.Client)
+	mockClient2.On("GetFileShare", c.NewAdminContext(), req.FileshareId).Return(&SampleFileShares[0], nil)
+	mockClient2.On("GetDockByPoolId", c.NewAdminContext(), fileshare.PoolId).Return(nil, errors.New("when search supported dock resource: "))
+	mockClient2.On("UpdateFileShareSnapshotStatus", c.NewAdminContext(), req.Id, "error").Return(&SampleFileShareSnapshots[0], nil)
+	mockClient2.On("GetFileShareSnapshot", c.NewAdminContext(), req.Id).Return(&SampleFileShareSnapshots[0], nil)
+	mockClient2.On("UpdateStatus", c.NewAdminContext(), snp, "error").Return(nil)
+	db.C = mockClient2
+
+	var ctrl2 = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+	t2, _ := ctrl2.CreateFileShareSnapshot(context.Background(), req)
+	err_desc2 := t2.GetError().Description
+	expectedError2 := fmt.Sprintf("when search supported dock resource: ")
+	if err_desc2 != expectedError2 {
+		t.Errorf("test of create file share snapshot failed, didn't get %v instead got %v\n", expectedError2, err_desc2)
+	}
+}
+
+func TestDeleteFileShareSnapshot(t *testing.T) {
+	var req = &pb.DeleteFileShareSnapshotOpts{
+		Id:          "3769855c-a102-11e7-b772-17b880d2f537",
+		FileshareId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		Context:     c.NewAdminContext().ToJson(),
+	}
+	var fileshare = &SampleShares[0]
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetFileShare", c.NewAdminContext(), req.FileshareId).Return(fileshare, nil)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), fileshare.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("DeleteFileShareSnapshot", c.NewAdminContext(), req.Id).Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+	if _, err := ctrl.DeleteFileShareSnapshot(context.Background(), req); err != nil {
+		t.Errorf("failed to delete file share snapshot: %v\n", err)
+	}
+
+	mockClient1 := new(dbtest.Client)
+	mockClient1.On("GetFileShare", c.NewAdminContext(), req.FileshareId).Return(nil, errors.New("get file share failed in delete file share snapshot method:"))
+	mockClient1.On("UpdateFileShareSnapshotStatus", c.NewAdminContext(), req.Id, "errorDeleting").Return(&SampleFileShareSnapshots[0], nil)
+	mockClient1.On("GetFileShareSnapshot", c.NewAdminContext(), req.Id).Return(&SampleFileShareSnapshots[0], nil)
+	mockClient1.On("UpdateStatus", c.NewAdminContext(), &SampleFileShareSnapshots[0], "errorDeleting").Return(nil)
+	db.C = mockClient1
+
+	var ctrl1 = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+	t1, _ := ctrl1.DeleteFileShareSnapshot(context.Background(), req)
+	err_desc := t1.GetError().Description
+	expectedError := fmt.Sprintf("get file share failed in delete file share snapshot method:")
+	if err_desc != expectedError {
+		t.Errorf("test of create file share snapshot failed, didn't get %v instead got %v\n", expectedError, err_desc)
+	}
+
+	mockClient2 := new(dbtest.Client)
+	mockClient2.On("GetFileShare", c.NewAdminContext(), req.FileshareId).Return(&SampleFileShares[0], nil)
+	mockClient2.On("GetDockByPoolId", c.NewAdminContext(), "bdd44c8e-b8a9-488a-89c0-d1e5beb902dg").Return(nil, errors.New("when search supported dock resource: "))
+	mockClient2.On("UpdateFileShareSnapshotStatus", c.NewAdminContext(), req.Id, "errorDeleting").Return(&SampleFileShareSnapshots[0], nil)
+	mockClient2.On("GetFileShareSnapshot", c.NewAdminContext(), req.Id).Return(&SampleFileShareSnapshots[0], nil)
+	mockClient2.On("UpdateStatus", c.NewAdminContext(), &SampleFileShareSnapshots[0], "errorDeleting").Return(nil)
+	db.C = mockClient2
+
+	var ctrl2 = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+	t2, _ := ctrl2.DeleteFileShareSnapshot(context.Background(), req)
+	err_desc2 := t2.GetError().Description
+	expectedError2 := fmt.Sprintf("when search supported dock resource: ")
+	if err_desc2 != expectedError2 {
+		t.Errorf("test of create file share snapshot failed, didn't get %v instead got %v\n", expectedError2, err_desc2)
+	}
+}
+
+func TestCreateFileShareAcl(t *testing.T) {
+	var req = &pb.CreateFileShareAclOpts{
+		Id:               "d2975ebe-d82c-430f-b28e-f373746a71ca",
+		Description:      "This is a sample Acl for testing",
+		Context:          c.NewAdminContext().ToJson(),
+		Type:             "ip",
+		AccessTo:         "10.21.23.10",
+		AccessCapability: []string{"Read", "Write"},
+	}
+	var fileshare = &SampleFileShares[0]
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetFileShare", c.NewAdminContext(), "").Return(&SampleFileShares[0], nil)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), fileshare.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("CreateFileShareAcl", c.NewAdminContext(), req).Return(&SampleFileSharesAcl[0], nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), &SampleFileSharesAcl[2], "available").Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+	if _, err := ctrl.CreateFileShareAcl(context.Background(), req); err != nil {
+		t.Errorf("failed to create file share acl: %v\n", err)
+	}
+
+	mockClient1 := new(dbtest.Client)
+	mockClient1.On("GetFileShare", c.NewAdminContext(), "").Return(nil, fmt.Errorf("specified fileshare(%s) can't find", req.Id))
+	mockClient1.On("GetFileShareAcl", c.NewAdminContext(), "d2975ebe-d82c-430f-b28e-f373746a71ca").Return(&SampleFileSharesAcl[2], nil)
+	mockClient1.On("UpdateFileShareAclStatus", c.NewAdminContext(), SampleFileSharesAcl[2].Id, "error").Return(nil)
+	mockClient1.On("UpdateStatus", c.NewAdminContext(), &SampleFileSharesAcl[2], "error").Return(nil)
+	db.C = mockClient1
+
+	var ctrl1 = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+
+	t1, _ := ctrl1.CreateFileShareAcl(context.Background(), req)
+	err_desc := t1.GetError().Description
+	expectedError := fmt.Sprintf("specified fileshare(%s) can't find", fileshare.Id)
+	if err_desc != expectedError {
+		t.Errorf("test of create file share acl failed, didn't get %v instead got %v\n", expectedError, err_desc)
+	}
+
+	mockClient2 := new(dbtest.Client)
+	mockClient2.On("GetFileShare", c.NewAdminContext(), "").Return(&SampleFileShares[0], nil)
+	mockClient2.On("GetDockByPoolId", c.NewAdminContext(), fileshare.PoolId).Return(nil, errors.New("when search supported dock resource:Get dock failed by pool id: "+fileshare.PoolId))
+	mockClient2.On("GetFileShareAcl", c.NewAdminContext(), "d2975ebe-d82c-430f-b28e-f373746a71ca").Return(&SampleFileSharesAcl[2], nil)
+	mockClient2.On("UpdateFileShareAclStatus", c.NewAdminContext(), SampleFileSharesAcl[2].Id, "error").Return(nil)
+	mockClient2.On("UpdateStatus", c.NewAdminContext(), &SampleFileSharesAcl[2], "error").Return(nil)
+	db.C = mockClient2
+
+	var ctrl2 = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+
+	t2, _ := ctrl2.CreateFileShareAcl(context.Background(), req)
+	err_desc2 := t2.GetError().Description
+	expectedError2 := fmt.Sprintf("when search supported dock resource:Get dock failed by pool id: %v", fileshare.PoolId)
+	if err_desc2 != expectedError2 {
+		t.Errorf("test of create file share acl failed, didn't get %v instead got %v\n", expectedError2, err_desc2)
+	}
+
+}
+
+func TestDeleteFileShareAcl(t *testing.T) {
+	var req = &pb.DeleteFileShareAclOpts{
+		Id:          "d2975ebe-d82c-430f-b28e-f373746a71ca",
+		Description: "This is a sample Acl for testing",
+		Context:     c.NewAdminContext().ToJson(),
+	}
+	var fileshare = &SampleFileShares[0]
+	mockClient := new(dbtest.Client)
+	mockClient.On("GetFileShare", c.NewAdminContext(), "").Return(&SampleFileShares[0], nil)
+	mockClient.On("GetDockByPoolId", c.NewAdminContext(), fileshare.PoolId).Return(&SampleDocks[0], nil)
+	mockClient.On("DeleteFileShareAcl", c.NewAdminContext(), req.Id).Return(nil)
+	mockClient.On("UpdateStatus", c.NewAdminContext(), &SampleFileSharesAcl[2], "available").Return(nil)
+	db.C = mockClient
+
+	var ctrl = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+	if _, err := ctrl.DeleteFileShareAcl(context.Background(), req); err != nil {
+		t.Errorf("failed to delete file share snapshot: %v\n", err)
+	}
+
+	mockClient1 := new(dbtest.Client)
+	mockClient1.On("GetFileShare", c.NewAdminContext(), "").Return(nil, fmt.Errorf(" when delete file share acl:specified fileshare(%s) can't find", req.Id))
+	mockClient1.On("GetFileShareAcl", c.NewAdminContext(), "d2975ebe-d82c-430f-b28e-f373746a71ca").Return(&SampleFileSharesAcl[2], nil)
+	mockClient1.On("UpdateFileShareAclStatus", c.NewAdminContext(), SampleFileSharesAcl[2].Id, "error").Return(nil)
+	mockClient1.On("UpdateStatus", c.NewAdminContext(), &SampleFileSharesAcl[2], "errorDeleting").Return(nil)
+	db.C = mockClient1
+
+	var ctrl1 = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+
+	t1, _ := ctrl1.DeleteFileShareAcl(context.Background(), req)
+	err_desc := t1.GetError().Description
+	expectedError := fmt.Sprintf(" when delete file share acl:specified fileshare(%s) can't find", fileshare.Id)
+	if err_desc != expectedError {
+		t.Errorf("test of delete file share acl failed, didn't get %v instead got %v\n", expectedError, err_desc)
+	}
+
+	mockClient2 := new(dbtest.Client)
+	mockClient2.On("GetFileShare", c.NewAdminContext(), "").Return(&SampleFileShares[0], nil)
+	mockClient2.On("GetDockByPoolId", c.NewAdminContext(), fileshare.PoolId).Return(nil, errors.New("when search supported dock resource:Get dock failed by pool id: "+fileshare.PoolId))
+	mockClient2.On("GetFileShareAcl", c.NewAdminContext(), "d2975ebe-d82c-430f-b28e-f373746a71ca").Return(&SampleFileSharesAcl[2], nil)
+	mockClient2.On("UpdateFileShareAclStatus", c.NewAdminContext(), SampleFileSharesAcl[2].Id, "error").Return(nil)
+	mockClient2.On("UpdateStatus", c.NewAdminContext(), &SampleFileSharesAcl[2], "errorDeleting").Return(nil)
+	db.C = mockClient2
+
+	var ctrl2 = &Controller{
+		fileshareController: NewFakeFileShareController(),
+	}
+
+	t2, _ := ctrl2.DeleteFileShareAcl(context.Background(), req)
+	err_desc2 := t2.GetError().Description
+	expectedError2 := fmt.Sprintf("when search supported dock resource:Get dock failed by pool id: %v", fileshare.PoolId)
+	if err_desc2 != expectedError2 {
+		t.Errorf("test of delete file share acl failed, didn't get %v instead got %v\n", expectedError2, err_desc2)
+	}
+
 }

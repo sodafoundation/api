@@ -50,11 +50,10 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		return
 	}
 	ctx := c.GetContext(f.Ctx)
-	// Get profile
-	var prf *model.ProfileSpec
 	var fileshareacl = model.FileShareAclSpec{
 		BaseModel: &model.BaseModel{},
 	}
+
 	// Unmarshal the request body
 	if err := json.NewDecoder(f.Ctx.Request.Body).Decode(&fileshareacl); err != nil {
 		reason := fmt.Sprintf("parse fileshare access rules request body failed: %s", err.Error())
@@ -62,6 +61,26 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		log.Error(reason)
 		return
 	}
+
+	fileshare, err := db.C.GetFileShare(ctx, fileshareacl.FileShareId)
+	if err != nil {
+		reason := fmt.Sprintf("getFileshare failed in create fileshare acl: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, reason)
+		log.Error(reason)
+		return
+	}
+	// If user doesn't specified profile, using profile derived from fileshare
+	if len(fileshareacl.ProfileId) == 0 {
+		log.Warning("User doesn't specified profile id, using profile derived from file share")
+		fileshareacl.ProfileId = fileshare.ProfileId
+	}
+	prf, err := db.C.GetProfile(ctx, fileshareacl.ProfileId)
+	if err != nil {
+		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
+		f.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
 	result, err := util.CreateFileShareAclDBEntry(c.GetContext(f.Ctx), &fileshareacl)
 	if err != nil {
 		reason := fmt.Sprintf("createFileshareAcldbentry failed: %s", err.Error())
@@ -69,19 +88,7 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		log.Error(reason)
 		return
 	}
-	fileshare, err := db.C.GetFileShare(ctx, result.FileShareId)
-	if err != nil {
-		reason := fmt.Sprintf("getFileshare failed in createfileshare acl: %s", err.Error())
-		f.ErrorHandle(model.ErrorBadRequest, reason)
-		log.Error(reason)
-		return
-	}
-	prf, err = db.C.GetProfile(ctx, fileshare.ProfileId)
-	if err != nil {
-		errMsg := fmt.Sprintf("get profile failed: %s", err.Error())
-		f.ErrorHandle(model.ErrorBadRequest, errMsg)
-		return
-	}
+
 	// Marshal the result.
 	body, err := json.Marshal(result)
 	if err != nil {
@@ -165,6 +172,29 @@ func (f *FileSharePortal) CreateFileShare() {
 		return
 	}
 
+	// make the fileshare name global so that we can use at multiple place
+	var fileshareMetadata map[string]string
+	fileshareMetadata = fileshare.Metadata
+	var snapshotName string
+
+	// Validate the snapthot existance
+	if fileshare.SnapshotId != "" {
+		snapshot, _err := db.C.GetFileShareSnapshot(ctx, fileshare.SnapshotId)
+		if _err != nil {
+			errMsg := fmt.Sprintf("give valid snapshotId %s. %s", fileshare.SnapshotId, _err.Error())
+			f.ErrorHandle(model.ErrorNotFound, errMsg)
+			return
+		}
+		existingFs, _err := db.C.GetFileShare(ctx, snapshot.FileShareId)
+		if _err != nil {
+			errMsg := fmt.Sprintf("This snapshot %s is not associated with any filesystem.", fileshare.SnapshotId)
+			f.ErrorHandle(model.ErrorNotFound, errMsg)
+			return
+		}
+		fileshareMetadata = existingFs.Metadata
+		snapshotName = snapshot.Name
+	}
+
 	// Get profile
 	var prf *model.ProfileSpec
 	var err error
@@ -230,7 +260,9 @@ func (f *FileSharePortal) CreateFileShare() {
 		Profile:          prf.ToJson(),
 		PoolId:           result.PoolId,
 		ExportLocations:  result.ExportLocations,
-		Metadata:         result.Metadata,
+		SnapshotId:       result.SnapshotId,
+		SnapshotName:     snapshotName,
+		Metadata:         fileshareMetadata,
 		Context:          ctx.ToJson(),
 	}
 	response, err := f.CtrClient.CreateFileShare(context.Background(), opt)
@@ -478,11 +510,12 @@ func (f *FileSharePortal) DeleteFileShare() {
 	defer f.CtrClient.Close()
 
 	opt := &pb.DeleteFileShareOpts{
-		Id:       fileshare.Id,
-		PoolId:   fileshare.PoolId,
-		Metadata: fileshare.Metadata,
-		Context:  ctx.ToJson(),
-		Profile:  prf.ToJson(),
+		Id:              fileshare.Id,
+		PoolId:          fileshare.PoolId,
+		Metadata:        fileshare.Metadata,
+		Context:         ctx.ToJson(),
+		Profile:         prf.ToJson(),
+		ExportLocations: fileshare.ExportLocations,
 	}
 	response, err := f.CtrClient.DeleteFileShare(context.Background(), opt)
 	if err != nil {

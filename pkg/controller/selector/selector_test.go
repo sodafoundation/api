@@ -92,12 +92,16 @@ var (
 			ProvisioningProperties: model.ProvisioningPropertiesSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
-					IsSpaceEfficient:   true,
+					Compression:   true,
+					Deduplication: true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "iscsi",
 					MaxIOPS:        50000,
 					MaxBWS:         500,
+					MinIOPS:        10000,
+					MinBWS:         100,
+					Latency:	100,
 				},
 			},
 			ReplicationProperties: model.ReplicationPropertiesSpec{
@@ -124,12 +128,16 @@ var (
 			ProvisioningProperties: model.ProvisioningPropertiesSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy: "Thin",
-					IsSpaceEfficient:   true,
+					Compression:   true,
+					Deduplication: true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "rbd",
 					MaxIOPS:        500,
 					MaxBWS:         500,
+					MinIOPS:        10000,
+					MinBWS:		100,
+					Latency:	100,
 				},
 			},
 			ReplicationProperties: model.ReplicationPropertiesSpec{
@@ -169,12 +177,16 @@ var (
 				DataStorage: model.DataStorageLoS{
 					RecoveryTimeObjective: 1,
 					ProvisioningPolicy:    "Thin",
-					IsSpaceEfficient:      true,
+					Compression:   true,
+					Deduplication: true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "iscsi",
 					MaxIOPS:        100000,
 					MaxBWS:         1000,
+					MinIOPS:	100000,
+					MinBWS:		100,
+					Latency:	100,
 				},
 				DataProtection: model.DataProtectionLoS{},
 				Advanced: map[string]interface{}{
@@ -200,12 +212,16 @@ var (
 				DataStorage: model.DataStorageLoS{
 					RecoveryTimeObjective: 1,
 					ProvisioningPolicy:    "Thin",
-					IsSpaceEfficient:      true,
+					Compression:   true,
+					Deduplication: true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "iscsi",
 					MaxIOPS:        60000,
 					MaxBWS:         600,
+					MinIOPS:        10000,
+					MinBWS:		100,
+					Latency:	100,
 				},
 				DataProtection: model.DataProtectionLoS{
 					IsIsolated:  true,

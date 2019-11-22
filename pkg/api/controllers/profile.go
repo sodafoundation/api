@@ -64,7 +64,7 @@ func (p *ProfilePortal) CreateProfile() {
 				profile.ProvisioningProperties.DataStorage.StorageAccessCapability = []string{"Read", "Write", "Execute"}
 			}
 		}
-		if io := pp.IOConnectivity; io.IsEmpty(){
+		if io := pp.IOConnectivity; io.IsEmpty() {
 			if io.AccessProtocol == "" {
 				profile.ProvisioningProperties.IOConnectivity.AccessProtocol = "nfs"
 			}

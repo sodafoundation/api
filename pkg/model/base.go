@@ -59,9 +59,10 @@ type DataStorageLoS struct {
 
 	StorageAccessCapability []string `json:"storageAccessCapability,omitempty" yaml:"storageAccessCapability,omitempty"`
 
-	// IsSpaceEfficient indicates that the storage is compressed or deduplicated.
-	// The default value for this prperty is false.
-	IsSpaceEfficient bool `json:"isSpaceEfficient" yaml:"isSpaceEfficient,omitempty"`
+	// Compression/Deduplication indicates that the storage is compressed or/and deduplicated.
+	// The default value for these prperties are false.
+	Compression   bool `json:"compression" yaml:"compression,omitempty"`
+	Deduplication bool `json:"deduplication" yaml:"deduplication,omitempty"`
 }
 
 func (ds DataStorageLoS) IsEmptyStorageAccessCapability() bool {
@@ -86,10 +87,23 @@ type IOConnectivityLoS struct {
 	// +units:[IO]/s
 	MaxIOPS int64 `json:"maxIOPS,omitempty" yaml:"maxIOPS,omitempty"`
 
+	// MinIOPS shall be the minimum IOs per second that the connection shall
+	// allow for the selected access protocol.
+	// +units:[IO]/s
+	MinIOPS int64 `json:"minIOPS,omitempty" yaml:"minIOPS,omitempty"`
+
 	// MaxBWS shall be the maximum amount of data that can be transmitted in a
 	// fixed amount of time.
 	// +units:[MB]/s
 	MaxBWS int64 `json:"maxBWS,omitempty" yaml:"maxBWS,omitempty"`
+
+	// MinBWS shall be the minimum amount of data that can be transmitted in a
+	// fixed amount of time.
+	// +units:[MB]/s
+	MinBWS int64 `json:"minBWS,omitempty" yaml:"minBWS,omitempty"`
+
+	// maximum supported latency value
+	Latency int64 `json:"latency,omitempty" yaml:"latency,omitempty"`
 }
 
 func (ic IOConnectivityLoS) IsEmpty() bool {

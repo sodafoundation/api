@@ -19,10 +19,6 @@ This module implements the common data structure.
 
 package model
 
-import (
-	"encoding/json"
-)
-
 // VolumeSpec is an block device created by storage service, it can be attached
 // to physical machine or virtual machine instance.
 type VolumeSpec struct {
@@ -83,69 +79,15 @@ type VolumeSpec struct {
 	AttachStatus string
 
 	// Whether the volume can be attached more than once, default value is false.
-	MultiAttach bool `json:"multiAttach,omitempty"`
+	MultiAttach bool        `json:"multiAttach,omitempty"`
+	Identifier  *Identifier `json:"identifier,omitempty"`
 }
 
-// VolumeAttachmentSpec is a description of volume attached resource.
-type VolumeAttachmentSpec struct {
-	*BaseModel
-
-	// The uuid of the project that the volume belongs to.
-	TenantId string `json:"tenantId,omitempty"`
-
-	// The uuid of the user that the volume belongs to.
-	// +optional
-	UserId string `json:"userId,omitempty"`
-
-	// The uuid of the volume which the attachment belongs to.
-	VolumeId string `json:"volumeId,omitempty"`
-
-	// The locaility when the volume was attached to a host.
-	Mountpoint string `json:"mountpoint,omitempty"`
-
-	// The status of the attachment.
-	// One of: "attaching", "attached", "error", etc.
-	Status string `json:"status,omitempty"`
-
-	// Metadata should be kept until the scemantics between opensds volume
-	// attachment and backend attached storage resouce description are clear.
-	// +optional
-	Metadata map[string]string `json:"metadata,omitempty"`
-
-	// See details in `HostInfo`
-	HostInfo `json:"hostInfo,omitempty"`
-
-	// See details in `ConnectionInfo`
-	ConnectionInfo `json:"connectionInfo,omitempty"`
-
-	// The protocol
-	AccessProtocol string `json:"accessProtocol,omitempty"`
-
-	// read-only (‘ro’) or read-and-write (‘rw’), default is ‘rw’
-	AttachMode string `json:"attachMode,omitempty"`
-}
-
-// HostInfo is a structure for all properties of host when create a volume
-// attachment.
-type HostInfo struct {
-	Platform  string `json:"platform,omitempty"`
-	OsType    string `json:"osType,omitempty"`
-	Ip        string `json:"ip,omitempty"`
-	Host      string `json:"host,omitempty"`
-	Initiator string `json:"initiator,omitempty"`
-}
-
-// ConnectionInfo is a structure for all properties of connection when
-// create a volume attachment.
-type ConnectionInfo struct {
-	DriverVolumeType     string                 `json:"driverVolumeType,omitempty"`
-	ConnectionData       map[string]interface{} `json:"data,omitempty"`
-	AdditionalProperties map[string]interface{} `json:"additionalProperties,omitempty"`
-}
-
-func (con *ConnectionInfo) EncodeConnectionData() []byte {
-	conBody, _ := json.Marshal(&con.ConnectionData)
-	return conBody
+// This type describes any additional identifiers for a resource which is used to uniquly identify the resource.
+type Identifier struct {
+	//This indicates the world wide, persistent name of the resource
+	DurableName       string `json:"durableName,omitempty"`
+	DurableNameFormat string `json:"durableNameFormat,omitempty"`
 }
 
 // VolumeSnapshotSpec is a description of volume snapshot resource.

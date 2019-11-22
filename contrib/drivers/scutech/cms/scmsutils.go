@@ -15,9 +15,9 @@
 package scms
 
 import (
+	"errors"
 	"os/exec"
 	"strconv"
-	"errors"
 )
 
 const CMS_ADM = "/opt/cmsagent/cmsadm"
@@ -25,21 +25,20 @@ const CMS_ADM = "/opt/cmsagent/cmsadm"
 const (
 	CMS_CREATE = "--create"
 	CMS_DELETE = "--remove"
-	CMS_START = "--up"
-	CMS_STOP = "--down"
-	CMS_QUERY = "--query"
+	CMS_START  = "--up"
+	CMS_STOP   = "--down"
+	CMS_QUERY  = "--query"
 )
 
 type CmsAdm struct {
 }
 
-
-func NewCmsAdm () *CmsAdm {
+func NewCmsAdm() *CmsAdm {
 	return &CmsAdm{}
 }
 
 func (c *CmsAdm) CreateTask(t *CmsTask, arg ...string) ([]byte, error) {
-	var argv = []string {CMS_CREATE}
+	var argv = []string{CMS_CREATE}
 
 	var option string
 	option = "-b " + strconv.FormatInt(t.bandwidth, 10)
@@ -63,12 +62,12 @@ func (c *CmsAdm) CreateTask(t *CmsTask, arg ...string) ([]byte, error) {
 }
 
 func (c *CmsAdm) DeleteTask(arg ...string) ([]byte, error) {
-	var argv = []string {CMS_DELETE}
+	var argv = []string{CMS_DELETE}
 	return cmdExec(CMS_ADM, argv)
 }
 
 func (c *CmsAdm) Up() ([]byte, error) {
-	var argv = []string {CMS_START}
+	var argv = []string{CMS_START}
 	return cmdExec(CMS_ADM, argv)
 }
 
@@ -82,10 +81,10 @@ func (c *CmsAdm) Query() ([]byte, error) {
 	return cmdExec(CMS_ADM, argv)
 }
 
-func cmdExec(cmd string, argv[]string) ([]byte, error) {
+func cmdExec(cmd string, argv []string) ([]byte, error) {
 	out, err := exec.Command(cmd, argv[0:]...).Output()
 	if err != nil {
 		err = errors.New(string(out))
 	}
-	return out,err
+	return out, err
 }

@@ -128,6 +128,7 @@ func init() {
 	volumeCommand.AddCommand(volumeSnapshotCommand)
 	volumeCommand.AddCommand(volumeAttachmentCommand)
 	volumeCommand.AddCommand(volumeGroupCommand)
+	volumeCommand.AddCommand(replicationCommand)
 }
 
 func volumeAction(cmd *cobra.Command, args []string) {
@@ -188,7 +189,7 @@ func volumeListAction(cmd *cobra.Command, args []string) {
 	if err != nil {
 		Fatalln(HttpErrStrip(err))
 	}
-	keys := KeyList{"Id", "Name", "Description", "Size", "Status", "ProfileId", "GroupId"}
+	keys := KeyList{"Id", "Name", "Description", "Size", "Status", "ProfileId", "AvailabilityZone"}
 	PrintList(resp, keys, volFormatters)
 }
 

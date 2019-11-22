@@ -1,0 +1,27 @@
+tgtBindIp: 11.242.178.20
+tgtConfDir: /etc/tgt/conf.d
+pool:
+  opensds-files-default:
+    diskType: NL-SAS
+    availabilityZone: default
+    multiAttach: true
+    storageType: file
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        compression: false
+        deduplication: false
+        storageAccessCapability:
+          - Read
+          - Write
+          - Execute
+      ioConnectivity:
+        accessProtocol: nfs
+        maxIOPS: 7000000
+        maxBWS: 600
+        minIOPS: 1000000
+        minBWS: 100
+        latency: 100
+      advanced:
+        diskType: SSD
+        latency: 5ms

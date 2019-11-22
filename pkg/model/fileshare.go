@@ -14,7 +14,6 @@
 
 /*
 This module implements the common data structure.
-
 */
 package model
 
@@ -38,6 +37,10 @@ type FileShareAclSpec struct {
 
 	// The description of the fileshare acl.
 	Description string `json:"description,omitempty"`
+
+	// The status of the fileshareacl.
+	// One of: "available", "error" etc.
+	Status string `json:"status,omitempty"`
 
 	// The uuid of the profile which the fileshare belongs to.
 	ProfileId string `json:"profileId,omitempty"`
@@ -90,6 +93,9 @@ type FileShareSpec struct {
 
 	// The uuid of the snapshot which the fileshare is created
 	SnapshotId string `json:"snapshotId,omitempty"`
+
+	// The name of the snapshot which the fileshare is created
+	SnapshotName string `json:"snapshotName,omitempty"`
 
 	// ExportLocations of the fileshare.
 	ExportLocations []string `json:"exportLocations,omitempty"`

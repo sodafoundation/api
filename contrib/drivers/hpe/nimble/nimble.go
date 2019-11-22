@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/drivers/utils"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -207,7 +208,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 		log.Infof("%v: trying initialize connection...", DriverName)
 
 		poolId := opt.GetMetadata()["PoolId"]
-		initiatorName := opt.GetHostInfo().Initiator
+		initiatorName := utils.GetInitiatorName(opt.GetHostInfo().GetInitiators(), opt.GetAccessProtocol())
 		if initiatorName == "" || opt.GetHostInfo().Ip == "" {
 			if opt.GetAccessProtocol() == ISCSIProtocol {
 				return nil, fmt.Errorf("%v: pls set initiator IQN and IP address for %v protocol.\n", DriverName, opt.GetAccessProtocol())
