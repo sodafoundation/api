@@ -44,7 +44,7 @@ func (p *HostPortal) ListHosts() {
 
 	m, err := p.GetParameters()
 	if err != nil {
-		errMsg := fmt.Sprintf("list hosts failed: %s", err.Error())
+		errMsg := fmt.Sprintf("get the query parameters of host failed: %s", err.Error())
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -86,7 +86,7 @@ func (p *HostPortal) CreateHost() {
 	// HostName should be unique in the system
 	hostArr, err := db.C.ListHostsByName(c.GetContext(p.Ctx), host.HostName)
 	if err != nil {
-		errMsg := fmt.Sprintf("list hosts failed in CreateHost method: %v", err)
+		errMsg := fmt.Sprintf("check host %s failed in CreateHost method: %v", host.HostName, err)
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
@@ -197,7 +197,7 @@ func (p *HostPortal) DeleteHost() {
 		return
 	}
 	if len(attachments) > 0 {
-		errMsg := fmt.Sprintf("some volumes are attached to host: %s, please remove them first", host.HostName)
+		errMsg := fmt.Sprintf("some volumes are attached to host: %s, please detach them first", host.HostName)
 		p.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
