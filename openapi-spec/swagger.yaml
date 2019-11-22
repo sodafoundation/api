@@ -383,7 +383,7 @@ paths:
           $ref: '#/components/responses/HTTPStatus404'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
-  '/v1beta/{tenantId}/profiles/{profileId}/customeProperties':
+  '/v1beta/{tenantId}/profiles/{profileId}/customProperties':
     parameters:
       - $ref: '#/components/parameters/tenantId'
       - $ref: '#/components/parameters/profileId'

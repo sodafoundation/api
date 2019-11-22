@@ -59,4 +59,9 @@ const (
 	Read    = "Read"
 	Write   = "Write"
 	Execute = "Execute"
+
+	// Default value for pagination and sorting
+	DefaultSortDir = "desc"
+	DefaultLimit   = 50
+	DefaultOffset  = 0
 )
