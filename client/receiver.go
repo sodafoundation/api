@@ -152,7 +152,9 @@ func request(urlStr string, method string, headers HeaderOption, input interface
 type receiver struct{}
 
 func (*receiver) Recv(url string, method string, input interface{}, output interface{}) error {
-	return request(url, method, nil, input, output)
+	headers := HeaderOption{}
+	headers["Content-Type"] = constants.ContentType
+	return request(url, method, headers, input, output)
 }
 
 func NewKeystoneReceiver(auth *KeystoneAuthOptions) (Receiver, error) {

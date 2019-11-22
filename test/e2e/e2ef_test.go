@@ -581,9 +581,11 @@ func prepareHostForTest(t *testing.T) (*model.HostSpec, error) {
 
 	hostName, _ := os.Hostname()
 	var body = &model.HostSpec{
-		HostName: hostName,
-		IP:       getHostIp(),
-		OsType:   runtime.GOOS,
+		HostName:          hostName,
+		IP:                getHostIp(),
+		OsType:            runtime.GOOS,
+		AccessMode:        "agentless",
+		AvailabilityZones: []string{"default"},
 		Initiators: []*model.Initiator{
 			&model.Initiator{
 				PortName: localIqn,
