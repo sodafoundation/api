@@ -170,17 +170,6 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 	if in.UpdatedAt == "" {
 		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
 	}
-	//validate the name
-	if in.Name == "" {
-		errMsg := fmt.Sprintf("empty fileshare name is not allowed. Please give valid name.")
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
-	if len(in.Name) > 255 {
-		errMsg := fmt.Sprintf("fileshare name length should not be more than 255 characters. input name length is : %d", len(in.Name))
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
 
 	reg, err := regexp.Compile("^[a-zA-Z0-9_-]+$")
 	if err != nil {
@@ -281,12 +270,6 @@ func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotS
 		in.CreatedAt = time.Now().Format(constants.TimeFormat)
 	}
 
-	//validate the snapshot name
-	if in.Name == "" {
-		errMsg := fmt.Sprintf("snapshot name can not be empty. Please give valid snapshot name")
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
 	if strings.HasPrefix(in.Name, "snapshot") {
 		errMsg := fmt.Sprintf("names starting 'snapshot' are reserved. Please choose a different snapshot name.")
 		log.Error(errMsg)

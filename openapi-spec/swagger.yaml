@@ -2751,6 +2751,7 @@ components:
           minLength: 1
           maxLength: 255
           type: string
+          pattern: '^[\w\- ]+$'
         description:
           type: string
     FileShareSnapshotRespSpec:
