@@ -574,8 +574,8 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	prf, err := db.C.GetProfile(ctx, snapshot.ProfileId)
 	if err != nil {
 		errMsg := fmt.Sprintf("delete snapshot failed: %v", err.Error())
-		v.ErrorHandle(model.ErrorBadRequest, errMsg)
-		return
+		log.Warning(errMsg)
+		prf = &model.ProfileSpec{BaseModel: &model.BaseModel{}}
 	}
 
 	// NOTE:It will update the the status of the volume snapshot waiting for deletion in
