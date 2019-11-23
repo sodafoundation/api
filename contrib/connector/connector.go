@@ -36,6 +36,8 @@ const (
 	NvmeofDriver = config.NVMEOFProtocol
 	Nqn          = "nqn"
 	NFSDriver    = config.NFSProtocol
+
+	SampleDriver = config.SampleProtocol
 )
 
 // Connector implementation

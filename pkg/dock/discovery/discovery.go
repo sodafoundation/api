@@ -251,7 +251,7 @@ func (add *attachDockDiscoverer) Discover() error {
 
 	bindIp := CONF.BindIp
 	if bindIp == "" {
-		bindIp = connector.GetHostIP()
+		bindIp = connector.GetCommonMounter().GetHostIP()
 	}
 
 	fcInitiator, err := connector.NewConnector(connector.FcDriver).GetInitiatorInfo()

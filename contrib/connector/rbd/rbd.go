@@ -106,7 +106,7 @@ func (*RBD) Detach(conn map[string]interface{}) error {
 
 // GetInitiatorInfo implementation
 func (*RBD) GetInitiatorInfo() (string, error) {
-	hostName, err := connector.GetHostName()
+	hostName, err := connector.GetCommonMounter().GetHostName()
 
 	if err != nil {
 		return "", err
