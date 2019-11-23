@@ -35,6 +35,10 @@ import (
 	. "github.com/opensds/opensds/pkg/utils/config"
 )
 
+const (
+	NoProfile = "opensds_no_Profile"
+)
+
 func NewVolumePortal() *VolumePortal {
 	return &VolumePortal{
 		CtrClient: client.NewClient(),
@@ -68,7 +72,7 @@ func (v *VolumePortal) CreateVolume() {
 	var err error
 	// If pool id is  specified, ignore profile
 	if volume.PoolId != "" {
-		volume.ProfileId = ""
+		volume.ProfileId = NoProfile
 		pool, err := db.C.GetPool(ctx, volume.PoolId)
 		if err == nil {
 			volume.PoolId = pool.Id
@@ -128,8 +132,8 @@ func (v *VolumePortal) CreateVolume() {
 	defer v.CtrClient.Close()
 	var profId string
 	var poolID string
-	if volume.ProfileId == "" {
-		profId = ""
+	if volume.ProfileId == NoProfile {
+		profId = NoProfile
 		poolID = volume.PoolId
 
 	} else {
@@ -570,12 +574,16 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		v.ErrorHandle(model.ErrorNotFound, errMsg)
 		return
 	}
-
-	prf, err := db.C.GetProfile(ctx, snapshot.ProfileId)
-	if err != nil {
-		errMsg := fmt.Sprintf("delete snapshot failed: %v", err.Error())
-		log.Warning(errMsg)
-		prf = &model.ProfileSpec{BaseModel: &model.BaseModel{}}
+	prf := &model.ProfileSpec{
+		BaseModel: &model.BaseModel{},
+	}
+	if snapshot.ProfileId != NoProfile {
+		prf, err = db.C.GetProfile(ctx, snapshot.ProfileId)
+		if err != nil {
+			errMsg := fmt.Sprintf("delete snapshot failed: %v", err.Error())
+			v.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
 	}
 
 	// NOTE:It will update the the status of the volume snapshot waiting for deletion in
