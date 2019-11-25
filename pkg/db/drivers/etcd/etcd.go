@@ -330,33 +330,6 @@ func (c *Client) CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*
 	return fshare, nil
 }
 
-func (c *Client) SelectFileShares(m map[string][]string, fileshares []*model.FileShareSpec) []*model.FileShareSpec {
-	if !c.SelectOrNot(m) {
-		return fileshares
-	}
-
-	var fshares = []*model.FileShareSpec{}
-	var flag bool
-	for _, fshare := range fileshares {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			f := c.FindFileShareValue(key, fshare)
-			if !strings.EqualFold(m[key][0], f) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			fshares = append(fshares, fshare)
-		}
-	}
-	return fshares
-
-}
-
 func (c *Client) SortFileShares(shares []*model.FileShareSpec, p *Parameter) []*model.FileShareSpec {
 	volume_sortKey = p.sortKey
 
@@ -446,9 +419,16 @@ func (c *Client) ListFileSharesWithFilter(ctx *c.Context, m map[string][]string)
 		return nil, err
 	}
 
-	vols := c.SelectFileShares(m, fileshares)
-	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "CRETEDAT", "UPDATEDAT", "PROTOCOLS", "EXPORTLOCATIONS", "SNAPSHOTID"})
-	return c.SortFileShares(vols, p), nil
+	datas := c.SelectDatas(m, utils.Slice(fileshares, 0, len(fileshares)).([]interface{}))
+	var fs []*model.FileShareSpec
+	for _, data := range datas {
+		p, ok := data.(*model.FileShareSpec)
+		if ok {
+			fs = append(fs, p)
+		}
+	}
+	p := c.ParameterFilter(m, len(fs), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "CRETEDAT", "UPDATEDAT", "PROTOCOLS", "EXPORTLOCATIONS", "SNAPSHOTID"})
+	return c.SortFileShares(fs, p), nil
 }
 
 // ListFileShares
@@ -815,33 +795,6 @@ func (c *Client) FindFileShareSnapshotsValue(k string, p *model.FileShareSnapsho
 	return ""
 }
 
-func (c *Client) SelectFileShareSnapshots(m map[string][]string, snapshots []*model.FileShareSnapshotSpec) []*model.FileShareSnapshotSpec {
-	if !c.SelectOrNot(m) {
-		return snapshots
-	}
-
-	var snps = []*model.FileShareSnapshotSpec{}
-	var flag bool
-	for _, snapshot := range snapshots {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			v := c.FindFileShareSnapshotsValue(key, snapshot)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			snps = append(snps, snapshot)
-		}
-	}
-	return snps
-
-}
-
 func (c *Client) SortFileShareSnapshots(snapshots []*model.FileShareSnapshotSpec, p *Parameter) []*model.FileShareSnapshotSpec {
 	fileshareSnapshotSortKey = p.sortKey
 
@@ -861,7 +814,14 @@ func (c *Client) ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][
 		return nil, err
 	}
 
-	snps := c.SelectFileShareSnapshots(m, fileshareSnapshots)
+	datas := c.SelectDatas(m, utils.Slice(fileshareSnapshots, 0, len(fileshareSnapshots)).([]interface{}))
+	var snps []*model.FileShareSnapshotSpec
+	for _, data := range datas {
+		p, ok := data.(*model.FileShareSnapshotSpec)
+		if ok {
+			snps = append(snps, p)
+		}
+	}
 	p := c.ParameterFilter(m, len(snps), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
 
 	return c.SortFileShareSnapshots(snps, p)[p.beginIdx:p.endIdx], nil
@@ -1085,32 +1045,6 @@ func (c *Client) FindDockValue(k string, d *model.DockSpec) string {
 	return ""
 }
 
-func (c *Client) SelectDocks(m map[string][]string, docks []*model.DockSpec) []*model.DockSpec {
-	if !c.SelectOrNot(m) {
-		return docks
-	}
-	var dcks = []*model.DockSpec{}
-
-	var flag bool
-	for _, dock := range docks {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			v := c.FindDockValue(key, dock)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			dcks = append(dcks, dock)
-		}
-	}
-	return dcks
-}
-
 func (c *Client) SortDocks(dcks []*model.DockSpec, p *Parameter) []*model.DockSpec {
 	dockSortKey = p.sortKey
 	if strings.EqualFold(p.sortDir, "asc") {
@@ -1128,7 +1062,14 @@ func (c *Client) ListDocksWithFilter(ctx *c.Context, m map[string][]string) ([]*
 		return nil, err
 	}
 
-	dcks := c.SelectDocks(m, docks)
+	datas := c.SelectDatas(m, utils.Slice(docks, 0, len(docks)).([]interface{}))
+	var dcks []*model.DockSpec
+	for _, data := range datas {
+		p, ok := data.(*model.DockSpec)
+		if ok {
+			dcks = append(dcks, p)
+		}
+	}
 
 	p := c.ParameterFilter(m, len(dcks), []string{"ID", "NAME", "ENDPOINT", "DRIVERNAME", "DESCRIPTION", "STATUS"})
 	return c.SortDocks(dcks, p)[p.beginIdx:p.endIdx], nil
@@ -1260,32 +1201,6 @@ func (c *Client) FindPoolValue(k string, p *model.StoragePoolSpec) string {
 	return ""
 }
 
-func (c *Client) SelectPools(m map[string][]string, pools []*model.StoragePoolSpec) []*model.StoragePoolSpec {
-
-	if !c.SelectOrNot(m) {
-		return pools
-	}
-	var pols = []*model.StoragePoolSpec{}
-	var flag bool
-	for _, pool := range pools {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			v := c.FindPoolValue(key, pool)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			pols = append(pols, pool)
-		}
-	}
-	return pols
-}
-
 func (c *Client) SortPools(pools []*model.StoragePoolSpec, p *Parameter) []*model.StoragePoolSpec {
 
 	poolSortKey = p.sortKey
@@ -1305,7 +1220,14 @@ func (c *Client) ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*
 		return nil, err
 	}
 
-	pols := c.SelectPools(m, pools)
+	datas := c.SelectDatas(m, utils.Slice(pools, 0, len(pools)).([]interface{}))
+	var pols []*model.StoragePoolSpec
+	for _, data := range datas {
+		p, ok := data.(*model.StoragePoolSpec)
+		if ok {
+			pols = append(pols, p)
+		}
+	}
 	p := c.ParameterFilter(m, len(pols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "DOCKID", "DESCRIPTION"})
 	return c.SortPools(pols, p)[p.beginIdx:p.endIdx], nil
 }
@@ -1596,33 +1518,6 @@ func (c *Client) SortProfiles(profiles []*model.ProfileSpec, p *Parameter) []*mo
 	return profiles
 }
 
-func (c *Client) SelectProfiles(m map[string][]string, profiles []*model.ProfileSpec) []*model.ProfileSpec {
-	if !c.SelectOrNot(m) {
-		return profiles
-	}
-
-	var prfs = []*model.ProfileSpec{}
-	var flag bool
-	for _, profile := range profiles {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			v := c.FindProfileValue(key, profile)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			prfs = append(prfs, profile)
-		}
-	}
-	return prfs
-
-}
-
 func (c *Client) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ProfileSpec, error) {
 	profiles, err := c.ListProfiles(ctx)
 	if err != nil {
@@ -1630,8 +1525,14 @@ func (c *Client) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) (
 		return nil, err
 	}
 
-	prfs := c.SelectProfiles(m, profiles)
-
+	datas := c.SelectDatas(m, utils.Slice(profiles, 0, len(profiles)).([]interface{}))
+	var prfs []*model.ProfileSpec
+	for _, data := range datas {
+		p, ok := data.(*model.ProfileSpec)
+		if ok {
+			prfs = append(prfs, p)
+		}
+	}
 	p := c.ParameterFilter(m, len(prfs), []string{"ID", "NAME", "DESCRIPTION"})
 
 	return c.SortProfiles(prfs, p)[p.beginIdx:p.endIdx], nil
@@ -1919,31 +1820,33 @@ func (c *Client) FindVolumeValue(k string, p *model.VolumeSpec) string {
 	return ""
 }
 
-func (c *Client) SelectVolumes(m map[string][]string, volumes []*model.VolumeSpec) []*model.VolumeSpec {
+func (c *Client) SelectDatas(m map[string][]string, datas []interface{}) []interface{} {
 	if !c.SelectOrNot(m) {
-		return volumes
+		return datas
 	}
-
-	var vols = []*model.VolumeSpec{}
-	var flag bool
-	for _, vol := range volumes {
-		flag = true
+	var ret []interface{}
+	for i := 0; i < len(datas); i++ {
+		c, err := utils.StructToMap(datas[i])
+		if err != nil {
+			log.Error("call StructToMap failed: ", err)
+			return nil
+		}
+		selected := true
 		for key := range m {
 			if utils.Contained(key, validKey) {
 				continue
 			}
-			v := c.FindVolumeValue(key, vol)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
+
+			if c[utils.LowerCaseFirst(key)] == "" || c[utils.LowerCaseFirst(key)] != m[key][0] {
+				selected = false
 				break
 			}
 		}
-		if flag {
-			vols = append(vols, vol)
+		if selected {
+			ret = append(ret, datas[i])
 		}
 	}
-	return vols
-
+	return ret
 }
 
 func (c *Client) SortVolumes(volumes []*model.VolumeSpec, p *Parameter) []*model.VolumeSpec {
@@ -1965,8 +1868,14 @@ func (c *Client) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([
 		return nil, err
 	}
 
-	vols := c.SelectVolumes(m, volumes)
-
+	datas := c.SelectDatas(m, utils.Slice(volumes, 0, len(volumes)).([]interface{}))
+	var vols []*model.VolumeSpec
+	for _, data := range datas {
+		p, ok := data.(*model.VolumeSpec)
+		if ok {
+			vols = append(vols, p)
+		}
+	}
 	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "PROJECTID", "SIZE", "POOLID", "DESCRIPTION", "GROUPID"})
 
 	return c.SortVolumes(vols, p)[p.beginIdx:p.endIdx], nil
@@ -2431,33 +2340,6 @@ func (c *Client) FindSnapshotsValue(k string, p *model.VolumeSnapshotSpec) strin
 	return ""
 }
 
-func (c *Client) SelectSnapshots(m map[string][]string, snapshots []*model.VolumeSnapshotSpec) []*model.VolumeSnapshotSpec {
-	if !c.SelectOrNot(m) {
-		return snapshots
-	}
-
-	var snps = []*model.VolumeSnapshotSpec{}
-	var flag bool
-	for _, snapshot := range snapshots {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			v := c.FindSnapshotsValue(key, snapshot)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			snps = append(snps, snapshot)
-		}
-	}
-	return snps
-
-}
-
 func (c *Client) SortSnapshots(snapshots []*model.VolumeSnapshotSpec, p *Parameter) []*model.VolumeSnapshotSpec {
 	volumeSnapshotSortKey = p.sortKey
 
@@ -2477,7 +2359,14 @@ func (c *Client) ListVolumeSnapshotsWithFilter(ctx *c.Context, m map[string][]st
 		return nil, err
 	}
 
-	snps := c.SelectSnapshots(m, volumeSnapshots)
+	datas := c.SelectDatas(m, utils.Slice(volumeSnapshots, 0, len(volumeSnapshots)).([]interface{}))
+	var snps []*model.VolumeSnapshotSpec
+	for _, data := range datas {
+		p, ok := data.(*model.VolumeSnapshotSpec)
+		if ok {
+			snps = append(snps, p)
+		}
+	}
 	p := c.ParameterFilter(m, len(snps), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
 
 	return c.SortSnapshots(snps, p)[p.beginIdx:p.endIdx], nil
