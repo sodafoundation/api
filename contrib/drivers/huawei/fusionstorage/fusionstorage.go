@@ -127,6 +127,7 @@ func (d *Driver) ListPools() ([]*StoragePoolSpec, error) {
 			Name:             poolId,
 			TotalCapacity:    p.TotalCapacity >> UnitGiShiftBit,
 			FreeCapacity:     (p.TotalCapacity - p.UsedCapacity) >> UnitGiShiftBit,
+			ConsumedCapacity:  p.UsedCapacity >> UnitGiShiftBit,
 			StorageType:      c.Pool[poolId].StorageType,
 			Extras:           c.Pool[poolId].Extras,
 			AvailabilityZone: c.Pool[poolId].AvailabilityZone,

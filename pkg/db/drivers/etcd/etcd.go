@@ -1254,6 +1254,8 @@ func (c *Client) FindPoolValue(k string, p *model.StoragePoolSpec) string {
 		return strconv.FormatInt(p.TotalCapacity, 10)
 	case "FreeCapacity":
 		return strconv.FormatInt(p.FreeCapacity, 10)
+	case "ConsumedCapacity":
+		return strconv.FormatInt(p.ConsumedCapacity, 0)
 	case "StorageType":
 		return p.StorageType
 	}
