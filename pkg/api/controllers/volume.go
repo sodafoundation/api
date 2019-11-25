@@ -35,10 +35,6 @@ import (
 	. "github.com/opensds/opensds/pkg/utils/config"
 )
 
-const (
-	NoProfile = "opensds_no_Profile"
-)
-
 func NewVolumePortal() *VolumePortal {
 	return &VolumePortal{
 		CtrClient: client.NewClient(),
@@ -72,7 +68,7 @@ func (v *VolumePortal) CreateVolume() {
 	var err error
 	// If pool id is  specified, ignore profile
 	if volume.PoolId != "" {
-		volume.ProfileId = NoProfile
+		volume.ProfileId = ""
 		pool, err := db.C.GetPool(ctx, volume.PoolId)
 		if err == nil {
 			volume.PoolId = pool.Id
@@ -132,8 +128,8 @@ func (v *VolumePortal) CreateVolume() {
 	defer v.CtrClient.Close()
 	var profId string
 	var poolID string
-	if volume.ProfileId == NoProfile {
-		profId = NoProfile
+	if volume.ProfileId == "" {
+		profId = ""
 		poolID = volume.PoolId
 
 	} else {
@@ -577,7 +573,7 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 	prf := &model.ProfileSpec{
 		BaseModel: &model.BaseModel{},
 	}
-	if snapshot.ProfileId != NoProfile {
+	if snapshot.ProfileId != "" {
 		prf, err = db.C.GetProfile(ctx, snapshot.ProfileId)
 		if err != nil {
 			errMsg := fmt.Sprintf("delete snapshot failed: %v", err.Error())

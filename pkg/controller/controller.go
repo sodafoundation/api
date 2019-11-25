@@ -44,8 +44,7 @@ const (
 	LIST_LIFECIRCLE_FLAG
 	DELETE_LIFECIRCLE_FLAG
 	EXTEND_LIFECIRCLE_FLAG
-	NoProfile = "opensds_no_Profile"
-)
+	)
 
 func NewController() *Controller {
 	volCtrl := volume.NewController()
@@ -109,7 +108,7 @@ func (c *Controller) CreateVolume(contx context.Context, opt *pb.CreateVolumeOpt
 
 	log.V(5).Infof("controller create volume:  get volume from db %+v", vol)
 	var dockInfo *model.DockSpec
-	if (opt.ProfileId != "" && opt.ProfileId != NoProfile) || opt.SnapshotId != "" {
+	if opt.ProfileId != ""  || opt.SnapshotId != "" {
 
 		poolInfo, err := c.selector.SelectSupportedPoolForVolume(vol)
 		if err != nil {
