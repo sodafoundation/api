@@ -500,3 +500,14 @@ func TestSlice(t *testing.T) {
 
 	}
 }
+
+func TestLowerCaseFirst(t *testing.T) {
+	input := []string{"Name", "NAME", "name"}
+	expected := []string{"name", "nAME", "name"}
+	for index := range input {
+		result := LowerCaseFirst(input[index])
+		if expected[index] != result {
+			t.Errorf("Expected %v, get %v", expected[index], result)
+		}
+	}
+}
