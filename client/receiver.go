@@ -220,6 +220,7 @@ func (k *KeystoneReceiver) Recv(url string, method string, body interface{}, out
 		}
 
 		headers := HeaderOption{}
+		headers["Content-Type"] = constants.ContentType
 		headers[constants.AuthTokenHeader] = k.Auth.TokenID
 		return request(url, method, headers, body, output)
 	})
