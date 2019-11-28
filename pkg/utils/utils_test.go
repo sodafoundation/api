@@ -501,13 +501,26 @@ func TestSlice(t *testing.T) {
 	}
 }
 
-func TestLowerCaseFirst(t *testing.T) {
-	input := []string{"Name", "NAME", "name"}
-	expected := []string{"name", "nAME", "name"}
-	for index := range input {
-		result := LowerCaseFirst(input[index])
-		if expected[index] != result {
-			t.Errorf("Expected %v, get %v", expected[index], result)
-		}
+func TestContainsIgnoreCase(t *testing.T) {
+	var permissions = []string{"Read", "Write", "Execute"}
+	var testkey1 = "READ"
+	var testkey2 = "Read"
+	var testkey3 = "read"
+	var testkey4 = "Raed"
+	contains := ContainsIgnoreCase(permissions, testkey1)
+	if contains != true {
+		t.Errorf("%v should contains %v", permissions, testkey1)
+	}
+	contains = ContainsIgnoreCase(permissions, testkey2)
+	if contains != true {
+		t.Errorf("%v should contains %v", permissions, testkey2)
+	}
+	contains = ContainsIgnoreCase(permissions, testkey3)
+	if contains != true {
+		t.Errorf("%v should contains %v", permissions, testkey3)
+	}
+	contains = ContainsIgnoreCase(permissions, testkey4)
+	if contains != false {
+		t.Errorf("%v shouldn't contains %v", permissions, testkey4)
 	}
 }

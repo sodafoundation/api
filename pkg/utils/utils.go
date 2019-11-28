@@ -24,7 +24,6 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/opensds/opensds/pkg/utils/constants"
 
@@ -329,9 +328,11 @@ func WaitForCondition(f func() (bool, error), interval, timeout time.Duration) e
 	return fmt.Errorf("wait for condition timeout")
 }
 
-func LowerCaseFirst(str string) string {
-	for i, v := range str {
-		return string(unicode.ToLower(v)) + str[i+1:]
+func ContainsIgnoreCase(a []string, x string) bool {
+	for _, n := range a {
+		if strings.EqualFold(x, n) {
+			return true
+		}
 	}
-	return ""
+	return false
 }

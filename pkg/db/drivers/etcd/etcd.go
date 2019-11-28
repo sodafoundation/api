@@ -49,6 +49,28 @@ const (
 
 var validKey = []string{"limit", "offset", "sortDir", "sortKey"}
 
+const (
+	typeFileShares         string = "FileShares"
+	typeFileShareSnapshots string = "FileShareSnapshot"
+	typeDocks              string = "Docks"
+	typePools              string = "Pools"
+	typeProfiles           string = "Profiles"
+	typeVolumes            string = "Volumes"
+	typeAttachments        string = "Attachments"
+	typeVolumeSnapshots    string = "VolumeSnapshots"
+)
+
+var sortableKeysMap = map[string][]string{
+	typeFileShares:         {"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "TENANTID", "SIZE", "POOLID", "DESCRIPTION"},
+	typeFileShareSnapshots: {"ID", "VOLUMEID", "STATUS", "USERID", "TENANTID", "SIZE"},
+	typeDocks:              {"ID", "NAME", "STATUS", "ENDPOINT", "DRIVERNAME", "DESCRIPTION"},
+	typePools:              {"ID", "NAME", "STATUS", "AVAILABILITYZONE", "DOCKID"},
+	typeProfiles:           {"ID", "NAME", "DESCRIPTION"},
+	typeVolumes:            {"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "TENANTID", "SIZE", "POOLID", "DESCRIPTION", "GROUPID"},
+	typeAttachments:        {"ID", "VOLUMEID", "STATUS", "USERID", "TENANTID", "SIZE"},
+	typeVolumeSnapshots:    {"ID", "VOLUMEID", "STATUS", "USERID", "TENANTID", "SIZE"},
+}
+
 func IsAdminContext(ctx *c.Context) bool {
 	return ctx.IsAdmin
 }
@@ -167,6 +189,16 @@ func (c *Client) GetSortKey(m map[string][]string, sortKeys []string) string {
 		return defaultSortKey
 	}
 	return sortKey
+}
+
+func (c *Client) FilterAndSort(src interface{}, params map[string][]string, sortableKeys []string) interface{} {
+	var ret interface{}
+	ret = utils.Filter(src, params)
+	if len(params["sortKey"]) > 0 && utils.ContainsIgnoreCase(sortableKeys, params["sortKey"][0]) {
+		ret = utils.Sort(ret, params["sortKey"][0], c.GetSortDir(params))
+	}
+	ret = utils.Slice(ret, c.GetOffset(params, reflect.ValueOf(src).Len()), c.GetLimit(params))
+	return ret
 }
 
 //ParameterFilter
@@ -419,16 +451,12 @@ func (c *Client) ListFileSharesWithFilter(ctx *c.Context, m map[string][]string)
 		return nil, err
 	}
 
-	datas := c.SelectDatas(m, utils.Slice(fileshares, 0, len(fileshares)).([]interface{}))
-	var fs []*model.FileShareSpec
-	for _, data := range datas {
-		p, ok := data.(*model.FileShareSpec)
-		if ok {
-			fs = append(fs, p)
-		}
+	tmpFileshares := c.FilterAndSort(fileshares, m, sortableKeysMap[typeFileShares])
+	var res = []*model.FileShareSpec{}
+	for _, data := range tmpFileshares.([]interface{}) {
+		res = append(res, data.(*model.FileShareSpec))
 	}
-	p := c.ParameterFilter(m, len(fs), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "CRETEDAT", "UPDATEDAT", "PROTOCOLS", "EXPORTLOCATIONS", "SNAPSHOTID"})
-	return c.SortFileShares(fs, p), nil
+	return res, nil
 }
 
 // ListFileShares
@@ -740,73 +768,6 @@ func (c *Client) ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnaps
 	return fss, nil
 }
 
-var fileshareSnapshotSortKey string
-
-type FileShareSnapshotSlice []*model.FileShareSnapshotSpec
-
-func (fileshareSnapshot FileShareSnapshotSlice) Len() int { return len(fileshareSnapshot) }
-
-func (fileshareSnapshot FileShareSnapshotSlice) Swap(i, j int) {
-
-	fileshareSnapshot[i], fileshareSnapshot[j] = fileshareSnapshot[j], fileshareSnapshot[i]
-}
-
-func (fileshareSnapshot FileShareSnapshotSlice) Less(i, j int) bool {
-	switch fileshareSnapshotSortKey {
-	case "ID":
-		return fileshareSnapshot[i].Id < fileshareSnapshot[j].Id
-	case "VOLUMEID":
-		return fileshareSnapshot[i].FileShareId < fileshareSnapshot[j].FileShareId
-	case "STATUS":
-		return fileshareSnapshot[i].Status < fileshareSnapshot[j].Status
-	case "USERID":
-		return fileshareSnapshot[i].UserId < fileshareSnapshot[j].UserId
-	case "TENANTID":
-		return fileshareSnapshot[i].TenantId < fileshareSnapshot[j].TenantId
-	case "SIZE":
-		return fileshareSnapshot[i].SnapshotSize < fileshareSnapshot[j].SnapshotSize
-	}
-	return false
-}
-
-func (c *Client) FindFileShareSnapshotsValue(k string, p *model.FileShareSnapshotSpec) string {
-	switch k {
-	case "Id":
-		return p.Id
-	case "CreatedAt":
-		return p.CreatedAt
-	case "UpdatedAt":
-		return p.UpdatedAt
-	case "TenantId":
-		return p.TenantId
-	case "UserId":
-		return p.UserId
-	case "Name":
-		return p.Name
-	case "Description":
-		return p.Description
-	case "Status":
-		return p.Status
-	case "Size":
-		return strconv.FormatInt(p.SnapshotSize, 10)
-	case "FileShareId":
-		return p.FileShareId
-	}
-	return ""
-}
-
-func (c *Client) SortFileShareSnapshots(snapshots []*model.FileShareSnapshotSpec, p *Parameter) []*model.FileShareSnapshotSpec {
-	fileshareSnapshotSortKey = p.sortKey
-
-	if strings.EqualFold(p.sortDir, "asc") {
-		sort.Sort(FileShareSnapshotSlice(snapshots))
-	} else {
-		sort.Sort(sort.Reverse(FileShareSnapshotSlice(snapshots)))
-	}
-	return snapshots
-
-}
-
 func (c *Client) ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSnapshotSpec, error) {
 	fileshareSnapshots, err := c.ListFileShareSnapshots(ctx)
 	if err != nil {
@@ -814,17 +775,12 @@ func (c *Client) ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][
 		return nil, err
 	}
 
-	datas := c.SelectDatas(m, utils.Slice(fileshareSnapshots, 0, len(fileshareSnapshots)).([]interface{}))
-	var snps []*model.FileShareSnapshotSpec
-	for _, data := range datas {
-		p, ok := data.(*model.FileShareSnapshotSpec)
-		if ok {
-			snps = append(snps, p)
-		}
+	tmpFileshareSnapshots := c.FilterAndSort(fileshareSnapshots, m, sortableKeysMap[typeFileShareSnapshots])
+	var res = []*model.FileShareSnapshotSpec{}
+	for _, data := range tmpFileshareSnapshots.([]interface{}) {
+		res = append(res, data.(*model.FileShareSnapshotSpec))
 	}
-	p := c.ParameterFilter(m, len(snps), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
-
-	return c.SortFileShareSnapshots(snps, p)[p.beginIdx:p.endIdx], nil
+	return res, nil
 }
 
 // UpdateFileShareSnapshot
@@ -994,67 +950,6 @@ func (c *Client) ListDocks(ctx *c.Context) ([]*model.DockSpec, error) {
 	return dcks, nil
 }
 
-var dockSortKey string
-
-type DockSlice []*model.DockSpec
-
-func (dock DockSlice) Len() int { return len(dock) }
-
-func (dock DockSlice) Swap(i, j int) { dock[i], dock[j] = dock[j], dock[i] }
-
-func (dock DockSlice) Less(i, j int) bool {
-	switch dockSortKey {
-
-	case "ID":
-		return dock[i].Id < dock[j].Id
-	case "NAME":
-		return dock[i].Name < dock[j].Name
-	case "STATUS":
-		return dock[i].Status < dock[j].Status
-	case "ENDPOINT":
-		return dock[i].Endpoint < dock[j].Endpoint
-	case "DRIVERNAME":
-		return dock[i].DriverName < dock[j].DriverName
-	case "DESCRIPTION":
-		return dock[i].Description < dock[j].Description
-	}
-	return false
-}
-
-func (c *Client) FindDockValue(k string, d *model.DockSpec) string {
-	switch k {
-	case "Id":
-		return d.Id
-	case "CreatedAt":
-		return d.CreatedAt
-	case "Name":
-		return d.Name
-	case "UpdatedAt":
-		return d.UpdatedAt
-	case "Description":
-		return d.Description
-	case "Status":
-		return d.Status
-	case "StorageType":
-		return d.StorageType
-	case "Endpoint":
-		return d.Endpoint
-	case "DriverName":
-		return d.DriverName
-	}
-	return ""
-}
-
-func (c *Client) SortDocks(dcks []*model.DockSpec, p *Parameter) []*model.DockSpec {
-	dockSortKey = p.sortKey
-	if strings.EqualFold(p.sortDir, "asc") {
-		sort.Sort(DockSlice(dcks))
-	} else {
-		sort.Sort(sort.Reverse(DockSlice(dcks)))
-	}
-	return dcks
-}
-
 func (c *Client) ListDocksWithFilter(ctx *c.Context, m map[string][]string) ([]*model.DockSpec, error) {
 	docks, err := c.ListDocks(ctx)
 	if err != nil {
@@ -1062,17 +957,12 @@ func (c *Client) ListDocksWithFilter(ctx *c.Context, m map[string][]string) ([]*
 		return nil, err
 	}
 
-	datas := c.SelectDatas(m, utils.Slice(docks, 0, len(docks)).([]interface{}))
-	var dcks []*model.DockSpec
-	for _, data := range datas {
-		p, ok := data.(*model.DockSpec)
-		if ok {
-			dcks = append(dcks, p)
-		}
+	tmpDocks := c.FilterAndSort(docks, m, sortableKeysMap[typeDocks])
+	var res = []*model.DockSpec{}
+	for _, data := range tmpDocks.([]interface{}) {
+		res = append(res, data.(*model.DockSpec))
 	}
-
-	p := c.ParameterFilter(m, len(dcks), []string{"ID", "NAME", "ENDPOINT", "DRIVERNAME", "DESCRIPTION", "STATUS"})
-	return c.SortDocks(dcks, p)[p.beginIdx:p.endIdx], nil
+	return res, nil
 }
 
 // UpdateDock
@@ -1146,73 +1036,6 @@ func (c *Client) CreatePool(ctx *c.Context, pol *model.StoragePoolSpec) (*model.
 	return pol, nil
 }
 
-var poolSortKey string
-
-type StoragePoolSlice []*model.StoragePoolSpec
-
-func (pool StoragePoolSlice) Len() int { return len(pool) }
-
-func (pool StoragePoolSlice) Swap(i, j int) { pool[i], pool[j] = pool[j], pool[i] }
-
-func (pool StoragePoolSlice) Less(i, j int) bool {
-	switch poolSortKey {
-
-	case "ID":
-		return pool[i].Id < pool[j].Id
-	case "NAME":
-		return pool[i].Name < pool[j].Name
-	case "STATUS":
-		return pool[i].Status < pool[j].Status
-	case "AVAILABILITYZONE":
-		return pool[i].AvailabilityZone < pool[j].AvailabilityZone
-	case "DOCKID":
-		return pool[i].DockId < pool[j].DockId
-	case "DESCRIPTION":
-		return pool[i].Description < pool[j].Description
-	}
-	return false
-}
-
-func (c *Client) FindPoolValue(k string, p *model.StoragePoolSpec) string {
-	switch k {
-	case "Id":
-		return p.Id
-	case "CreatedAt":
-		return p.CreatedAt
-	case "UpdatedAt":
-		return p.UpdatedAt
-	case "Name":
-		return p.Name
-	case "Description":
-		return p.Description
-	case "Status":
-		return p.Status
-	case "DockId":
-		return p.DockId
-	case "AvailabilityZone":
-		return p.AvailabilityZone
-	case "TotalCapacity":
-		return strconv.FormatInt(p.TotalCapacity, 10)
-	case "FreeCapacity":
-		return strconv.FormatInt(p.FreeCapacity, 10)
-	case "StorageType":
-		return p.StorageType
-	}
-	return ""
-}
-
-func (c *Client) SortPools(pools []*model.StoragePoolSpec, p *Parameter) []*model.StoragePoolSpec {
-
-	poolSortKey = p.sortKey
-
-	if strings.EqualFold(p.sortDir, "asc") {
-		sort.Sort(StoragePoolSlice(pools))
-	} else {
-		sort.Sort(sort.Reverse(StoragePoolSlice(pools)))
-	}
-	return pools
-}
-
 func (c *Client) ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.StoragePoolSpec, error) {
 	pools, err := c.ListPools(ctx)
 	if err != nil {
@@ -1220,16 +1043,12 @@ func (c *Client) ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*
 		return nil, err
 	}
 
-	datas := c.SelectDatas(m, utils.Slice(pools, 0, len(pools)).([]interface{}))
-	var pols []*model.StoragePoolSpec
-	for _, data := range datas {
-		p, ok := data.(*model.StoragePoolSpec)
-		if ok {
-			pols = append(pols, p)
-		}
+	tmpPools := c.FilterAndSort(pools, m, sortableKeysMap[typePools])
+	var res = []*model.StoragePoolSpec{}
+	for _, data := range tmpPools.([]interface{}) {
+		res = append(res, data.(*model.StoragePoolSpec))
 	}
-	p := c.ParameterFilter(m, len(pols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "DOCKID", "DESCRIPTION"})
-	return c.SortPools(pols, p)[p.beginIdx:p.endIdx], nil
+	return res, nil
 }
 
 // GetPool
@@ -1468,56 +1287,6 @@ func (c *Client) ListProfiles(ctx *c.Context) ([]*model.ProfileSpec, error) {
 	return prfs, nil
 }
 
-var profileSortKey string
-
-type ProfileSlice []*model.ProfileSpec
-
-func (profile ProfileSlice) Len() int { return len(profile) }
-
-func (profile ProfileSlice) Swap(i, j int) { profile[i], profile[j] = profile[j], profile[i] }
-
-func (profile ProfileSlice) Less(i, j int) bool {
-	switch profileSortKey {
-
-	case "ID":
-		return profile[i].Id < profile[j].Id
-	case "NAME":
-		return profile[i].Name < profile[j].Name
-	case "DESCRIPTION":
-		return profile[i].Description < profile[j].Description
-	}
-	return false
-}
-
-func (c *Client) FindProfileValue(k string, p *model.ProfileSpec) string {
-	switch k {
-	case "Id":
-		return p.Id
-	case "CreatedAt":
-		return p.CreatedAt
-	case "UpdatedAt":
-		return p.UpdatedAt
-	case "Name":
-		return p.Name
-	case "Description":
-		return p.Description
-	case "StorageType":
-		return p.StorageType
-	}
-	return ""
-}
-
-func (c *Client) SortProfiles(profiles []*model.ProfileSpec, p *Parameter) []*model.ProfileSpec {
-	profileSortKey = p.sortKey
-
-	if strings.EqualFold(p.sortDir, "asc") {
-		sort.Sort(ProfileSlice(profiles))
-	} else {
-		sort.Sort(sort.Reverse(ProfileSlice(profiles)))
-	}
-	return profiles
-}
-
 func (c *Client) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ProfileSpec, error) {
 	profiles, err := c.ListProfiles(ctx)
 	if err != nil {
@@ -1525,17 +1294,12 @@ func (c *Client) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) (
 		return nil, err
 	}
 
-	datas := c.SelectDatas(m, utils.Slice(profiles, 0, len(profiles)).([]interface{}))
-	var prfs []*model.ProfileSpec
-	for _, data := range datas {
-		p, ok := data.(*model.ProfileSpec)
-		if ok {
-			prfs = append(prfs, p)
-		}
+	tmpProfiles := c.FilterAndSort(profiles, m, sortableKeysMap[typeProfiles])
+	var res = []*model.ProfileSpec{}
+	for _, data := range tmpProfiles.([]interface{}) {
+		res = append(res, data.(*model.ProfileSpec))
 	}
-	p := c.ParameterFilter(m, len(prfs), []string{"ID", "NAME", "DESCRIPTION"})
-
-	return c.SortProfiles(prfs, p)[p.beginIdx:p.endIdx], nil
+	return res, nil
 }
 
 // UpdateProfile
@@ -1820,35 +1584,6 @@ func (c *Client) FindVolumeValue(k string, p *model.VolumeSpec) string {
 	return ""
 }
 
-func (c *Client) SelectDatas(m map[string][]string, datas []interface{}) []interface{} {
-	if !c.SelectOrNot(m) {
-		return datas
-	}
-	var ret []interface{}
-	for i := 0; i < len(datas); i++ {
-		c, err := utils.StructToMap(datas[i])
-		if err != nil {
-			log.Error("call StructToMap failed: ", err)
-			return nil
-		}
-		selected := true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-
-			if c[utils.LowerCaseFirst(key)] == "" || c[utils.LowerCaseFirst(key)] != m[key][0] {
-				selected = false
-				break
-			}
-		}
-		if selected {
-			ret = append(ret, datas[i])
-		}
-	}
-	return ret
-}
-
 func (c *Client) SortVolumes(volumes []*model.VolumeSpec, p *Parameter) []*model.VolumeSpec {
 	volume_sortKey = p.sortKey
 
@@ -1868,17 +1603,12 @@ func (c *Client) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([
 		return nil, err
 	}
 
-	datas := c.SelectDatas(m, utils.Slice(volumes, 0, len(volumes)).([]interface{}))
-	var vols []*model.VolumeSpec
-	for _, data := range datas {
-		p, ok := data.(*model.VolumeSpec)
-		if ok {
-			vols = append(vols, p)
-		}
+	tmpVolumes := c.FilterAndSort(volumes, m, sortableKeysMap[typeVolumes])
+	var res = []*model.VolumeSpec{}
+	for _, data := range tmpVolumes.([]interface{}) {
+		res = append(res, data.(*model.VolumeSpec))
 	}
-	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "PROJECTID", "SIZE", "POOLID", "DESCRIPTION", "GROUPID"})
-
-	return c.SortVolumes(vols, p)[p.beginIdx:p.endIdx], nil
+	return res, nil
 }
 
 // UpdateVolume ...
@@ -2108,8 +1838,7 @@ func (c *Client) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[string][]
 		return nil, err
 	}
 
-	tmpAttachments := utils.Filter(attachments, m)
-	tmpAttachments = utils.Slice(tmpAttachments, c.GetOffset(m, len(attachments)), c.GetLimit(m))
+	tmpAttachments := c.FilterAndSort(attachments, m, sortableKeysMap[typeAttachments])
 	var res = []*model.VolumeAttachmentSpec{}
 	for _, data := range tmpAttachments.([]interface{}) {
 		res = append(res, data.(*model.VolumeAttachmentSpec))
@@ -2284,74 +2013,6 @@ func (c *Client) ListVolumeSnapshots(ctx *c.Context) ([]*model.VolumeSnapshotSpe
 	return vss, nil
 }
 
-var volumeSnapshotSortKey string
-
-type VolumeSnapshotSlice []*model.VolumeSnapshotSpec
-
-func (volumeSnapshot VolumeSnapshotSlice) Len() int { return len(volumeSnapshot) }
-
-func (volumeSnapshot VolumeSnapshotSlice) Swap(i, j int) {
-
-	volumeSnapshot[i], volumeSnapshot[j] = volumeSnapshot[j], volumeSnapshot[i]
-}
-
-func (volumeSnapshot VolumeSnapshotSlice) Less(i, j int) bool {
-	switch volumeSnapshotSortKey {
-	case "ID":
-		return volumeSnapshot[i].Id < volumeSnapshot[j].Id
-	case "VOLUMEID":
-		return volumeSnapshot[i].VolumeId < volumeSnapshot[j].VolumeId
-	case "STATUS":
-		return volumeSnapshot[i].Status < volumeSnapshot[j].Status
-	case "USERID":
-		return volumeSnapshot[i].UserId < volumeSnapshot[j].UserId
-	case "TENANTID":
-		return volumeSnapshot[i].TenantId < volumeSnapshot[j].TenantId
-	case "SIZE":
-		return volumeSnapshot[i].Size < volumeSnapshot[j].Size
-		//TODO:case "GroupSnapshotId"
-	}
-	return false
-}
-
-func (c *Client) FindSnapshotsValue(k string, p *model.VolumeSnapshotSpec) string {
-	switch k {
-	case "Id":
-		return p.Id
-	case "CreatedAt":
-		return p.CreatedAt
-	case "UpdatedAte":
-		return p.UpdatedAt
-	case "TenantId":
-		return p.TenantId
-	case "UserId":
-		return p.UserId
-	case "Name":
-		return p.Name
-	case "Description":
-		return p.Description
-	case "Status":
-		return p.Status
-	case "Size":
-		return strconv.FormatInt(p.Size, 10)
-	case "VolumeId":
-		return p.VolumeId
-	}
-	return ""
-}
-
-func (c *Client) SortSnapshots(snapshots []*model.VolumeSnapshotSpec, p *Parameter) []*model.VolumeSnapshotSpec {
-	volumeSnapshotSortKey = p.sortKey
-
-	if strings.EqualFold(p.sortDir, "asc") {
-		sort.Sort(VolumeSnapshotSlice(snapshots))
-	} else {
-		sort.Sort(sort.Reverse(VolumeSnapshotSlice(snapshots)))
-	}
-	return snapshots
-
-}
-
 func (c *Client) ListVolumeSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeSnapshotSpec, error) {
 	volumeSnapshots, err := c.ListVolumeSnapshots(ctx)
 	if err != nil {
@@ -2359,17 +2020,12 @@ func (c *Client) ListVolumeSnapshotsWithFilter(ctx *c.Context, m map[string][]st
 		return nil, err
 	}
 
-	datas := c.SelectDatas(m, utils.Slice(volumeSnapshots, 0, len(volumeSnapshots)).([]interface{}))
-	var snps []*model.VolumeSnapshotSpec
-	for _, data := range datas {
-		p, ok := data.(*model.VolumeSnapshotSpec)
-		if ok {
-			snps = append(snps, p)
-		}
+	tmpVolumeSnapshots := c.FilterAndSort(volumeSnapshots, m, sortableKeysMap[typeVolumeSnapshots])
+	var res = []*model.VolumeSnapshotSpec{}
+	for _, data := range tmpVolumeSnapshots.([]interface{}) {
+		res = append(res, data.(*model.VolumeSnapshotSpec))
 	}
-	p := c.ParameterFilter(m, len(snps), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
-
-	return c.SortSnapshots(snps, p)[p.beginIdx:p.endIdx], nil
+	return res, nil
 }
 
 // UpdateVolumeSnapshot
