@@ -41,9 +41,9 @@ osds::etcd::download() {
 
 osds::etcd::install() {
     # validate before running
-    which etcd >/dev/null || {
-    osds::etcd::download
-    }
+    if [ ! -f "${OPT_DIR}/etcd-v${ETCD_VERSION}-linux-amd64/etcd" ]; then
+        osds::etcd::download
+    fi
 
     # Start etcd
     mkdir -p $ETCD_DIR
