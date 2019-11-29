@@ -48,8 +48,9 @@ const (
 )
 
 const (
-	KLvPath  = "lvPath"
-	KLvsPath = "lvsPath"
+	KLvPath     = "lvPath"
+	KLvsPath    = "lvsPath"
+	KLvIdFormat = "NAA"
 )
 
 type LVMConfig struct {
@@ -171,6 +172,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (vol *model.VolumeSpec, 
 		Name:        opt.GetName(),
 		Size:        opt.GetSize(),
 		Description: opt.GetDescription(),
+		Identifier:  &model.Identifier{DurableName: targets.CreateScsiIDFromVolID(opt.GetId()), DurableNameFormat: KLvIdFormat},
 		Metadata: map[string]string{
 			KLvPath: lvPath,
 		},

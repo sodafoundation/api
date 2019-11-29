@@ -20,7 +20,7 @@ _osdsctl() {
     local pre=${COMP_WORDS[COMP_CWORD-1]};
     case "$COMP_CWORD $pre" in
     "1 osdsctl")
-          COMPREPLY=($(compgen -W 'dock pool profile version volume fileshare' -- $cur)) ;;
+          COMPREPLY=($(compgen -W 'dock pool profile version volume fileshare host' -- $cur)) ;;
     "2 dock")
           COMPREPLY=($(compgen -W 'list show' -- $cur)) ;;
     "2 pool")
@@ -32,7 +32,9 @@ _osdsctl() {
     "2 volume")
           COMPREPLY=($(compgen -W 'attachment create delete list show extend snapshot update group replication' -- $cur)) ;;
     "2 fileshare")
-              COMPREPLY=($(compgen -W 'create delete list show acl snapshot' -- $cur)) ;;
+          COMPREPLY=($(compgen -W 'create delete list show acl snapshot' -- $cur)) ;;
+    "2 host")
+          COMPREPLY=($(compgen -W 'create delete list show update initiator' -- $cur)) ;;
     '*')
           ;;
     esac
@@ -51,6 +53,8 @@ _osdsctl() {
             COMPREPLY=($(compgen -W 'create delete list show update' -- $cur)) ;;
         "fileshare acl")
               COMPREPLY=($(compgen -W 'create delete list show' -- $cur)) ;;
+        "host initiator")
+              COMPREPLY=($(compgen -W 'add remove' -- $cur)) ;;
     esac
     fi
     return 0

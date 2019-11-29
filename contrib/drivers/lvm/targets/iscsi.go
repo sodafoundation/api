@@ -86,6 +86,14 @@ func (t *tgtTarget) getTgtConfPath(volId string) string {
 
 type configMap map[string][]string
 
+func CreateScsiIDFromVolID(volID string) string {
+	//Construct a 32 digit  NAA.6 ( Network Addressing Authority) Identifier for the volume.
+	scsi_id := strings.Replace(volID, "-", "", -1)
+	out := []rune(scsi_id)
+	// Make the first digit 6 , which specifies the IEEE registerd extended format for WWN.
+	out[0] = '6'
+	return string(out)
+}
 func (t *tgtTarget) CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator string, chapAuth []string) error {
 	// Multi-attach require a specific ip
 	if hostIp == "" || hostIp == "ALL" {
@@ -108,6 +116,7 @@ func (t *tgtTarget) CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator str
 	config := make(configMap)
 
 	configFile := t.getTgtConfPath(volId)
+	scsiID := CreateScsiIDFromVolID(volId)
 
 	if IsExist(configFile) {
 		data, err := ioutil.ReadFile(configFile)
@@ -127,6 +136,7 @@ func (t *tgtTarget) CreateISCSITarget(volId, tgtIqn, path, hostIp, initiator str
 	config.updateConfigmap("driver", "iscsi")
 	config.updateConfigmap("backing-store", path)
 	config.updateConfigmap("write-cache", "on")
+	config.updateConfigmap("scsi_id", scsiID)
 
 	err := config.writeConfig(configFile, tgtIqn)
 	if err != nil {
