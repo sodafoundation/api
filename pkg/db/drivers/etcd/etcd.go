@@ -62,13 +62,13 @@ const (
 
 var sortableKeysMap = map[string][]string{
 	typeFileShares:         {"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "TENANTID", "SIZE", "POOLID", "DESCRIPTION"},
-	typeFileShareSnapshots: {"ID", "VOLUMEID", "STATUS", "USERID", "TENANTID", "SIZE"},
+	typeFileShareSnapshots: {"ID", "NAME", "VOLUMEID", "STATUS", "USERID", "TENANTID", "SIZE"},
 	typeDocks:              {"ID", "NAME", "STATUS", "ENDPOINT", "DRIVERNAME", "DESCRIPTION"},
 	typePools:              {"ID", "NAME", "STATUS", "AVAILABILITYZONE", "DOCKID"},
 	typeProfiles:           {"ID", "NAME", "DESCRIPTION"},
 	typeVolumes:            {"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "TENANTID", "SIZE", "POOLID", "DESCRIPTION", "GROUPID"},
 	typeAttachments:        {"ID", "VOLUMEID", "STATUS", "USERID", "TENANTID", "SIZE"},
-	typeVolumeSnapshots:    {"ID", "VOLUMEID", "STATUS", "USERID", "TENANTID", "SIZE"},
+	typeVolumeSnapshots:    {"ID", "NAME", "VOLUMEID", "STATUS", "USERID", "TENANTID", "SIZE"},
 }
 
 func IsAdminContext(ctx *c.Context) bool {
