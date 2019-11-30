@@ -55,6 +55,10 @@ type StoragePoolSpec struct {
 	// Default unit of FreeCapacity is GB.
 	FreeCapacity int64 `json:"freeCapacity,omitempty"`
 
+      // The consumed or used capaicty of the pool.
+      // Default unit of ConsumedCapacity is GB.
+      ConsumedCapacity int64 `json:"consumedCapacity,omitempty"`
+
 	// MultiAttach
 	// If true, this volume can attach to more than one instance. Default will be multiattach:False
 	MultiAttach bool `json:"multiAttach"`
