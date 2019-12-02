@@ -51,7 +51,7 @@ var validKey = []string{"limit", "offset", "sortDir", "sortKey"}
 
 const (
 	typeFileShares         string = "FileShares"
-	typeFileShareSnapshots string = "FileShareSnapshot"
+	typeFileShareSnapshots string = "FileShareSnapshots"
 	typeDocks              string = "Docks"
 	typePools              string = "Pools"
 	typeProfiles           string = "Profiles"
