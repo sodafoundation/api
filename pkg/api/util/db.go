@@ -25,6 +25,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
@@ -178,6 +179,11 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 	}
 	if len(in.Name) > 128 {
 		errMsg := fmt.Sprintf("fileshare name length should not more than 128 characters. current length is : %d", len(in.Name))
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	if utf8.ValidString(in.Name) == false {
+		errMsg := fmt.Sprintf("fileshare name must be a utf-8. current fileshare name is : %v", in.Name)
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
