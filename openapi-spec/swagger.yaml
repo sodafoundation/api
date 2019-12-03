@@ -183,6 +183,32 @@ paths:
       tags:
         - Profiles
       description: Lists information for all profiles.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word
+          schema:
+            type: string
+            enum:
+            - name
+            - createdAt
+        - name: storageType
+          in: query
+          schema:
+            type: string
+            enum:
+            - block
+            - file
+            - object
+        - name: name
+          in: query
+          schema:
+            minLength: 1
+            maxLength: 255
+            type: string
       responses:
         '200':
           description: OK
@@ -191,7 +217,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ProfileSpec'
+                  $ref: '#/components/schemas/ProfileRespSpec'
               examples:
                 response:
                   value:
@@ -242,6 +268,7 @@ paths:
                         key3: value3
                     - id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
                       name: Silver
+                      storageType: block
                       description: provide silver storage service
                       provisioningProperties:
                         dataStorage:
@@ -251,6 +278,8 @@ paths:
                       customProperties:
                         key1: value1
                         key2: value2
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -262,17 +291,18 @@ paths:
         - Profiles
       description: Creates a profile.
       responses:
-        '201':
+        '200':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileSpec'
+                $ref: '#/components/schemas/ProfileRespSpec'
               examples:
                 response:
                   value:
                     id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
                     name: Silver
+                    storageType: block
                     description: provide silver storage service
                     provisioningProperties:
                       dataStorage:
@@ -291,11 +321,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProfileSpec'
-        required: true
+        $ref: '#/components/requestBodies/ProfileCreateSpec'
   '/v1beta/{tenantId}/profiles/{profileId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -310,21 +336,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileSpec'
-              examples:
-                response:
-                  value:
-                    id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
-                    name: Silver
-                    description: provide silver storage service
-                    provisioningProperties:
-                      dataStorage:
-                        provisioningPolicy: Thin
-                      ioConnectivity:
-                        accessProtocol: iscsi
-                    customProperties:
-                      key1: value1
-                      key2: value2
+                $ref: '#/components/schemas/ProfileRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -343,12 +355,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileSpec'
+                $ref: '#/components/schemas/ProfileRespSpec'
               examples:
                 response:
                   value:
                     id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
                     name: Silver
+                    storageType: block
                     description: provide silver storage service
                     provisioningProperties:
                       dataStorage:
@@ -364,10 +377,12 @@ paths:
           $ref: '#/components/responses/HTTPStatus401'
         '403':
           $ref: '#/components/responses/HTTPStatus403'
+        '404':
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/Profile'
+        $ref: '#/components/requestBodies/ProfileUpdateSpec'
     delete:
       tags:
         - Profiles
@@ -557,7 +572,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/Profile'
+        $ref: '#/components/requestBodies/VolumeUpdateSpec'
     delete:
       tags:
         - Block volumes
@@ -1434,7 +1449,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/Profile'
+        $ref: '#/components/requestBodies/FileShareUpdateSpec'
     delete:
       tags:
         - File Shares
@@ -1539,7 +1554,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/Profile'
+        $ref: '#/components/requestBodies/FileShareSnapshotUpdateSpec'
     delete:
       tags:
         - File Share Snapshots
@@ -1644,45 +1659,27 @@ paths:
       - $ref: '#/components/parameters/tenantId'
     get:
       tags:
-      - Host
+        - Host
       description: Lists host information.
       parameters:
-      - name: limit
-        in: query
-        description: Number of query results on multiple pages
-        schema:
-          minimum: 1
-          type: integer
-          format: int32
-      - name: offset
-        in: query
-        description: Start position of the pagination query
-        schema:
-          minimum: 0
-          type: integer
-          format: int32
-      - name: sortKey
-        in: query
-        description: Sorting keyword, which can be sorted based on host name
-        schema:
-          type: string
-          enum:
-          - hostName
-      - name: sortDir
-        in: query
-        description: Asending or descending
-        schema:
-          type: string
-          enum:
-          - asc
-          - desc
-      - name: hostName
-        in: query
-        description: Host name
-        schema:
-          maxLength: 255
-          minLength: 1
-          type: string
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word
+          schema:
+            type: string
+            enum:
+            - hostName
+            - createdAt
+        - name: hostName
+          in: query
+          description: Host name
+          schema:
+            maxLength: 255
+            minLength: 1
+            type: string
       responses:
         '200':
           description: OK
@@ -1905,6 +1902,31 @@ components:
       description: The UUID of the host.
       schema:
         type: string
+    limit:
+      name: limit
+      in: query
+      description: Number of query results on multiple pages
+      schema:
+        minimum: 1
+        type: integer
+        format: int32
+    offset:
+      name: offset
+      in: query
+      description: Start position of the pagination query
+      schema:
+        minimum: 0
+        type: integer
+        format: int32
+    sortDir:
+      name: sortDir
+      in: query
+      description: Asending or descending
+      schema:
+        type: string
+        enum:
+        - asc
+        - desc
   responses:
     HTTPStatus400:
       description: BadRequest
@@ -1942,13 +1964,46 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ReplicationSpec'
-    Profile:
+    ProfileCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProfileCreateSpec'
+    ProfileUpdateSpec:
       content:
         application/json:
           schema:
             type: object
-            required:
-              - name
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+    VolumeUpdateSpec:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+    FileShareUpdateSpec:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+    FileShareSnapshotUpdateSpec:
+      content:
+        application/json:
+          schema:
+            type: object
             properties:
               name:
                 type: string
@@ -1997,29 +2052,40 @@ components:
           example: '2017-07-10T14:36:58.014Z'
           readOnly: true
     DataStorageLoS:
-      description: >-
-        DataStorageLoS can be used to describe a service option covering storage
-        provisioning and availability.
       type: object
       properties:
         recoveryTimeObjective:
+          example: 10
+          description: Recovery Time Objective(RTO) is a maximum acceptable time within which storage must be restored after disaster. For e.g 10 sec.
           type: integer
           format: int64
         provisioningPolicy:
+          default: thick
+          description: The provisioning policy of the pool. It can be thick or thin.
           type: string
           enum:
             - Thin
             - Thick
         compression:
+          description: The optimization policy to remove redundant data within the file
+          default: false
           type: boolean
         deduplication:
+          description: The optimization policy to remove redundant data or file on the storage
+          default: false
           type: boolean
         characterCodeSet:
+          description: The code set to store the data
+          example: ASCII
           type: string
         maxFileNameLengthBytes:
+          description: The maximum filename length in bytes
+          example: 255
           type: integer
           format: int64
         storageAccessCapability:
+          description: The type of access capability. This can be set of read,write or execute.
+          example: Read
           type: array
           items:
             type: string
@@ -2027,48 +2093,63 @@ components:
               - Read
               - Write
               - Execute
+      description: DataStorageLoS can be used to describe a service option covering
+        storage provisioning and availability.
     IOConnectivityLoS:
-      description: >-
-        IOConnectivityLoS can be used to specify the characteristics of storage
-        connectivity.
       type: object
       properties:
         accessProtocol:
+          description: The type of access protocol. This can be iscsi, rbd, fibre channel, or DSWare(Data Service Middleware), nvmeof and nfs
+          example: iscsi
           type: string
           enum:
             - iscsi
             - rbd
             - fibre_channel
-            - DSWARE
+            - nvmeof
+            - DSWare
             - NFS
         maxIOPS:
-          type: integer
-          format: int64
-        maxBWS:
+          example: 150
+          description: The maximum IOPS(Input/Output Operations Per Second) supported by storage. For e.g. 150IOPS
           type: integer
           format: int64
         minIOPS:
+          example: 50
+          description: The minimum IOPS(Input/Output Operations Per Second) supported by storage.In otherwords, performance can not dropped below this level. For e.g. 50IOPS
+          type: integer
+          format: int64
+        maxBWS:
+          description: The maximum bandwidth suported by storage. For e.g. 5mbps
+          example: 5
           type: integer
           format: int64
         minBWS:
+          description: The minimum bandwidth suported by storage. In otherwords, performance can not dropped below this level. For e.g. 1mbps
+          example: 1
           type: integer
           format: int64
         latency:
+          description: The latency of the storage in ns(nanosec.). For e.g. 1ns
+          example: 1
           type: integer
           format: int64
+      description: IOConnectivityLoS can be used to specify the characteristics of storage connectivity.
     DataProtectionLoS:
-      description: >-
-        DataProtectionLoS describes a replica that protects data from loss. The
-        requirements must be met collectively by the communication path and the
-        replica.
       type: object
       properties:
         isIsolated:
+          default: false
+          example: true
+          description: Isolated storage is designed to prevent data corruption and data loss
           type: boolean
         minLifetime:
+          description: It is an ISO 8601 duration that specifies the minimum lifetime required for the replica
           type: string
           example: P3Y6M4DT12H30M5S
         RecoveryGeographicObjective:
+          description: It is supported failure domain from where data can be restored after disaster
+          example: datacenter
           type: string
           enum:
             - Datacenter
@@ -2078,9 +2159,12 @@ components:
             - Row
             - Server
         RecoveryPointObjectiveTime:
+          description: It's an ISO 8601 time interval that specifies the maximum source information that may be lost on failure. In the case of isIsolated = false, failure of the domain is not considered.
           type: string
           example: P3Y6M4DT12H30M5S
         RecoveryTimeObjective:
+          description: It specifies the relative time required to make a replica available as a source
+          example: offline
           type: string
           enum:
             - OnlineActive
@@ -2088,12 +2172,17 @@ components:
             - Nearline
             - Offline
         ReplicaType:
+          description: The value specify the type of repilca
+          example: snapshot
           type: string
           enum:
             - Clone
             - Mirror
             - Snapshot
             - TokenizedClone
+      description: DataProtectionLoS describes a replica that protects data from loss.
+        The requirements must be met collectively by the communication path and the
+        replica.
     DockSpec:
       description: >-
         A backend is initialized by specific driver configuration. Each backend
@@ -2214,27 +2303,68 @@ components:
             key2: false
             key3:
               key31: value31
-    ProfileSpec:
-      description: >-
-        An OpenSDS profile is identified by a unique name and ID. With adding
-        extra properties, each profile can contains a set of tags of storage
+    ProfileCreateSpec:
+      description: An OpenSDS profile is identified by a unique name and ID. With
+        adding extra properties, each profile can contains a set of tags of storage
+        capabilities which are desirable features for a class of applications.
+      required:
+        - name
+        - storageType
+      type: object
+      properties:
+        name:
+          description: The name of the profile
+          minLength: 1
+          maxLength: 255
+          pattern: '[A-Za-z0-9_-]'
+          type: string
+          example: File_Profile
+        storageType:
+          description: The type of the storage. It can be either block, file or object
+          example: block
+          type: string
+          enum:
+          - block
+          - file
+          - object
+        description:
+          description: The description of the profile
+          type: string
+        provisioningProperties:
+          $ref: '#/components/schemas/ProvisioningPropertiesSpec'
+        replicationProperties:
+          $ref: '#/components/schemas/ReplicationPropertiesSpec'
+        snapshotProperties:
+          $ref: '#/components/schemas/SnapshotPropertiesSpec'
+        dataProtectionProperties:
+          $ref: '#/components/schemas/DataProtectionPropertiesSpec'
+        customProperties:
+          $ref: '#/components/schemas/CustomPropertiesSpec'
+    ProfileRespSpec:
+      description: An OpenSDS profile is identified by a unique name and ID. With
+        adding extra properties, each profile can contains a set of tags of storage
         capabilities which are desirable features for a class of applications.
       allOf:
-        - $ref: '#/components/schemas/BaseModel'
-        - type: object
-          required:
-            - name
-            - description
-          properties:
+      - $ref: '#/components/schemas/BaseModel'
+      - type: object
+        properties:
             name:
+              description: The name of the profile
+              minLength: 1
+              maxLength: 255
+              pattern: '[A-Za-z0-9_-]'
               type: string
+              example: File_Profile
             storageType:
+              description: The type of the storage. It can be either block, file or object
+              example: block
               type: string
               enum:
-                - block
-                - file
-                - object
+              - block
+              - file
+              - object
             description:
+              description: The is description of the profile
               type: string
             provisioningProperties:
               $ref: '#/components/schemas/ProvisioningPropertiesSpec'
@@ -2246,6 +2376,7 @@ components:
               $ref: '#/components/schemas/DataProtectionPropertiesSpec'
             customProperties:
               $ref: '#/components/schemas/CustomPropertiesSpec'
+
     FileShareSpec:
       description: >-
         FileShare is a file system created by nfs southbound driver, it can be
@@ -2385,9 +2516,6 @@ components:
         ioConnectivity:
           $ref: '#/components/schemas/IOConnectivityLoS'
     ReplicationPropertiesSpec:
-      description: >-
-        ReplicationPropertiesSpec represents some suggested properties for
-        performing replication policies.
       type: object
       properties:
         dataProtection:
@@ -2396,33 +2524,43 @@ components:
           type: object
           properties:
             replicaUpdateMode:
+              description: It specify the replica update mode. It can be Active, Adaptive, Asynchronous, Synchronous
+              example: Active
               type: string
               enum:
                 - Active
                 - Adaptive
                 - Asynchronous
                 - Synchronous
-            consistencyEnalbed:
-              type: boolean
-            replicationPeriod:
-              type: string
-              example: P3Y6M4DT12H30M5S
             replcationBandwidth:
+              description: The bandwidth required for replication in MB
+              example: 5
               type: integer
               format: int64
+            replicationPeriod:
+              description: It is an ISO 8601 interval that specify the required time for replication
+              type: string
+              example: P3Y6M4DT12H30M5S
+            consistencyEnalbed:
+              description: It specify the data consitency in replication
+              default: false
+              example: true
+              type: boolean
+      description: ReplicationPropertiesSpec represents some suggested properties
+        for performing replication policies.
     SnapshotPropertiesSpec:
-      description: >-
-        SnapshotPropertiesSpec represents some suggested properties for
-        performing snapshot policies.
       type: object
       properties:
         schedule:
           type: object
           properties:
             datetime:
+              example: "2019-09-07T07:02:35.389"
               type: string
               format: date-time
             occurrence:
+              description: The occurence of snapshot creation
+              example: Daily
               type: string
               enum:
                 - Daily
@@ -2431,34 +2569,42 @@ components:
         retention:
           type: object
           properties:
-            number:
+            duration:
+              description: The retention time of snapshot in days
+              example: 15
               type: integer
               format: int64
-            duration:
+            number:
+              description: The number of snapshot at a particular time
+              example: 10
               type: integer
               format: int64
         topology:
           type: object
           properties:
             bucket:
+
               type: string
+      description: SnapshotPropertiesSpec represents some suggested properties for
+        performing snapshot policies.
     DataProtectionPropertiesSpec:
-      description: >-
-        DataProtectionPropertiesSpec represents some suggested properties for
-        performing data protection policies.
       type: object
       properties:
         dataProtection:
           $ref: '#/components/schemas/DataProtectionLoS'
         consistencyEnalbed:
+          description: It specify the data consitency in dataprotection
+          default: false
+          example: true
           type: boolean
+      description: DataProtectionPropertiesSpec represents some suggested properties
+        for performing data protection policies.
     CustomPropertiesSpec:
-      description: >-
-        CustomPropertiesSpec is a map of keys and JSON object that represents
-        the customized properties of profile, such as requested capabilities
-        including diskType, latency, deduplication, compression and so forth.
       type: object
       additionalProperties: {}
+      description: CustomPropertiesSpec is a map of keys and JSON object that represents
+        the customized properties of profile, such as requested capabilities including
+        diskType, latency, deduplicaiton, compression and so forth.
       example:
         key1: value1
         key2: false
