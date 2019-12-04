@@ -129,7 +129,7 @@ func TestCreateFileShare(t *testing.T) {
 		Description:     "fileshare for testing",
 		Size:            int64(1),
 		Protocols:       []string{"nfs"},
-		ExportLocations: []string{"11.242.178.20:/var/test001"},
+		ExportLocations: []string{"11.242.178.20:/mnt/test001"},
 		Metadata: map[string]string{
 			"lvPath":           "/dev/vg001/test001",
 			"nfsFileshareID":   "e1bb066c-5ce7-46eb-9336-25508cee9f71",
