@@ -1921,7 +1921,7 @@ components:
     sortDir:
       name: sortDir
       in: query
-      description: Asending or descending
+      description: Ascending or descending
       schema:
         type: string
         enum:
@@ -2067,7 +2067,7 @@ components:
             - Thin
             - Thick
         compression:
-          description: The optimization policy to remove redundant data within the file
+          description: The optimization policy to reduce the number of data bits to save storage space
           default: false
           type: boolean
         deduplication:
@@ -2116,16 +2116,16 @@ components:
           format: int64
         minIOPS:
           example: 50
-          description: The minimum IOPS(Input/Output Operations Per Second) supported by storage.In otherwords, performance can not dropped below this level. For e.g. 50IOPS
+          description: The minimum IOPS(Input/Output Operations Per Second) supported by storage. In other words, performance can not drop below this level. For e.g. 50IOPS
           type: integer
           format: int64
         maxBWS:
-          description: The maximum bandwidth suported by storage. For e.g. 5mbps
+          description: The maximum bandwidth supported by storage. For e.g. 5mbps
           example: 5
           type: integer
           format: int64
         minBWS:
-          description: The minimum bandwidth suported by storage. In otherwords, performance can not dropped below this level. For e.g. 1mbps
+          description: The minimum bandwidth supported by storage. In other words, performance can not drop below this level. For e.g. 1mbps
           example: 1
           type: integer
           format: int64
@@ -2148,7 +2148,7 @@ components:
           type: string
           example: P3Y6M4DT12H30M5S
         RecoveryGeographicObjective:
-          description: It is supported failure domain from where data can be restored after disaster
+          description: Supported failure domain from where data can be restored after disaster
           example: datacenter
           type: string
           enum:
@@ -2172,7 +2172,7 @@ components:
             - Nearline
             - Offline
         ReplicaType:
-          description: The value specify the type of repilca
+          description: This value specify the type of replica
           example: snapshot
           type: string
           enum:
@@ -2305,7 +2305,7 @@ components:
               key31: value31
     ProfileCreateSpec:
       description: An OpenSDS profile is identified by a unique name and ID. With
-        adding extra properties, each profile can contains a set of tags of storage
+        adding extra properties, each profile can contain a set of tags of storage
         capabilities which are desirable features for a class of applications.
       required:
         - name
@@ -2342,7 +2342,7 @@ components:
           $ref: '#/components/schemas/CustomPropertiesSpec'
     ProfileRespSpec:
       description: An OpenSDS profile is identified by a unique name and ID. With
-        adding extra properties, each profile can contains a set of tags of storage
+        adding extra properties, each profile can contain a set of tags of storage
         capabilities which are desirable features for a class of applications.
       allOf:
       - $ref: '#/components/schemas/BaseModel'
@@ -2604,7 +2604,7 @@ components:
       additionalProperties: {}
       description: CustomPropertiesSpec is a map of keys and JSON object that represents
         the customized properties of profile, such as requested capabilities including
-        diskType, latency, deduplicaiton, compression and so forth.
+        disk type, latency, de-duplicaiton, compression and so forth.
       example:
         key1: value1
         key2: false
