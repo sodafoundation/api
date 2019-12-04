@@ -182,6 +182,7 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
+
 	reg, err := regexp.Compile("^[a-zA-Z0-9_-]+$")
 	if err != nil {
 		errMsg := fmt.Sprintf("regex compilation for file name validation failed")
