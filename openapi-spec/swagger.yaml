@@ -2077,6 +2077,9 @@ components:
               type: string
               readOnly: true
             name:
+              minLength: 1
+              maxLength: 255
+              pattern: '[A-Za-z0-9_-]'
               type: string
             description:
               type: string
