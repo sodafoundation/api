@@ -192,7 +192,6 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 		errMsg := fmt.Sprintf("invalid fileshare name it only contain english char and number  : %v", in.Name)
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
-
 	}
 	// validate the description
 	reg, err = regexp.Compile("[^a-zA-Z0-9 ]+")
