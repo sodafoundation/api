@@ -184,16 +184,7 @@ func (ds *dockServer) CreateVolumeAttachment(ctx context.Context, opt *pb.Create
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
 		},
-		VolumeId: opt.GetVolumeId(),
-		HostInfo: model.HostInfo{
-			Platform:  opt.HostInfo.GetPlatform(),
-			OsType:    opt.HostInfo.GetOsType(),
-			Ip:        opt.HostInfo.GetIp(),
-			Host:      opt.HostInfo.GetHost(),
-			Initiator: opt.HostInfo.GetInitiator(),
-		},
 		ConnectionInfo: *connInfo,
-		Metadata:       opt.GetMetadata(),
 	}
 	log.V(8).Infof("CreateVolumeAttachment result: %v", atc)
 	return pb.GenericResponseResult(atc), nil

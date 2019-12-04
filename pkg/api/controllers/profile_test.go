@@ -52,12 +52,16 @@ func TestCreateProfile(t *testing.T) {
 		"customProperties": {
 			"dataStorage": {
 				"provisioningPolicy": "Thin",
-				"isSpaceEfficient": true
+				"compression": true,
+				"deduplication": true
 			},
 			"ioConnectivity": {
 				"accessProtocol": "rbd",
 				"maxIOPS": 5000000,
-				"maxBWS": 500
+				"maxBWS": 500,
+				"minIOPS": 1000000,
+				"minBWS": 100,
+				"latency": 100
 			}
 		}
 	}`
@@ -72,12 +76,16 @@ func TestCreateProfile(t *testing.T) {
 			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true,
+					"compression": true,
+					"deduplication": true,
 				},
 				"ioConnectivity": map[string]interface{}{
 					"accessProtocol": "rbd",
 					"maxIOPS":        float64(5000000),
 					"maxBWS":         float64(500),
+					"minIOPS":        float64(1000000),
+					"minBWS":         float64(100),
+					"latency":        float64(100),
 				},
 			}}).Return(&SampleProfiles[1], nil)
 		db.C = mockClient
@@ -108,12 +116,16 @@ func TestUpdateProfile(t *testing.T) {
 		"customProperties": {
 			"dataStorage": {
 				"provisioningPolicy": "Thin",
-				"isSpaceEfficient":   true
+				"compression": true,
+				"deduplication": true
 			},
 			"ioConnectivity": {
 				"accessProtocol": "rbd",
 				"maxIOPS":        5000000,
-				"maxBWS":         500
+				"maxBWS":         500,
+				"minIOPS": 	  1000000,
+				"minBWS": 	  100,
+				"latency": 	  100
 			}
 		}
 	}`)
@@ -296,12 +308,16 @@ func TestFileShareCreateProfile(t *testing.T) {
                         "dataStorage":{
                                 "storageAccessCapability": ["Read","Write","Execute"],
                                 "provisioningPolicy": "Thin",
-                                "isSpaceEfficient": true
+				"compression": true,
+				"deduplication": true
                         },
                         "ioConnectivity": {
                                 "accessProtocol": "NFS",
                                 "maxIOPS": 5000000,
-                                "maxBWS": 500
+                                "maxBWS": 500,
+				"minIOPS": 1000000,
+				"minBWS": 100,
+				"latency": 100
                         }
                 }
         }`
@@ -317,12 +333,16 @@ func TestFileShareCreateProfile(t *testing.T) {
 				DataStorage: model.DataStorageLoS{
 					StorageAccessCapability: []string{"Read", "Write", "Execute"},
 					ProvisioningPolicy:      "Thin",
-					IsSpaceEfficient:        true,
+					Compression:        true,
+					Deduplication: true,
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "NFS",
 					MaxIOPS:        5000000,
 					MaxBWS:         500,
+					MinIOPS:        1000000,
+					MinBWS:         100,
+					Latency:        100,
 				},
 			}}).Return(&SampleFileShareProfiles[1], nil)
 		db.C = mockClient
@@ -354,12 +374,16 @@ func TestFileShareUpdateProfile(t *testing.T) {
                         "dataStorage":{
                                 "storageAccessCapability": ["Read","Write","Execute"],
                                 "provisioningPolicy": "Thin",
-                                "isSpaceEfficient": true
+				"compression": true,
+				"deduplication": true
                         },
                         "ioConnectivity": {
                                 "accessProtocol": "NFS",
                                 "maxIOPS":        5000000,
-                                "maxBWS":         500
+                                "maxBWS":         500,
+				"minIOPS": 	  1000000,
+				"minBWS": 	  100,
+				"latency": 	  100
                         }
                 }
         }`)
@@ -537,7 +561,8 @@ func TestAddCustomProperty(t *testing.T) {
 	var fakeBody = `{
 		"dataStorage": {
 			"provisioningPolicy": "Thin",
-			"isSpaceEfficient": true
+			"compression": true,
+			"deduplication": true
 		}
 	}`
 
@@ -546,7 +571,7 @@ func TestAddCustomProperty(t *testing.T) {
 		mockClient.On("AddCustomProperty", c.NewAdminContext(), "2f9c0a04-66ef-11e7-ade2-43158893e017", model.CustomPropertiesSpec{
 			"dataStorage": map[string]interface{}{
 				"provisioningPolicy": "Thin",
-				"isSpaceEfficient":   true}}).Return(&SampleCustomProperties, nil)
+				"compression":   true, "deduplication": true}}).Return(&SampleCustomProperties, nil)
 		db.C = mockClient
 
 		r, _ := http.NewRequest("POST", "/v1beta/profiles/2f9c0a04-66ef-11e7-ade2-43158893e017/customProperties", strings.NewReader(fakeBody))

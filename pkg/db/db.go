@@ -223,7 +223,7 @@ type Client interface {
 
 	ListVolumeGroupsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeGroupSpec, error)
 
-	ListHosts(ctx *c.Context) ([]*model.HostSpec, error)
+	ListHosts(ctx *c.Context, m map[string][]string) ([]*model.HostSpec, error)
 
 	ListHostsByName(ctx *c.Context, hostName string) ([]*model.HostSpec, error)
 

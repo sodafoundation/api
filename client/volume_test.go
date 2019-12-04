@@ -30,12 +30,13 @@ func TestCreateVolume(t *testing.T) {
 		BaseModel: &model.BaseModel{
 			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		},
-		Name:        "sample-volume",
-		Description: "This is a sample volume for testing",
-		Size:        int64(1),
-		Status:      "available",
-		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+		Name:             "sample-volume",
+		Description:      "This is a sample volume for testing",
+		Size:             int64(1),
+		AvailabilityZone: "default",
+		Status:           "available",
+		PoolId:           "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 
 	vol, err := fv.CreateVolume(&model.VolumeSpec{})
@@ -56,12 +57,13 @@ func TestGetVolume(t *testing.T) {
 		BaseModel: &model.BaseModel{
 			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		},
-		Name:        "sample-volume",
-		Description: "This is a sample volume for testing",
-		Size:        int64(1),
-		Status:      "available",
-		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+		Name:             "sample-volume",
+		Description:      "This is a sample volume for testing",
+		Size:             int64(1),
+		AvailabilityZone: "default",
+		Status:           "available",
+		PoolId:           "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 
 	vol, err := fv.GetVolume(volID)
@@ -82,12 +84,13 @@ func TestListVolumes(t *testing.T) {
 			BaseModel: &model.BaseModel{
 				Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 			},
-			Name:        "sample-volume",
-			Description: "This is a sample volume for testing",
-			Size:        int64(1),
-			Status:      "available",
-			PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
-			ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+			Name:             "sample-volume",
+			Description:      "This is a sample volume for testing",
+			Size:             int64(1),
+			AvailabilityZone: "default",
+			Status:           "available",
+			PoolId:           "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
 		},
 	}
 
@@ -129,12 +132,13 @@ func TestUpdateVolume(t *testing.T) {
 		BaseModel: &model.BaseModel{
 			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		},
-		Name:        "sample-volume",
-		Description: "This is a sample volume for testing",
-		Size:        int64(1),
-		Status:      "available",
-		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+		Name:             "sample-volume",
+		Description:      "This is a sample volume for testing",
+		Size:             int64(1),
+		AvailabilityZone: "default",
+		Status:           "available",
+		PoolId:           "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 
 	if !reflect.DeepEqual(result, expected) {
@@ -159,12 +163,13 @@ func TestExtendVolume(t *testing.T) {
 		BaseModel: &model.BaseModel{
 			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
 		},
-		Name:        "sample-volume",
-		Description: "This is a sample volume for testing",
-		Size:        int64(1),
-		Status:      "available",
-		PoolId:      "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		ProfileId:   "1106b972-66ef-11e7-b172-db03f3689c9c",
+		Name:             "sample-volume",
+		Description:      "This is a sample volume for testing",
+		Size:             int64(1),
+		AvailabilityZone: "default",
+		Status:           "available",
+		PoolId:           "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
 	}
 
 	if !reflect.DeepEqual(result, expected) {
@@ -181,7 +186,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 		},
 		Status:   "available",
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: model.HostInfo{},
+		HostId:   "202964b5-8e73-46fd-b41b-a8e403f3c30b",
 		ConnectionInfo: model.ConnectionInfo{
 			DriverVolumeType: "iscsi",
 			ConnectionData: map[string]interface{}{
@@ -195,7 +200,7 @@ func TestCreateVolumeAttachment(t *testing.T) {
 
 	atc, err := fv.CreateVolumeAttachment(&model.VolumeAttachmentSpec{
 		VolumeId: volID,
-		HostInfo: model.HostInfo{},
+		HostId:   "202964b5-8e73-46fd-b41b-a8e403f3c30b",
 	})
 	if err != nil {
 		t.Error(err)
@@ -209,14 +214,13 @@ func TestCreateVolumeAttachment(t *testing.T) {
 }
 
 func TestUpdateVolumeAttachment(t *testing.T) {
-	var volID = "bd5b12a8-a101-11e7-941e-d77981b584d8"
 	expected := &model.VolumeAttachmentSpec{
 		BaseModel: &model.BaseModel{
 			Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
 		},
 		Status:   "available",
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: model.HostInfo{},
+		HostId:   "202964b5-8e73-46fd-b41b-a8e403f3c30b",
 		ConnectionInfo: model.ConnectionInfo{
 			DriverVolumeType: "iscsi",
 			ConnectionData: map[string]interface{}{
@@ -229,8 +233,9 @@ func TestUpdateVolumeAttachment(t *testing.T) {
 	}
 
 	atc, err := fv.UpdateVolumeAttachment("f2dda3d2-bf79-11e7-8665-f750b088f63e", &model.VolumeAttachmentSpec{
-		VolumeId: volID,
-		HostInfo: model.HostInfo{},
+		BaseModel: &model.BaseModel{
+			Id: "f2dda3d2-bf79-11e7-8665-f750b088f63e",
+		},
 	})
 	if err != nil {
 		t.Error(err)
@@ -251,7 +256,7 @@ func TestGetVolumeAttachment(t *testing.T) {
 		},
 		Status:   "available",
 		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		HostInfo: model.HostInfo{},
+		HostId:   "202964b5-8e73-46fd-b41b-a8e403f3c30b",
 		ConnectionInfo: model.ConnectionInfo{
 			DriverVolumeType: "iscsi",
 			ConnectionData: map[string]interface{}{
@@ -283,7 +288,7 @@ func TestListVolumeAttachments(t *testing.T) {
 			},
 			Status:   "available",
 			VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
-			HostInfo: model.HostInfo{},
+			HostId:   "202964b5-8e73-46fd-b41b-a8e403f3c30b",
 			ConnectionInfo: model.ConnectionInfo{
 				DriverVolumeType: "iscsi",
 				ConnectionData: map[string]interface{}{

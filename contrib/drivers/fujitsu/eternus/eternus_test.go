@@ -308,11 +308,16 @@ func TestInitializeConnection_IscsiNoPort(t *testing.T) {
 		DoLocalAttach: false,
 		MultiPath:     false,
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      "hostname",
-			Ip:        "1.1.1.1",
-			Initiator: "iqn.testtest",
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     "hostname",
+			Ip:       "1.1.1.1",
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: "iscsi",
+					PortName: "iqn.testtest",
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "1",
@@ -357,11 +362,16 @@ func TestInitializeConnection_Iscsi(t *testing.T) {
 		DoLocalAttach: false,
 		MultiPath:     false,
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      hostname,
-			Ip:        ipAddr,
-			Initiator: initiator,
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     hostname,
+			Ip:       ipAddr,
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: "iscsi",
+					PortName: initiator,
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "21",
@@ -527,11 +537,16 @@ func TestInitializeConnection_FC(t *testing.T) {
 		DoLocalAttach: false,
 		MultiPath:     false,
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      hostname,
-			Ip:        ipAddr,
-			Initiator: initiator,
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     hostname,
+			Ip:       ipAddr,
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: FCProtocol,
+					PortName: initiator,
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "21",
@@ -697,11 +712,16 @@ func TestInitializeConnection_FCNoInitiator(t *testing.T) {
 		DoLocalAttach: false,
 		MultiPath:     false,
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      hostname,
-			Ip:        ipAddr,
-			Initiator: initiator,
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     hostname,
+			Ip:       ipAddr,
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: FCProtocol,
+					PortName: initiator,
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "21",
@@ -793,11 +813,16 @@ func TestTerminateConnection_Iscsi(t *testing.T) {
 		Id:       "id",
 		VolumeId: "volumeid",
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      hostname,
-			Ip:        ipAddr,
-			Initiator: initiator,
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     hostname,
+			Ip:       ipAddr,
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: "iscsi",
+					PortName: initiator,
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "21",
@@ -882,11 +907,16 @@ func TestTerminateConnection_IscsiDLunGroup(t *testing.T) {
 		Id:       "id",
 		VolumeId: "volumeid",
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      hostname,
-			Ip:        ipAddr,
-			Initiator: initiator,
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     hostname,
+			Ip:       ipAddr,
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: "iscsi",
+					PortName: initiator,
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "21",
@@ -992,11 +1022,16 @@ func TestTerminateConnection_FcDLunGroup(t *testing.T) {
 		Id:       "id",
 		VolumeId: "volumeid",
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      hostname,
-			Ip:        ipAddr,
-			Initiator: initiator,
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     hostname,
+			Ip:       ipAddr,
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: FCProtocol,
+					PortName: initiator,
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "21",

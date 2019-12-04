@@ -40,9 +40,6 @@ import (
 )
 
 const (
-	defaultLimit            = 50
-	defaultOffset           = 0
-	defaultSortDir          = "desc"
 	defaultSortKey          = "ID"
 	defaultBlockProfileName = "default_block"
 	defaultFileProfileName  = "default_file"
@@ -106,11 +103,11 @@ func (c *Client) GetLimit(m map[string][]string) int {
 		limit, err = strconv.Atoi(v[0])
 		if err != nil || limit < 0 {
 			log.Warning("Invalid input limit:", limit, ",use default value instead:50")
-			return defaultLimit
+			return constants.DefaultLimit
 		}
 	} else {
 		log.Warning("The parameter limit is not present,use default value instead:50")
-		return defaultLimit
+		return constants.DefaultLimit
 	}
 	return limit
 }
@@ -127,12 +124,12 @@ func (c *Client) GetOffset(m map[string][]string, size int) int {
 		if err != nil || offset < 0 || offset > size {
 			log.Warning("Invalid input offset or input offset is out of bounds:", offset, ",use default value instead:0")
 
-			return defaultOffset
+			return constants.DefaultOffset
 		}
 
 	} else {
 		log.Warning("The parameter offset is not present,use default value instead:0")
-		return defaultOffset
+		return constants.DefaultOffset
 	}
 	return offset
 }
@@ -145,11 +142,11 @@ func (c *Client) GetSortDir(m map[string][]string) string {
 		sortDir = v[0]
 		if !strings.EqualFold(sortDir, "desc") && !strings.EqualFold(sortDir, "asc") {
 			log.Warning("Invalid input sortDir:", sortDir, ",use default value instead:desc")
-			return defaultSortDir
+			return constants.DefaultSortDir
 		}
 	} else {
 		log.Warning("The parameter sortDir is not present,use default value instead:desc")
-		return defaultSortDir
+		return constants.DefaultSortDir
 	}
 	return sortDir
 }
@@ -182,7 +179,7 @@ func (c *Client) ParameterFilter(m map[string][]string, size int, sortKeys []str
 	endIdx := limit + offset
 
 	// If use not specified the limit return all the items.
-	if limit == defaultLimit || endIdx > size {
+	if limit == constants.DefaultLimit || endIdx > size {
 		endIdx = size
 	}
 
@@ -1257,6 +1254,8 @@ func (c *Client) FindPoolValue(k string, p *model.StoragePoolSpec) string {
 		return strconv.FormatInt(p.TotalCapacity, 10)
 	case "FreeCapacity":
 		return strconv.FormatInt(p.FreeCapacity, 10)
+	case "ConsumedCapacity":
+		return strconv.FormatInt(p.ConsumedCapacity, 0)
 	case "StorageType":
 		return p.StorageType
 	}
@@ -2102,6 +2101,10 @@ func (c *Client) ExtendVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 
 // CreateVolumeAttachment
 func (c *Client) CreateVolumeAttachment(ctx *c.Context, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	if attachment.Id == "" {
+		attachment.Id = uuid.NewV4().String()
+	}
+	attachment.CreatedAt = time.Now().Format(constants.TimeFormat)
 	attachment.TenantId = ctx.TenantId
 
 	atcBody, err := json.Marshal(attachment)
@@ -2187,109 +2190,24 @@ func (c *Client) ListVolumeAttachments(ctx *c.Context, volumeId string) ([]*mode
 
 }
 
-var volumeAttachmentSortKey string
-
-type VolumeAttachmentSlice []*model.VolumeAttachmentSpec
-
-func (volumeAttachment VolumeAttachmentSlice) Len() int { return len(volumeAttachment) }
-
-func (volumeAttachment VolumeAttachmentSlice) Swap(i, j int) {
-
-	volumeAttachment[i], volumeAttachment[j] = volumeAttachment[j], volumeAttachment[i]
-}
-
-func (volumeAttachment VolumeAttachmentSlice) Less(i, j int) bool {
-	switch volumeAttachmentSortKey {
-	case "ID":
-		return volumeAttachment[i].Id < volumeAttachment[j].Id
-	case "VOLUMEID":
-		return volumeAttachment[i].VolumeId < volumeAttachment[j].VolumeId
-	case "STATUS":
-		return volumeAttachment[i].Status < volumeAttachment[j].Status
-	case "USERID":
-		return volumeAttachment[i].UserId < volumeAttachment[j].UserId
-	case "TENANTID":
-		return volumeAttachment[i].TenantId < volumeAttachment[j].TenantId
-	}
-	return false
-}
-
-func (c *Client) FindAttachmentValue(k string, p *model.VolumeAttachmentSpec) string {
-	switch k {
-	case "Id":
-		return p.Id
-	case "CreatedAt":
-		return p.CreatedAt
-	case "UpdatedAte":
-		return p.UpdatedAt
-	case "TenantId":
-		return p.TenantId
-	case "UserId":
-		return p.UserId
-	case "VolumeId":
-		return p.VolumeId
-	case "Mountpoint":
-		return p.Mountpoint
-	case "Status":
-		return p.Status
-	}
-	return ""
-}
-
-func (c *Client) SelectVolumeAttachments(m map[string][]string, attachments []*model.VolumeAttachmentSpec) []*model.VolumeAttachmentSpec {
-	if !c.SelectOrNot(m) {
-		return attachments
-	}
-
-	var atcs = []*model.VolumeAttachmentSpec{}
-	var flag bool
-	for _, attachment := range attachments {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			v := c.FindAttachmentValue(key, attachment)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			atcs = append(atcs, attachment)
-		}
-	}
-	return atcs
-
-}
-
-func (c *Client) SortVolumeAttachments(attachments []*model.VolumeAttachmentSpec, p *Parameter) []*model.VolumeAttachmentSpec {
-	volumeAttachmentSortKey = p.sortKey
-
-	if strings.EqualFold(p.sortDir, "asc") {
-		sort.Sort(VolumeAttachmentSlice(attachments))
-	} else {
-		sort.Sort(sort.Reverse(VolumeAttachmentSlice(attachments)))
-	}
-	return attachments
-
-}
-
 func (c *Client) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeAttachmentSpec, error) {
 	var volumeId string
 	if v, ok := m["VolumeId"]; ok {
 		volumeId = v[0]
 	}
-	volumeAttachments, err := c.ListVolumeAttachments(ctx, volumeId)
+	attachments, err := c.ListVolumeAttachments(ctx, volumeId)
 	if err != nil {
 		log.Error("List volumes failed: ", err)
 		return nil, err
 	}
 
-	atcs := c.SelectVolumeAttachments(m, volumeAttachments)
-	p := c.ParameterFilter(m, len(atcs), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
-
-	return c.SortVolumeAttachments(atcs, p)[p.beginIdx:p.endIdx], nil
+	tmpAttachments := utils.Filter(attachments, m)
+	tmpAttachments = utils.Slice(tmpAttachments, c.GetOffset(m, len(attachments)), c.GetLimit(m))
+	var res = []*model.VolumeAttachmentSpec{}
+	for _, data := range tmpAttachments.([]interface{}) {
+		res = append(res, data.(*model.VolumeAttachmentSpec))
+	}
+	return res, nil
 }
 
 // UpdateVolumeAttachment
@@ -2305,10 +2223,6 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 		result.Status = attachment.Status
 	}
 
-	// Update metadata
-	if attachment.Metadata != nil {
-		result.Metadata = utils.MergeStringMaps(result.Metadata, attachment.Metadata)
-	}
 	// Update DriverVolumeType
 	if len(attachment.DriverVolumeType) > 0 {
 		result.DriverVolumeType = attachment.DriverVolumeType
@@ -3259,7 +3173,7 @@ func (c *Client) SelectVolumeGroup(param map[string][]string, vgs []*model.Volum
 	return vglist
 }
 
-func (c *Client) ListHosts(ctx *c.Context) ([]*model.HostSpec, error) {
+func (c *Client) ListHosts(ctx *c.Context, m map[string][]string) ([]*model.HostSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateHostURL(urls.Etcd, ctx.TenantId),
 	}
@@ -3286,11 +3200,23 @@ func (c *Client) ListHosts(ctx *c.Context) ([]*model.HostSpec, error) {
 		}
 		hosts = append(hosts, host)
 	}
-	return hosts, nil
+
+	tmpHosts := utils.Filter(hosts, m)
+	if len(m["sortKey"]) > 0 && utils.Contains([]string{"hostName", "createdAt"}, m["sortKey"][0]) {
+		tmpHosts = utils.Sort(tmpHosts, m["sortKey"][0], c.GetSortDir(m))
+	}
+
+	tmpHosts = utils.Slice(tmpHosts, c.GetOffset(m, len(hosts)), c.GetLimit(m))
+	var res = []*model.HostSpec{}
+	for _, data := range tmpHosts.([]interface{}) {
+		res = append(res, data.(*model.HostSpec))
+	}
+
+	return res, nil
 }
 
 func (c *Client) ListHostsByName(ctx *c.Context, hostName string) ([]*model.HostSpec, error) {
-	hosts, err := c.ListHosts(ctx)
+	hosts, err := c.ListHosts(ctx, map[string][]string{"hostName": []string{hostName}})
 	if err != nil {
 		log.Error("List hosts failed: ", err)
 		return nil, err
@@ -3389,7 +3315,7 @@ func (c *Client) GetHost(ctx *c.Context, hostId string) (*model.HostSpec, error)
 	if !IsAdminContext(ctx) || err == nil {
 		return host, err
 	}
-	hosts, err := c.ListHosts(ctx)
+	hosts, err := c.ListHosts(ctx, map[string][]string{"id": []string{hostId}})
 	if err != nil {
 		return nil, err
 	}

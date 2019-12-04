@@ -179,6 +179,8 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 
 	if len(in.Name) > 128 {
 		errMsg := fmt.Sprintf("fileshare name length should not more than 128 characters. current length is : %d", len(in.Name))
+	if len(in.Name) > 255 {
+		errMsg := fmt.Sprintf("fileshare name length should not be more than 255 characters. input name length is : %d", len(in.Name))
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -443,82 +445,6 @@ func ExtendVolumeDBEntry(ctx *c.Context, volID string, in *model.ExtendVolumeSpe
 	volume.Status = model.VolumeExtending
 	// Store the volume data into database.
 	return db.C.ExtendVolume(ctx, volume)
-}
-
-// CreateVolumeAttachmentDBEntry just modifies the state of the volume attachment
-// to be creating in the DB, the real operation would be executed in another new
-// thread.
-func CreateVolumeAttachmentDBEntry(ctx *c.Context, volAttachment *model.VolumeAttachmentSpec) (
-	*model.VolumeAttachmentSpec, error) {
-	vol, err := db.C.GetVolume(ctx, volAttachment.VolumeId)
-	if err != nil {
-		msg := fmt.Sprintf("get volume failed in create volume attachment method: %v", err)
-		log.Error(msg)
-		return nil, errors.New(msg)
-	}
-
-	if vol.Status == model.VolumeAvailable {
-		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAttaching)
-	} else if vol.Status == model.VolumeInUse {
-		if vol.MultiAttach {
-			db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAttaching)
-		} else {
-			msg := "volume is already attached or volume multiattach must be true if attach more than once"
-			log.Error(msg)
-			return nil, errors.New(msg)
-		}
-	} else {
-		errMsg := "only the status of volume is available, attachment can be created"
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
-
-	if volAttachment.Id == "" {
-		volAttachment.Id = uuid.NewV4().String()
-	}
-
-	if volAttachment.CreatedAt == "" {
-		volAttachment.CreatedAt = time.Now().Format(constants.TimeFormat)
-	}
-
-	if volAttachment.AttachMode != "ro" && volAttachment.AttachMode != "rw" {
-		volAttachment.AttachMode = "rw"
-	}
-
-	volAttachment.Status = model.VolumeAttachCreating
-	volAttachment.Metadata = utils.MergeStringMaps(volAttachment.Metadata, vol.Metadata)
-	return db.C.CreateVolumeAttachment(ctx, volAttachment)
-}
-
-// DeleteVolumeAttachmentDBEntry just modifies the state of the volume attachment to
-// be deleting in the DB, the real deletion operation would be executed in
-// another new thread.
-func DeleteVolumeAttachmentDBEntry(ctx *c.Context, in *model.VolumeAttachmentSpec) error {
-	validStatus := []string{model.VolumeAttachAvailable, model.VolumeAttachError,
-		model.VolumeAttachErrorDeleting}
-	if !utils.Contained(in.Status, validStatus) {
-		errMsg := fmt.Sprintf("only the volume attachment with the status available, error, error_deleting can be deleted, the volume status is %s", in.Status)
-		log.Error(errMsg)
-		return errors.New(errMsg)
-	}
-
-	// If volume id is invalid, it would mean that volume attachment creation failed before the create method
-	// in storage driver was called, and delete its db entry directly.
-	_, err := db.C.GetVolume(ctx, in.VolumeId)
-	if err != nil {
-		if err := db.C.DeleteVolumeAttachment(ctx, in.Id); err != nil {
-			log.Error("when delete volume attachment in db:", err)
-			return err
-		}
-		return nil
-	}
-
-	in.Status = model.VolumeAttachDeleting
-	_, err = db.C.UpdateVolumeAttachment(ctx, in.Id, in)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // CreateVolumeSnapshotDBEntry just modifies the state of the volume snapshot

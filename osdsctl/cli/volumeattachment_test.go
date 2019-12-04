@@ -51,7 +51,7 @@ func TestVolumeAttachmentAction(t *testing.T) {
 
 func TestVolumeAttachmentCreateAction(t *testing.T) {
 	var args []string
-	args = append(args, ByteAttachment)
+	args = append(args, "f2dda3d2-bf79-11e7-8665-f750b088f63e", "202964b5-8e73-46fd-b41b-a8e403f3c30b")
 	volumeAttachmentCreateAction(volumeAttachmentCreateCommand, args)
 }
 

@@ -342,20 +342,22 @@ message CreateVolumeAttachmentOpts {
     string id = 1;
     // The uuid of the volume, required.
     string volumeId = 2;
+    // The uuid of the pool that volume belongs to, required.
+    string poolId = 3;
     // This field indicates if the volume is attached locally, optional.
-    bool doLocalAttach = 3;
+    bool doLocalAttach = 4;
     // This field indicates if the volume is attached multiple times, optional.
-    bool multiPath = 4;
+    bool multiPath = 5;
     // The infomation of the host node on which the volume will be attached.
-    HostInfo hostInfo = 5;
+    HostInfo hostInfo = 6;
     // The metadata of the volume attachment, optional.
-    map<string, string> metadata = 6;
+    map<string, string> metadata = 7;
     // The storage driver type.
-    string driverName = 7;
+    string driverName = 8;
     // The Context
-    string context = 8;
+    string context = 9;
     // The protocol
-    string AccessProtocol = 9;
+    string AccessProtocol = 10;
 }
 
 // DeleteVolumeAttachmentOpts is a structure which indicates all required
@@ -365,16 +367,18 @@ message DeleteVolumeAttachmentOpts {
     string id = 1;
     // The uuid of the volume, required.
     string volumeId = 2;
+    // The uuid of the pool that volume belongs to, required.
+    string poolId = 3;
     // The infomation of the host node on which the volume will be attached.
-    HostInfo hostInfo = 3;
+    HostInfo hostInfo = 4;
     // The metadata of the volume attachment, optional.
-    map<string, string> metadata = 4;
+    map<string, string> metadata = 5;
     // The storage driver type.
-    string driverName = 5;
+    string driverName = 6;
     // The Context
-    string context = 6;
+    string context = 7;
     // The protocol
-    string AccessProtocol = 7;
+    string AccessProtocol = 8;
 }
 
 // CreateSnapshotAttachmentOpts is a structure which indicates all required
@@ -428,8 +432,15 @@ message HostInfo {
      string host = 3;
     // The ip address of the host
     string ip = 4;
-    // The initiator infomation, such as: "iqn.2017.com.redhat:e08039b48d5c"
-    string initiator = 5;
+    // The initiators' infomation
+    repeated Initiator initiators = 5;
+}
+
+message Initiator {
+    // initiator name
+    string portName = 1;
+    // protocol like iscsi and fibre_channel
+    string protocol = 2;
 }
 
 message VolumeData {
