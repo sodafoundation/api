@@ -2982,10 +2982,13 @@ components:
           type: string
           minLength: 1
           maxLength: 64
-          description: Only numbers, letters, '-', '_', '.' in ASCII characters are allowed.
+          pattern: "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
+          description: Only numbers, letters, '-', '.' in ASCII characters are allowed.
+          example: opensds-node1
         ip:
           type: string
           description: IP address of the host, mandatory
+          pattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
           example: 8.8.8.8
         port:
           maximum: 65535
@@ -3019,6 +3022,7 @@ components:
             maxLength: 64
             minLength: 1
             description: name or uuid of availablity zone
+          uniqueItems: true
         initiators:
           type: array
           description: Initiator of host
@@ -3049,10 +3053,13 @@ components:
           type: string
           minLength: 1
           maxLength: 64
-          description: Only numbers, letters, '-', '_', '.' in ASCII characters are allowed.
+          pattern: "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
+          description: Only numbers, letters, '-', '.' in ASCII characters are allowed.
+          example: opensds-node1
         ip:
           type: string
           description: IP address of the host, mandatory
+          pattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
           example: 8.8.8.8
         port:
           maximum: 65535
@@ -3086,6 +3093,7 @@ components:
             maxLength: 64
             minLength: 1
             description: name or uuid of availablity zone
+          uniqueItems: true
         initiators:
           type: array
           description: Initiator of host
