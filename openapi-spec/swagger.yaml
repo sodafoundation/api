@@ -2831,6 +2831,7 @@ components:
           enum:
           - linux
           - windows
+          - esxi
         hostName:
           type: string
           minLength: 1
