@@ -189,12 +189,9 @@ paths:
         - $ref: '#/components/parameters/sortDir'
         - name: sortKey
           in: query
-          description: Sorting key word
+          description: Sorting key word, such as name, createdAt
           schema:
             type: string
-            enum:
-            - name
-            - createdAt
         - name: storageType
           in: query
           schema:
@@ -490,6 +487,35 @@ paths:
       tags:
         - Block volumes
       description: Lists information for all volumes.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word, such as name, createdAt
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: The volume name
+          schema:
+            type: string
+        - name: profileId
+          in: query
+          description: The UUID of profile
+          schema:
+            type: string
+        - name: poolId
+          in: query
+          description: The UUID of pool
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: The volume status
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -498,7 +524,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/VolumeSpec'
+                  $ref: '#/components/schemas/VolumeRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -515,7 +541,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSpec'
+                $ref: '#/components/schemas/VolumeRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -525,10 +551,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VolumeSpec'
+        $ref: '#/components/requestBodies/VolumeCreateSpec'
   '/v1beta/{tenantId}/block/volumes/{volumeId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -543,7 +566,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSpec'
+                $ref: '#/components/schemas/VolumeRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -562,7 +585,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSpec'
+                $ref: '#/components/schemas/VolumeRespSpec'
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -580,6 +605,8 @@ paths:
       responses:
         '202':
           description: Accepted
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -602,7 +629,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSpec'
+                $ref: '#/components/schemas/VolumeRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -612,10 +639,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ExtendVolumeSpec'
+        $ref: '#/components/requestBodies/VolumeExtendSpec'
   '/v1beta/{tenantId}/block/attachments':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -738,12 +762,24 @@ paths:
       - $ref: '#/components/parameters/tenantId'
     get:
       parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word, such as name, createdAt
+          schema:
+            type: string
         - name: volumeId
           description: The UUID of the volume assosicated with the snapshot.
           in: query
           schema:
             type: string
-            uniqueItems: true
+        - name: status
+          in: query
+          description: The volume snapshot status
+          schema:
+            type: string
       tags:
         - Block volume snapshots
       description: Lists information for all volume snapshots.
@@ -755,7 +791,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/VolumeSnapshotSpec'
+                  $ref: '#/components/schemas/VolumeSnapshotRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -772,7 +808,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSnapshotSpec'
+                $ref: '#/components/schemas/VolumeSnapshotRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -782,10 +818,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VolumeSnapshotSpec'
+        $ref: '#/components/requestBodies/VolumeSnapshotCreateSpec'
   '/v1beta/{tenantId}/block/snapshots/{snapshotId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -800,7 +833,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSnapshotSpec'
+                $ref: '#/components/schemas/VolumeSnapshotRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -819,7 +852,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSnapshotSpec'
+                $ref: '#/components/schemas/VolumeSnapshotRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -847,6 +880,8 @@ paths:
       responses:
         '202':
           description: Accepted
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -870,7 +905,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/VolumeGroupSpec'
+                  $ref: '#/components/schemas/VolumeGroupRespSpec'
               examples:
                 response:
                   value:
@@ -899,7 +934,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeGroupSpec'
+                $ref: '#/components/schemas/VolumeGroupRespSpec'
               examples:
                 response:
                   value:
@@ -920,11 +955,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VolumeGroupSpec'
-        required: true
+        $ref: '#/components/requestBodies/VolumeGroupCreateSpec'
   '/v1beta/{tenantId}/block/volumeGroups/{volumeGroupId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -939,7 +970,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeGroupSpec'
+                $ref: '#/components/schemas/VolumeGroupRespSpec'
               examples:
                 response:
                   value:
@@ -971,7 +1002,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeGroupSpec'
+                $ref: '#/components/schemas/VolumeGroupRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -1014,6 +1045,8 @@ paths:
       responses:
         '202':
           description: Accepted
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1029,6 +1062,20 @@ paths:
       tags:
         - Block Replications
       description: Lists information for all replications.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word, such as name, createdAt
+          schema:
+            type: string
+        - name: name
+          description: The replication name
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1037,13 +1084,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ReplicationSpec'
-              examples:
-                response:
-                  value:
-                    - id: e416db95-b6f4-4669-a075-5a873d050a93
-                      name: replication-demo
-                      ReplicationStatus: enabled
+                  $ref: '#/components/schemas/ReplicationRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1060,7 +1101,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReplicationSpec'
+                $ref: '#/components/schemas/ReplicationRespSpec'
               examples:
                 response:
                   value:
@@ -1101,7 +1142,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/ReplicationSpec'
+        $ref: '#/components/requestBodies/ReplicationCreateSpec'
   '/v1beta/{tenantId}/block/replications/{replicationId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1116,7 +1157,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReplicationSpec'
+                $ref: '#/components/schemas/ReplicationRespSpec'
               examples:
                 response:
                   value:
@@ -1166,7 +1207,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReplicationSpec'
+                $ref: '#/components/schemas/ReplicationRespSpec'
               examples:
                 response:
                   value:
@@ -1218,8 +1259,6 @@ paths:
                   type: string
                 description:
                   type: string
-              required:
-                - name
     delete:
       tags:
         - Block Replications
@@ -1244,6 +1283,20 @@ paths:
       tags:
         - Block Replications
       description: Lists detail information for all replications.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word, such as name, createdAt
+          schema:
+            type: string
+        - name: name
+          description: The replication name
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1252,7 +1305,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ReplicationSpec'
+                  $ref: '#/components/schemas/ReplicationRespSpec'
               examples:
                 response:
                   value:
@@ -1311,8 +1364,6 @@ paths:
           $ref: '#/components/responses/HTTPStatus404'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
-      requestBody:
-        $ref: '#/components/requestBodies/ReplicationSpec'
   '/v1beta/{tenantId}/block/replications/{replicationId}/disable':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1334,8 +1385,7 @@ paths:
           $ref: '#/components/responses/HTTPStatus404'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
-      requestBody:
-        $ref: '#/components/requestBodies/ReplicationSpec'
+
   '/v1beta/{tenantId}/block/replications/{replicationId}/failover':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1358,10 +1408,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FailoverReplicationSpec'
+        $ref: '#/components/requestBodies/FailoverReplicationSpec'
   '/v1beta/{tenantId}/file/shares':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1667,12 +1714,9 @@ paths:
         - $ref: '#/components/parameters/sortDir'
         - name: sortKey
           in: query
-          description: Sorting key word
+          description: Sorting key word, such as hostName, createdAt
           schema:
             type: string
-            enum:
-            - hostName
-            - createdAt
         - name: hostName
           in: query
           description: Host name
@@ -1959,11 +2003,24 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorSpec'
   requestBodies:
-    ReplicationSpec:
+    ReplicationCreateSpec:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ReplicationSpec'
+            $ref: '#/components/schemas/ReplicationCreateSpec'
+    FailoverReplicationSpec:
+      content:
+        application/json:
+          schema:
+            description: >-
+              FailoverReplicationSpec represents failover replication relationship
+              between the volumes on the primary and secondary sites.
+            type: object
+            properties:
+              allowAttachedVolume:
+                type: boolean
+              secondaryBackendId:
+                type: string
     ProfileCreateSpec:
       content:
         application/json:
@@ -1979,6 +2036,11 @@ components:
                 type: string
               description:
                 type: string
+    VolumeCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VolumeCreateSpec'
     VolumeUpdateSpec:
       content:
         application/json:
@@ -1989,6 +2051,29 @@ components:
                 type: string
               description:
                 type: string
+    VolumeExtendSpec:
+      content:
+        application/json:
+          schema:
+            type: object
+            description: 'Extends the size of a volume to a requested size, in gibibytes (GiB).'
+            required:
+              - newSize
+            properties:
+              newSize:
+                type: integer
+                format: int64
+                example: 2
+    VolumeSnapshotCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VolumeSnapshotCreateSpec'
+    VolumeGroupCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VolumeGroupCreateSpec'
     FileShareUpdateSpec:
       content:
         application/json:
@@ -2610,16 +2695,47 @@ components:
         key2: false
         key3:
           key31: value31
-    VolumeSpec:
+    VolumeCreateSpec:
+      description: >-
+        Volume is an block device created by storage service, it can be attached
+        to physical machine or virtual machine instance.
+      type: object
+      required:
+        - name
+        - size
+      properties:
+        name:
+          type: string
+        multiAttach:
+          type: boolean
+        description:
+          type: string
+        size:
+          type: integer
+          format: int64
+          example: 2
+        availabilityZone:
+          type: string
+          default: default
+        profileId:
+          type: string
+        poolId:
+          type: string
+        snapshotId:
+          type: string
+        groupId:
+          type: string
+        snapshotFromCloud:
+          type: boolean
+        replicationId:
+          type: string
+    VolumeRespSpec:
       description: >-
         Volume is an block device created by storage service, it can be attached
         to physical machine or virtual machine instance.
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
-          required:
-            - name
-            - size
           properties:
             tenantId:
               type: string
@@ -2655,6 +2771,13 @@ components:
               type: boolean
             replicationId:
               type: string
+            identifier:
+              type: object
+              properties:
+                durableName:
+                  type: string
+                durableNameFormat:
+                  type: string
             replicationDriverData:
               type: object
               additionalProperties:
@@ -2669,16 +2792,7 @@ components:
               example:
                 key1: value1
                 key2: value2
-    ExtendVolumeSpec:
-      description: 'Extends the size of a volume to a requested size, in gibibytes (GiB).'
-      type: object
-      required:
-        - newSize
-      properties:
-        newSize:
-          type: integer
-          format: int64
-          example: 2
+
     VolumeAttachmentCreateSpec:
       description: Attachment is a description of volume attached resource.
       required:
@@ -2758,14 +2872,25 @@ components:
             key2: false
             key3:
               key31: value31
-    VolumeSnapshotSpec:
+    VolumeSnapshotCreateSpec:
+      type: object
+      required:
+        - name
+        - volumeId
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        volumeId:
+          type: string
+        profileId:
+          type: string
+    VolumeSnapshotRespSpec:
       description: Snapshot is a description of volume snapshot resource.
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
-          required:
-            - name
-            - volumeId
           properties:
             tenantId:
               type: string
@@ -2793,16 +2918,32 @@ components:
               example:
                 key1: value1
                 key2: value2
-    VolumeGroupSpec:
+    VolumeGroupCreateSpec:
+      type: object
+      required:
+        - profiles
+        - name
+      properties:
+        name:
+          type: string
+          example: volumeGroup-demo
+        description:
+          type: string
+          example: volume group test
+        profiles:
+          type: array
+          items:
+            type: string
+          example:
+            - 993c87dc-1928-498b-9767-9da8f901d6ce
+            - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
+    VolumeGroupRespSpec:
       description: >-
         Volume group contains a list of volumes that are used in the same
         application.
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
-          required:
-            - profiles
-            - name
           properties:
             tenantId:
               type: string
@@ -2833,22 +2974,51 @@ components:
               example:
                 - 993c87dc-1928-498b-9767-9da8f901d6ce
                 - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
-    ReplicationSpec:
+    ReplicationCreateSpec:
+      type: object
+      required:
+        - name
+        - primaryVolumeId
+        - secondaryVolumeId
+        - availabilityZone
+        - replicationPeriod
+        - replicationMode
+        - profileId
+      properties:
+        name:
+          type: string
+          example: replication-demo
+        description:
+          type: string
+          example: This is replication demo api specs
+        availabilityZone:
+          type: string
+          example: default
+        primaryVolumeId:
+          type: string
+          example: 655ec3e2-5840-4138-b5bd-bce930d2acda
+        secondaryVolumeId:
+          type: string
+          example: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
+        replicationMode:
+          type: string
+          enum:
+            - sync
+            - async
+        replicationPeriod:
+          type: integer
+          format: int64
+          minimum: 0
+        profileId:
+          type: string
+          example: a66976e0-9fbf-4cf3-912a-e891dd41b1a5
+    ReplicationRespSpec:
       description: >-
         Replication represents a replication relationship between the volumes on
         the primary and secondary sites.
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
-          required:
-            - tenantId
-            - name
-            - primaryVolumeId
-            - scondaryVolumeId
-            - availabilityZone
-            - replicationPeriod
-            - replicationMode
-            - profileId
           properties:
             tenantId:
               type: string
@@ -2917,16 +3087,7 @@ components:
             profileId:
               type: string
               example: a66976e0-9fbf-4cf3-912a-e891dd41b1a5
-    FailoverReplicationSpec:
-      description: >-
-        FailoverReplicationSpec represents failover replication relationship
-        between the volumes on the primary and secondary sites.
-      type: object
-      properties:
-        allowAttachedVolume:
-          type: boolean
-        secondaryBackendId:
-          type: string
+
     ErrorSpec:
       description: >-
         Detailed HTTP error response, which consists of a HTTP status code, and
