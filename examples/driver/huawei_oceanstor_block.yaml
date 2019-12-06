@@ -5,18 +5,21 @@ authOptions:
   EnableEncrypted: false
   # Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.
   PwdEncrypter: "aes"
-  uri: "https://0.0.0.0:8088/deviceManager/rest"
+  endpoints: "https://0.0.0.0:8088/deviceManager/rest"
 
 pool:
-  opensds_file:
-    storageType: file
-    availabilityZone: fileshare
+  opensds_block:
+    storageType: block
+    availabilityZone: default
     extras:
       dataStorage:
-        storageAccessCapability: ["Read","Write","Execute"]          
+        provisioningPolicy: Thin
+        compression: false
+        deduplication: false
       ioConnectivity:
-        accessProtocol: NFS
-        maxIOPS: 1000
+        accessProtocol: iscsi
+        maxIOPS: 7000000
+        maxBWS: 600
       advanced:
         diskType: SSD
-        throughput: 1000
+        latency: 3ms
