@@ -39,7 +39,7 @@ func newRestCommon(conf *Config) (*Client, error) {
 	}
 
 	client := &Client{
-		urlPrefix: conf.Uri,
+		urlPrefix: conf.Endpoint,
 		username:  conf.Username,
 		password:  pwdCiphertext,
 		header:    map[string]string{"Content-Type": "application/json;charset=UTF-8"},
