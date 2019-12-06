@@ -274,7 +274,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			continue
 		}
 		host, _ := os.Hostname()
-		name := fmt.Sprintf("%s:%s:%s", host, d.Uri, p.Id)
+		name := fmt.Sprintf("%s:%s:%s", host, d.Endpoint, p.Id)
 
 		userTotalCapacity, _ := strconv.ParseInt(p.UserTotalCapacity, 10, 64)
 		userFreeCapacity, _ := strconv.ParseInt(p.UserFreeCapacity, 10, 64)
