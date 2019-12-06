@@ -77,8 +77,8 @@ func (c *Cli) CreateAccess(accessto, accesscapability, fname string) error {
 
 func (c *Cli) DeleteAccess(accessto, fname string) error {
 	var accesstoAndMount string
-	sharePath := path.Join("mnt/", fname)
-	accesstoAndMount = fmt.Sprintf("%s:/%s", accessto, strings.Replace(sharePath, "-", "_", -1))
+	sharePath := path.Join(MountPath, fname)
+	accesstoAndMount = fmt.Sprintf("%s:%s", accessto, strings.Replace(sharePath, "-", "_", -1))
 	cmd := []string{
 		"env", "LC_ALL=C",
 		"exportfs",
