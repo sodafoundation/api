@@ -283,7 +283,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, name).String(),
 			},
-			Name:             p.Id,
+			Name:             p.Name,
 			TotalCapacity:    Sector2Gb(userTotalCapacity),
 			FreeCapacity:     Sector2Gb(userFreeCapacity),
 			StorageType:      c.Pool[p.Name].StorageType,
