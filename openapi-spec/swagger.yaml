@@ -1786,6 +1786,130 @@ paths:
           $ref: '#/components/responses/HTTPStatus404'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
+  '/v1beta/{tenantId}/metrics':
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+    get:
+      tags:
+        - Metrics
+      description: Lists metrics for the specified time series.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MetricSpec'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+    post:
+      tags:
+        - Metrics
+      description: Trigger metric collection for the specified driver.
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricSpec'
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectMetricSpec'
+  '/v1beta/{tenantId}/metrics/urls':
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+    get:
+      tags:
+        - Metrics
+      description: Lists urls of metric management tools for visualization, alert management etc.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UrlSpec'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+  '/v1beta/{tenantId}/metrics/downloadconf':
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+    get:
+      tags:
+        - Metrics
+      description: download a config file.
+      parameters:
+      - name: conftype
+        in: query
+        required: true
+        description: Name of the tool to which the configuration file to be downloaded from.
+        schema:
+          minimum: 1
+          type: string
+          enum:
+            - prometheus
+            - alertmanager
+            - grafana
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+  '/v1beta/{tenantId}/metrics/uploadconf':
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+    post:
+      tags:
+        - Metrics
+      description: upload a config file.
+      parameters:
+      - name: conftype
+        in: query
+        required: true
+        description: Name of the tool to which the configuration file to be uploaded.
+        schema:
+          minimum: 1
+          type: string
+          enum:
+            - prometheus
+            - alertmanager
+            - grafana
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
 security:
   - basicAuth: []
 externalDocs:
@@ -3161,3 +3285,82 @@ components:
                   - nvmeof
 
       description: Host is a consumer of volume from storage.
+    MetricSpec:
+      description: >-
+        Metric spec represents metrics of different type, which has name, instanceID label, timestamp , value etc..
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          required:
+            - name
+          properties:
+            instanceID:
+              type: string
+              readOnly: true
+            instanceName:
+              type: string
+              readOnly: true
+            job:
+              type: string
+            name:
+              type: string
+              default: default
+            unit:
+              type: string
+              readOnly: true
+            aggrType:
+              type: string
+            metricValues:
+              type: array
+              description: Metric values for the timestamp
+              items:
+                type: object
+                properties:
+                  timestamp:
+                    type: integer
+                    format: int64
+                    description: Timestamp of the metric
+                    example: 1575363783
+                  value:
+                    type: number
+                    description: Value of the metric for this timestamp
+                    example: 16.74
+            labels:
+              type: object
+              additionalProperties:
+                type: string
+              example:
+                key1: value1
+                key2: value2
+    CollectMetricSpec:
+      description: >-
+        Collect Metric spec specifies the driver to trigger collect metrics action.
+      allOf:
+        - type: object
+          required:
+            - driverType
+          properties:
+            driverType:
+              type: string
+              enum:
+                - lvm
+                - ceph
+                - huawei_oceanstor_block
+    UrlSpec:
+      description: >-
+        Lists information for all url which can be used to access telemetry related services like grafana and alert manager.
+      type: object
+      required:
+        - name
+        - url
+        - desc
+      properties:
+        name:
+          type: string
+          example: Grafana
+        url:
+          type: string
+          example: http://localhost:3000
+        desc:
+          type: string
+          example: Open Grafana tool to visualize collected metric
