@@ -1369,6 +1369,39 @@ paths:
       tags:
         - File Shares
       description: Lists information for all file shares.
+      parameters:
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/sortDir'
+      - name: sortKey
+        in: query
+        description: Sorting key word
+        schema:
+          type: string
+          enum:
+          - name
+          - createdAt
+      - name: name
+        in: query
+        schema:
+          minLength: 1
+          maxLength: 255
+          type: string
+      - name: profileId
+        in: query
+        description: The UUID of profile
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: The fileshare status
+        schema:
+          type: string
+      - name: poolId
+        in: query
+        description: The UUID of pool
+        schema:
+          type: string
       responses:
         '200':
           description: OK
@@ -1377,7 +1410,27 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FileShareSpec'
+                  $ref: '#/components/schemas/FileShareRespSpec'
+              examples:
+                response:
+                  value:
+                  - id: 533041f3-0817-4314-8e7c-80fc26367a39
+                    createdAt: 2019-12-06T12:28:54
+                    updatedAt: 2019-12-06T12:28:54
+                    tenantId: e93b4c0934da416eb9c8d120c5d04d96
+                    userId:
+                    name: fstest
+                    protocols: [nfs]
+                    description: Testing file share
+                    size: 1
+                    status: available
+                    poolId: 52599613-6f64-5aae-9819-7d2a2c790629
+                    profileId: 68a3f0da-90f1-42b4-94cf-d02d55f7a25f
+                    snapshotId:
+                    exportLocations: "[10.0.2.15:/var/fstest]"
+                    metadata: {"lvPath": "/dev/opensds-files-default/fstest","nfsFileshareID": "533041f3-0817-4314-8e7c-80fc26367a39","nfsFileshareName": "fstest","snapshotName": ""}
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1394,7 +1447,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSpec'
+                $ref: '#/components/schemas/FileShareRespSpec'
+              examples:
+                response:
+                  value:
+                  - id: 533041f3-0817-4314-8e7c-80fc26367a39
+                    createdAt: 2019-12-06T12:28:54
+                    tenantId: e93b4c0934da416eb9c8d120c5d04d96
+                    userId:
+                    name: fstest
+                    protocols: []
+                    description: Testing file share
+                    size: 1
+                    status: creating
+                    poolId:
+                    profileId: 68a3f0da-90f1-42b4-94cf-d02d55f7a25f
+                    snapshotId:
+                    exportLocations: []
+                    metadata: null
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -1407,7 +1477,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FileShareSpec'
+              $ref: '#/components/schemas/FileShareCreateSpec'
   '/v1beta/{tenantId}/file/shares/{fileshareId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1422,7 +1492,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSpec'
+                $ref: '#/components/schemas/FileShareRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1441,10 +1511,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSpec'
+                $ref: '#/components/schemas/FileShareRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
+          $ref: '#/components/responses/HTTPStatus404'
+        '404':
           $ref: '#/components/responses/HTTPStatus404'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
@@ -1989,7 +2061,27 @@ components:
                 type: string
               description:
                 type: string
+    FileShareCreateSpec:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
     FileShareUpdateSpec:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+    FileShareRespSpec:
       content:
         application/json:
           schema:
@@ -2377,13 +2469,11 @@ components:
             customProperties:
               $ref: '#/components/schemas/CustomPropertiesSpec'
 
-    FileShareSpec:
+    FileShareCreateSpec:
       description: >-
         FileShare is a file system created by nfs southbound driver, it can be
         mounted on to physical machine or virtual machine instance.
-      allOf:
-        - $ref: '#/components/schemas/BaseModel'
-        - type: object
+      - type: object
           required:
             - name
             - size
@@ -2396,8 +2486,12 @@ components:
               readOnly: true
             name:
               type: string
+              minLength: 1
+              maxLength: 255
             description:
               type: string
+              minLength: 1
+              maxLength: 255
             size:
               type: integer
               format: int64
@@ -2405,28 +2499,86 @@ components:
             availabilityZone:
               type: string
               default: default
-            status:
-              type: string
-              readOnly: true
             profileId:
               type: string
-            exportLocations:
-              type: array
-              items:
-                type: string
-              readOnly: true
-            metadata:
-              type: object
-              readOnly: true
-              additionalProperties:
-                type: string
-              example:
-                lvPath: string
-                nfsFileshareID: string
-                nfsFileshareName: string
+            poolId:
+              type: string
+    FileShareUpdateSpec:
+      description: >-
+        FileShare name and description can be updated in the db.
+      - type: object
+        required:
+          - fileshareId
+        properties:
+          fileshareId:
+            type: string
+          tenantId:
+            type: string
+            readOnly: true
+          userId:
+            type: string
+            readOnly: true
+          name:
+            type: string
+            minLength: 1
+            maxLength: 255
+          description:
+            type: string
+            minLength: 1
+            maxLength: 255
+    FileShareRespSpec:
+      description: >-
+        FileShare is a file system created by nfs southbound driver, it's
+        response will have the following specification.
+      - $ref: '#/components/schemas/BaseModel'
+      - type: object
+        properties:
+          tenantId:
+            type: string
+            readOnly: true
+          userId:
+            type: string
+            readOnly: true
+          name:
+            type: string
+            minLength: 1
+            maxLength: 255
+          description:
+            type: string
+            minLength: 1
+            maxLength: 255
+          size:
+            type: integer
+            format: int64
+            example: 2
+          availabilityZone:
+            type: string
+            default: default
+          status:
+            type: string
+            readOnly: true
+          profileId:
+            type: string
+          poolId:
+            type: string
+          snapshotId:
+            type: string
+          exportLocations:
+            type: array
+            items:
+              type: string
+            readOnly: true
+          metadata:
+            type: object
+            readOnly: true
+            additionalProperties:
+              type: string
+            example:
+              lvPath: string
+              nfsFileshareID: string
+              nfsFileshareName: string
     FileShareSnapshotSpec:
       description: Snapshot is a description of fileshare snapshot resource.
-      allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
           required:
