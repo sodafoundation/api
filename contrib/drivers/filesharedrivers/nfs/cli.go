@@ -54,15 +54,15 @@ func (c *Cli) GetExportLocation(share_name, ip string) string {
 		return ""
 	}
 	var exportLocation string
-	sharePath := path.Join("var/", share_name)
-	exportLocation = fmt.Sprintf("%s:/%s", server, strings.Replace(sharePath, "-", "_", -1))
+	sharePath := path.Join(MountPath, share_name)
+	exportLocation = fmt.Sprintf("%s:%s", server, strings.Replace(sharePath, "-", "_", -1))
 	return exportLocation
 }
 
 func (c *Cli) CreateAccess(accessto, accesscapability, fname string) error {
 	var accesstoAndMount string
-	sharePath := path.Join("var/", fname)
-	accesstoAndMount = fmt.Sprintf("%s:/%s", accessto, strings.Replace(sharePath, "-", "_", -1))
+	sharePath := path.Join(MountPath, fname)
+	accesstoAndMount = fmt.Sprintf("%s:%s", accessto, strings.Replace(sharePath, "-", "_", -1))
 	cmd := []string{
 		"env", "LC_ALL=C",
 		"exportfs",
@@ -77,8 +77,8 @@ func (c *Cli) CreateAccess(accessto, accesscapability, fname string) error {
 
 func (c *Cli) DeleteAccess(accessto, fname string) error {
 	var accesstoAndMount string
-	sharePath := path.Join("var/", fname)
-	accesstoAndMount = fmt.Sprintf("%s:/%s", accessto, strings.Replace(sharePath, "-", "_", -1))
+	sharePath := path.Join(MountPath, fname)
+	accesstoAndMount = fmt.Sprintf("%s:%s", accessto, strings.Replace(sharePath, "-", "_", -1))
 	cmd := []string{
 		"env", "LC_ALL=C",
 		"exportfs",
