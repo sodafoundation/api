@@ -327,3 +327,12 @@ func WaitForCondition(f func() (bool, error), interval, timeout time.Duration) e
 	}
 	return fmt.Errorf("wait for condition timeout")
 }
+
+func ContainsIgnoreCase(a []string, x string) bool {
+	for _, n := range a {
+		if strings.EqualFold(x, n) {
+			return true
+		}
+	}
+	return false
+}

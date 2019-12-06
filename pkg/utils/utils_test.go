@@ -500,3 +500,27 @@ func TestSlice(t *testing.T) {
 
 	}
 }
+
+func TestContainsIgnoreCase(t *testing.T) {
+	var permissions = []string{"Read", "Write", "Execute"}
+	var testkey1 = "READ"
+	var testkey2 = "Read"
+	var testkey3 = "read"
+	var testkey4 = "Raed"
+	contains := ContainsIgnoreCase(permissions, testkey1)
+	if contains != true {
+		t.Errorf("%v should contains %v", permissions, testkey1)
+	}
+	contains = ContainsIgnoreCase(permissions, testkey2)
+	if contains != true {
+		t.Errorf("%v should contains %v", permissions, testkey2)
+	}
+	contains = ContainsIgnoreCase(permissions, testkey3)
+	if contains != true {
+		t.Errorf("%v should contains %v", permissions, testkey3)
+	}
+	contains = ContainsIgnoreCase(permissions, testkey4)
+	if contains != false {
+		t.Errorf("%v shouldn't contains %v", permissions, testkey4)
+	}
+}
