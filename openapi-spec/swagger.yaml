@@ -1472,6 +1472,30 @@ paths:
       tags:
         - File Share Snapshots
       description: Lists information for all file share spanshots.
+      parameters:
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/sortDir'
+      - name: sortKey
+        in: query
+        description: Sorting key word
+        schema:
+          type: string
+      - name: name
+        in: query
+        description: Fileshare name
+        schema:
+          type: string
+      - name: profileId
+        in: query
+        description: The UUID of profile
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: The fileshare status
+        schema:
+          type: string
       responses:
         '200':
           description: OK
@@ -1480,7 +1504,25 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FileShareSnapshotSpec'
+                  $ref: '#/components/schemas/FileShareSnapshotRespSpec'
+              examples:
+                response:
+                  value:
+                  - id: 405ded84-b6ff-4ac6-8a3c-cb0e82dcf372
+                    createdAt: 2019-12-04T13:23:13
+                    updatedAt: 2019-12-04T13:31:03
+                    tenantId: e93b4c0934da416eb9c8d120c5d04d96
+                    userId:
+                    fileshareId: eedfbfcf-de50-4476-a2b6-058e6bfa3558
+                    name: snaptest
+                    description: Testing file share snapshot
+                    shareSize: 1
+                    snapshotSize: 1
+                    status: available
+                    profileId: ed273ef0-4602-4790-ae68-09bdbb22d133
+                    metadata: {"lvPath": "/dev/opensds-files-default/test","snapshotID": "405ded84-b6ff-4ac6-8a3c-cb0e82dcf372","snapshotName": "snaptest"}
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1497,7 +1539,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSnapshotSpec'
+                $ref: '#/components/schemas/FileShareSnapshotRespSpec'
+              examples:
+                response:
+                  value:
+                  - id: 405ded84-b6ff-4ac6-8a3c-cb0e82dcf372
+                    createdAt: 2019-12-04T13:23:13
+                    tenantId: e93b4c0934da416eb9c8d120c5d04d96
+                    userId:
+                    fileshareId: eedfbfcf-de50-4476-a2b6-058e6bfa3558
+                    name: snaptest
+                    description: Testing file share snapshot
+                    shareSize: 1
+                    snapshotSize: 1
+                    status: creating
+                    profileId: ed273ef0-4602-4790-ae68-09bdbb22d133
+                    metadata: {"lvPath": "/dev/opensds-files-default/test","snapshotID": "405ded84-b6ff-4ac6-8a3c-cb0e82dcf372","snapshotName": "snaptest"}
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -1510,7 +1567,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FileShareSnapshotSpec'
+              $ref: '#/components/schemas/FileShareSnapshotCreateSpec'
   '/v1beta/{tenantId}/file/snapshots/{shareSnapshotId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1525,7 +1582,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSnapshotSpec'
+                $ref: '#/components/schemas/FileShareSnapshotRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1544,7 +1601,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSnapshotSpec'
+                $ref: '#/components/schemas/FileShareSnapshotRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1999,16 +2056,6 @@ components:
                 type: string
               description:
                 type: string
-    FileShareSnapshotUpdateSpec:
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-              description:
-                type: string
     VolumeAttachmentCreateSpec:
       content:
         application/json:
@@ -2029,6 +2076,21 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/HostUpdateSpec'
+    FileShareSnapshotCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileShareSnapshotCreateSpec'
+    FileShareSnapshotUpdateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileShareSnapshotUpdateSpec'
+    FileShareSnapshotRespSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileShareSnapshotRespSpec'
   securitySchemes:
     basicAuth:
       type: http
@@ -2424,19 +2486,45 @@ components:
                 lvPath: string
                 nfsFileshareID: string
                 nfsFileshareName: string
-    FileShareSnapshotSpec:
-      description: Snapshot is a description of fileshare snapshot resource.
+    FileShareSnapshotCreateSpec:
+      description: FileShare Snapshot is a snapshot of file share created by nfs southbound driver, it can be
+        mounted on to physical machine or virtual machine instance.
+      required:
+        - name
+        - fileshareId
+      properties:
+          fileshareId:
+            type: string
+          name:
+            minLength: 1
+            maxLength: 255
+            type: string
+          description:
+            type: string
+          profileId:
+            type: string
+    FileShareSnapshotUpdateSpec:
+      description: Snapshot name and description can be updated using this specification.
+      properties:
+          name:
+            minLength: 1
+            maxLength: 255
+            type: string
+          description:
+            type: string
+    FileShareSnapshotRespSpec:
+      description: Snapshot of file share has following specification.
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
-          required:
-            - tenantId
-            - name
-            - status
-            - snapshotId
-            - fileshareId
           properties:
             fileshareId:
+              type: string
+            snapId:
+              type: string
+            createdAt:
+              type: string
+            updatedAt:
               type: string
             tenantId:
               type: string
@@ -2448,6 +2536,14 @@ components:
               type: string
             description:
               type: string
+            shareSize:
+              type: integer
+              format: int64
+              example: 2
+            snapshotSize:
+              type: integer
+              format: int64
+              example: 2
             status:
               type: string
               readOnly: true
