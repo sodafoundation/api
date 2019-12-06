@@ -61,7 +61,7 @@ func init() {
 	dockListCommand.Flags().StringVarP(&dockLimit, "limit", "", "50", "the number of ertries displayed per page")
 	dockListCommand.Flags().StringVarP(&dockOffset, "offset", "", "0", "all requested data offsets")
 	dockListCommand.Flags().StringVarP(&dockSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
-	dockListCommand.Flags().StringVarP(&dockSortKey, "sortKey", "", "id", "the sort key of all requested data. supports id(default), name, status, endpoint, drivername, description")
+	dockListCommand.Flags().StringVarP(&dockSortKey, "sortKey", "", "createdAt", "the sort key of all requested data. supports name, createdAt")
 	dockListCommand.Flags().StringVarP(&dockId, "id", "", "", "list docks by id")
 	dockListCommand.Flags().StringVarP(&dockName, "name", "", "", "list docks by name")
 	dockListCommand.Flags().StringVarP(&dockDescription, "description", "", "", "list docks by description")

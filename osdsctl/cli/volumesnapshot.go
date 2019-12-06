@@ -84,8 +84,7 @@ func init() {
 	volumeSnapshotListCommand.Flags().StringVarP(&volSnapLimit, "limit", "", "50", "the number of ertries displayed per page")
 	volumeSnapshotListCommand.Flags().StringVarP(&volSnapOffset, "offset", "", "0", "all requested data offsets")
 	volumeSnapshotListCommand.Flags().StringVarP(&volSnapSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
-	volumeSnapshotListCommand.Flags().StringVarP(&volSnapSortKey, "sortKey", "", "id",
-		"the sort key of all requested data. supports id(default), volumeid, status, userid, tenantid, size")
+	volumeSnapshotListCommand.Flags().StringVarP(&volSnapSortKey, "sortKey", "", "createdAt", "the sort key of all requested data. supports name, createdAt")
 	volumeSnapshotListCommand.Flags().StringVarP(&volSnapId, "id", "", "", "list volume snapshot by id")
 	volumeSnapshotListCommand.Flags().StringVarP(&volSnapUserId, "userId", "", "", "list volume snapshot by storage userId")
 	volumeSnapshotListCommand.Flags().StringVarP(&volSnapVolumeId, "volumeId", "", "", "list volume snapshot by volume id")

@@ -85,8 +85,7 @@ func init() {
 	volumeGroupListCommand.Flags().StringVarP(&vgLimit, "limit", "", "50", "the number of ertries displayed per page")
 	volumeGroupListCommand.Flags().StringVarP(&vgOffset, "offset", "", "0", "all requested data offsets")
 	volumeGroupListCommand.Flags().StringVarP(&vgSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
-	volumeGroupListCommand.Flags().StringVarP(&vgSortKey, "sortKey", "", "id",
-		"the sort key of all requested data. supports id(default), name, status, availability zone, tenantid, pool id")
+	volumeGroupListCommand.Flags().StringVarP(&vgSortKey, "sortKey", "", "createdAt", "the sort key of all requested data. supports name, createdAt")
 	volumeGroupListCommand.Flags().StringVarP(&vgId, "id", "", "", "list volume group by id")
 	volumeGroupListCommand.Flags().StringVarP(&vgTenantId, "tenantId", "", "", "list volume group by tenantId")
 	volumeGroupListCommand.Flags().StringVarP(&vgUserId, "userId", "", "", "list volume group by storage userId")

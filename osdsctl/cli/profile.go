@@ -71,7 +71,7 @@ func init() {
 	profileListCommand.Flags().StringVarP(&profLimit, "limit", "", "50", "the number of ertries displayed per page")
 	profileListCommand.Flags().StringVarP(&profOffset, "offset", "", "0", "all requested data offsets")
 	profileListCommand.Flags().StringVarP(&profSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
-	profileListCommand.Flags().StringVarP(&profSortKey, "sortKey", "", "id", "the sort key of all requested data. supports id(default), name, description")
+	profileListCommand.Flags().StringVarP(&profSortKey, "sortKey", "", "createdAt", "the sort key of all requested data. supports name, createdAt")
 	profileListCommand.Flags().StringVarP(&profId, "id", "", "", "list profile by id")
 	profileListCommand.Flags().StringVarP(&profName, "name", "", "", "list profile by name")
 	profileListCommand.Flags().StringVarP(&profDescription, "description", "", "", "list profile by description")

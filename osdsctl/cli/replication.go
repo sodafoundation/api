@@ -109,8 +109,7 @@ func init() {
 	replicationListCommand.Flags().StringVarP(&repLimit, "limit", "", "50", "the number of ertries displayed per page")
 	replicationListCommand.Flags().StringVarP(&repOffset, "offset", "", "0", "all requested data offsets")
 	replicationListCommand.Flags().StringVarP(&repSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
-	replicationListCommand.Flags().StringVarP(&repSortKey, "sortKey", "", "id",
-		"the sort key of all requested data. supports id(default), name, primaryVolumeId, secondaryVolumeId,  description, create time, updatetime")
+	replicationListCommand.Flags().StringVarP(&repSortKey, "sortKey", "", "createdAt", "the sort key of all requested data. supports name, createdAt")
 	replicationListCommand.Flags().StringVarP(&repId, "id", "", "", "list replication by id")
 	replicationListCommand.Flags().StringVarP(&repName, "name", "", "", "list replication by name")
 	replicationListCommand.Flags().StringVarP(&repDesp, "description", "", "", "list replication by description")

@@ -96,8 +96,7 @@ func init() {
 	volumeListCommand.Flags().StringVarP(&volLimit, "limit", "", "50", "the number of ertries displayed per page")
 	volumeListCommand.Flags().StringVarP(&volOffset, "offset", "", "0", "all requested data offsets")
 	volumeListCommand.Flags().StringVarP(&volSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
-	volumeListCommand.Flags().StringVarP(&volSortKey, "sortKey", "", "id",
-		"the sort key of all requested data. supports id(default), name, status, availabilityzone, profileid, tenantid, size, poolid, description")
+	volumeListCommand.Flags().StringVarP(&volSortKey, "sortKey", "", "createdAt", "the sort key of all requested data. supports name, createdAt")
 	volumeListCommand.Flags().StringVarP(&volId, "id", "", "", "list volume by id")
 	volumeListCommand.Flags().StringVarP(&volName, "name", "", "", "list volume by name")
 	volumeListCommand.Flags().StringVarP(&volDesp, "description", "", "", "list volume by description")

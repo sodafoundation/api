@@ -102,8 +102,7 @@ func init() {
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapLimit, "limit", "", "50", "the number of ertries displayed per page")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapOffset, "offset", "", "0", "all requested data offsets")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
-	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapSortKey, "sortKey", "", "id",
-		"the sort key of all requested data. supports id(default), createdAt, updatedAt, name, description, snapshotSize, status, userId, tenantId, fileshareId, profileId")
+	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapSortKey, "sortKey", "", "createdAt", "the sort key of all requested data. supports name, createdAt")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapID, "id", "", "", "list fileshare snapshot by id")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapName, "name", "", "", "list fileshare snapshot by name")
 	fileShareSnapshotListCommand.Flags().StringVarP(&shareSnapDesp, "description", "", "", "list fileshare snapshot by description")

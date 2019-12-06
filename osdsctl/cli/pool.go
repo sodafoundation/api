@@ -60,7 +60,7 @@ func init() {
 	poolListCommand.Flags().StringVarP(&poolLimit, "limit", "", "50", "the number of ertries displayed per page")
 	poolListCommand.Flags().StringVarP(&poolOffset, "offset", "", "0", "all requested data offsets")
 	poolListCommand.Flags().StringVarP(&poolSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
-	poolListCommand.Flags().StringVarP(&poolSortKey, "sortKey", "", "id", "the sort key of all requested data. supports id(default), name, status, availabilityzone, dock id, description")
+	poolListCommand.Flags().StringVarP(&poolSortKey, "sortKey", "", "createdAt", "the sort key of all requested data. supports name, createdAt")
 	poolListCommand.Flags().StringVarP(&poolId, "id", "", "", "list pools by id")
 	poolListCommand.Flags().StringVarP(&poolName, "name", "", "", "list pools by name")
 	poolListCommand.Flags().StringVarP(&poolDescription, "description", "", "", "list pools by description")

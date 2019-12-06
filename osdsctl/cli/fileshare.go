@@ -101,8 +101,7 @@ func init() {
 	fileShareListCommand.Flags().StringVarP(&shareLimit, "limit", "", "50", "the number of ertries displayed per page")
 	fileShareListCommand.Flags().StringVarP(&shareOffset, "offset", "", "0", "all requested data offsets")
 	fileShareListCommand.Flags().StringVarP(&shareSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
-	fileShareListCommand.Flags().StringVarP(&shareSortKey, "sortKey", "", "id",
-		"the sort key of all requested data. supports id(default), createdAt, updatedAt, name, status, availabilityZone, profileId, tenantId, userId, size, poolId, description")
+	fileShareListCommand.Flags().StringVarP(&shareSortKey, "sortKey", "", "createdAt", "the sort key of all requested data. supports name, createdAt")
 	fileShareListCommand.Flags().StringVarP(&shareID, "id", "", "", "list share by id")
 	fileShareListCommand.Flags().StringVarP(&shareName, "name", "", "", "list share by name")
 	fileShareListCommand.Flags().StringVarP(&shareDescription, "description", "", "", "list share by description")
