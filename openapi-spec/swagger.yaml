@@ -3284,7 +3284,7 @@ components:
       description: Host is a consumer of volume from storage.
     MetricSpec:
       description: >-
-        Metric spec represents metrics of diifent type, which has name, instanceID label, timestamp , value etc..
+        Metric spec represents metrics of different type, which has name, instanceID label, timestamp , value etc..
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
@@ -3320,7 +3320,7 @@ components:
                     example: 1575363783
                   value:
                     type: number
-                    description: Vlue of the metric for this timestamp
+                    description: Value of the metric for this timestamp
                     example: 16.74
             labels:
               type: object
