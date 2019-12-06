@@ -182,8 +182,19 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 		return nil, errors.New(errMsg)
 	}
 
+	reg, err := regexp.Compile("^[a-zA-Z0-9_-]+$")
+	if err != nil {
+		errMsg := fmt.Sprintf("regex compilation for file name validation failed")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	if reg.MatchString(in.Name) == false {
+		errMsg := fmt.Sprintf("invalid fileshare name it only contain english char and number  : %v", in.Name)
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	// validate the description
-	reg, err := regexp.Compile("[^a-zA-Z0-9 ]+")
+	reg, err = regexp.Compile("[^a-zA-Z0-9 ]+")
 	if err != nil {
 		errMsg := fmt.Sprintf("regex compilation for file share description validation failed")
 		log.Error(errMsg)
