@@ -53,7 +53,7 @@ func (d *Driver) Setup() error {
 }
 
 func (d *Driver) InitConf() {
-	path := config.CONF.OsdsDock.Backends.HuaweiOceanstor.ConfigPath
+	path := config.CONF.OsdsDock.Backends.HuaweiOceanStorFile.ConfigPath
 	if path == "" {
 		path = DefaultConfPath
 	}

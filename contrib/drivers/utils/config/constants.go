@@ -27,7 +27,7 @@ const (
 	LVMDriverType                  = "lvm"
 	HuaweiOceanStorBlockDriverType = "huawei_oceanstor_block"
 	HuaweiFusionStorageDriverType  = "huawei_fusionstorage"
-	HuaweiOceanFileDriverType      = "huawei_oceanstor"
+	HuaweiOceanStorFileDriverType  = "huawei_oceanstor_file"
 	HpeNimbleDriverType            = "hpe_nimble"
 	DRBDDriverType                 = "drbd"
 	ScutechCMSDriverType           = "scutech_cms"

@@ -93,7 +93,7 @@ type Backends struct {
 	LVM                  BackendProperties `conf:"lvm"`
 	HuaweiOceanStorBlock BackendProperties `conf:"huawei_oceanstor_block"`
 	HuaweiFusionStorage  BackendProperties `conf:"huawei_fusionstorage"`
-	HuaweiOceanstor      BackendProperties `conf:"huawei_oceanstor"`
+	HuaweiOceanStorFile  BackendProperties `conf:"huawei_oceanstor_file"`
 	HpeNimble            BackendProperties `conf:"hpe_nimble"`
 	NFS                  BackendProperties `conf:"nfs"`
 	Manila               BackendProperties `conf:"manila"`
