@@ -193,18 +193,6 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	// validate the description
-	reg, err = regexp.Compile("[^a-zA-Z0-9 ]+")
-	if err != nil {
-		errMsg := fmt.Sprintf("regex compilation for file share description validation failed")
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
-	if reg.MatchString(in.Description) {
-		errMsg := fmt.Sprintf("invalid fileshare description and it has some special characters")
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
 
 	in.UserId = ctx.UserId
 	in.Status = model.FileShareCreating
