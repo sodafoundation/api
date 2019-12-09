@@ -1416,6 +1416,30 @@ paths:
       tags:
         - File Shares
       description: Lists information for all file shares.
+      parameters:
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/sortDir'
+      - name: sortKey
+        in: query
+        description: Sorting key word
+        schema:
+          type: string
+      - name: name
+        in: query
+        description: The fileshare name
+        schema:
+          type: string
+      - name: profileId
+        in: query
+        description: The UUID of profile
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: The fileshare status
+        schema:
+          type: string
       responses:
         '200':
           description: OK
@@ -1424,7 +1448,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FileShareSpec'
+                  $ref: '#/components/schemas/FileShareRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1441,7 +1465,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSpec'
+                $ref: '#/components/schemas/FileShareRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -1451,10 +1475,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FileShareSpec'
+        $ref: '#/components/requestBodies/FileShareCreateSpec'
   '/v1beta/{tenantId}/file/shares/{fileshareId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1469,7 +1490,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSpec'
+                $ref: '#/components/schemas/FileShareRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1488,7 +1509,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSpec'
+                $ref: '#/components/schemas/FileShareRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1519,6 +1540,25 @@ paths:
       tags:
         - File Share Snapshots
       description: Lists information for all file share spanshots.
+      parameters:
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/sortDir'
+      - name: sortKey
+        in: query
+        description: Sorting key word
+        schema:
+          type: string
+      - name: name
+        in: query
+        description: The fileshare snapshot name
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: The fileshare snapshot status
+        schema:
+          type: string
       responses:
         '200':
           description: OK
@@ -1527,7 +1567,25 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FileShareSnapshotSpec'
+                  $ref: '#/components/schemas/FileShareSnapshotRespSpec'
+              examples:
+                response:
+                  value:
+                  - id: 405ded84-b6ff-4ac6-8a3c-cb0e82dcf372
+                    createdAt: 2019-12-04T13:23:13
+                    updatedAt: 2019-12-04T13:31:03
+                    tenantId: e93b4c0934da416eb9c8d120c5d04d96
+                    userId:
+                    fileshareId: eedfbfcf-de50-4476-a2b6-058e6bfa3558
+                    name: snaptest
+                    description: Testing file share snapshot
+                    shareSize: 1
+                    snapshotSize: 1
+                    status: available
+                    profileId: ed273ef0-4602-4790-ae68-09bdbb22d133
+                    metadata: {"lvPath": "/dev/opensds-files-default/test","snapshotID": "405ded84-b6ff-4ac6-8a3c-cb0e82dcf372","snapshotName": "snaptest"}
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1544,7 +1602,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSnapshotSpec'
+                $ref: '#/components/schemas/FileShareSnapshotRespSpec'
+              examples:
+                response:
+                  value:
+                  - id: 405ded84-b6ff-4ac6-8a3c-cb0e82dcf372
+                    createdAt: 2019-12-04T13:23:13
+                    tenantId: e93b4c0934da416eb9c8d120c5d04d96
+                    userId:
+                    fileshareId: eedfbfcf-de50-4476-a2b6-058e6bfa3558
+                    name: snaptest
+                    description: Testing file share snapshot
+                    shareSize: 1
+                    snapshotSize: 1
+                    status: creating
+                    profileId: ed273ef0-4602-4790-ae68-09bdbb22d133
+                    metadata: {"lvPath": "/dev/opensds-files-default/test","snapshotID": "405ded84-b6ff-4ac6-8a3c-cb0e82dcf372","snapshotName": "snaptest"}
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -1554,10 +1627,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FileShareSnapshotSpec'
+        $ref: '#/components/requestBodies/FileShareSnapshotCreateSpec'
   '/v1beta/{tenantId}/file/snapshots/{shareSnapshotId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1572,7 +1642,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSnapshotSpec'
+                $ref: '#/components/schemas/FileShareSnapshotRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1591,7 +1661,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSnapshotSpec'
+                $ref: '#/components/schemas/FileShareSnapshotRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1632,7 +1702,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FileShareAclSpec'
+                  $ref: '#/components/schemas/FileShareAclRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1649,7 +1719,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareAclSpec'
+                $ref: '#/components/schemas/FileShareAclRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -1659,10 +1729,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FileShareAclSpec'
+        $ref: '#/components/requestBodies/FileShareAclCreateSpec'
   '/v1beta/{tenantId}/file/acls/{fileshareaclId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1677,7 +1744,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareAclSpec'
+                $ref: '#/components/schemas/FileShareAclRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -2198,26 +2265,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/VolumeGroupCreateSpec'
-    FileShareUpdateSpec:
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-              description:
-                type: string
-    FileShareSnapshotUpdateSpec:
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                type: string
-              description:
-                type: string
     VolumeAttachmentCreateSpec:
       content:
         application/json:
@@ -2238,6 +2285,41 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/HostUpdateSpec'
+    FileShareCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileShareCreateSpec'
+    FileShareUpdateSpec:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+    FileShareSnapshotCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileShareSnapshotCreateSpec'
+    FileShareSnapshotUpdateSpec:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+    FileShareAclCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileShareAclCreateSpec'
   securitySchemes:
     basicAuth:
       type: http
@@ -2585,17 +2667,36 @@ components:
               $ref: '#/components/schemas/DataProtectionPropertiesSpec'
             customProperties:
               $ref: '#/components/schemas/CustomPropertiesSpec'
+    FileShareCreateSpec:
+      type: object
+      required:
+        - name
+        - size
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: '[A-Za-z0-9_-]'
+        description:
+          type: string
+        size:
+          type: integer
+          format: int64
+          example: 2
+        availabilityZone:
+          type: string
+          default: default
+        profileId:
+          type: string
 
-    FileShareSpec:
+    FileShareRespSpec:
       description: >-
         FileShare is a file system created by nfs southbound driver, it can be
         mounted on to physical machine or virtual machine instance.
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
-          required:
-            - name
-            - size
           properties:
             tenantId:
               type: string
@@ -2604,9 +2705,6 @@ components:
               type: string
               readOnly: true
             name:
-              minLength: 1
-              maxLength: 255
-              pattern: '[A-Za-z0-9_-]'
               type: string
             description:
               type: string
@@ -2622,6 +2720,11 @@ components:
               readOnly: true
             profileId:
               type: string
+            protocols:
+              type: array
+              items:
+                type: string
+              readOnly: true
             exportLocations:
               type: array
               items:
@@ -2636,62 +2739,109 @@ components:
                 lvPath: string
                 nfsFileshareID: string
                 nfsFileshareName: string
-    FileShareSnapshotSpec:
-      description: Snapshot is a description of fileshare snapshot resource.
+    FileShareSnapshotCreateSpec:
+      type: object
+      required:
+      - name
+      - fileshareId
+      properties:
+        fileshareId:
+          type: string
+        name:
+          minLength: 1
+          maxLength: 255
+          type: string
+        description:
+          type: string
+    FileShareSnapshotRespSpec:
+      description: Snapshot of file share has following specification.
       allOf:
-        - $ref: '#/components/schemas/BaseModel'
-        - type: object
-          required:
-            - tenantId
-            - name
-            - status
-            - snapshotId
-            - fileshareId
-          properties:
-            fileshareId:
+      - $ref: '#/components/schemas/BaseModel'
+      - type: object
+        properties:
+          fileshareId:
+            type: string
+          snapId:
+            type: string
+          createdAt:
+            type: string
+          updatedAt:
+            type: string
+          tenantId:
+            type: string
+            readOnly: true
+          userId:
+            type: string
+            readOnly: true
+          name:
+            type: string
+          description:
+            type: string
+          shareSize:
+            type: integer
+            format: int64
+            example: 2
+          snapshotSize:
+            type: integer
+            format: int64
+            example: 2
+          status:
+            type: string
+            readOnly: true
+          profileId:
+            type: string
+          metadata:
+            type: object
+            readOnly: true
+            additionalProperties:
               type: string
-            tenantId:
-              type: string
-              readOnly: true
-            userId:
-              type: string
-              readOnly: true
-            name:
-              type: string
-            description:
-              type: string
-            status:
-              type: string
-              readOnly: true
-            profileId:
-              type: string
-            metadata:
-              type: object
-              readOnly: true
-              additionalProperties:
-                type: string
-              example:
-                snapshotId: string
-                snapshotName: string
-                lvPath: string
-    FileShareAclSpec:
+            example:
+              snapshotId: string
+              snapshotName: string
+              lvPath: string
+    FileShareAclCreateSpec:
+      type: object
+      required:
+        - fileshareId
+        - type
+        - accessCapability
+        - accessTo
+      properties:
+        fileshareId:
+          type: string
+        type:
+          type: string
+        accessCapability:
+          type: array
+          items:
+            type: string
+            enum:
+              - Read
+              - Write
+              - Execute
+        accessTo:
+          type: string
+        description:
+          type: string
+
+    FileShareAclRespSpec:
       description: File Share Acl API describes the  acl of file share resource
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
-          required:
-            - tenantId
-            - fileshareId
-            - type
-            - accessCapability
-            - accessTo
           properties:
             fileshareId:
               type: string
             type:
               type: string
             accessCapability:
-              type: string
+              type: array
+              items:
+                type: string
+                enum:
+                  - Read
+                  - Write
+                  - Execute
             accessTo:
               type: string
             tenantId:
@@ -2700,8 +2850,6 @@ components:
             userId:
               type: string
               readOnly: true
-            name:
-              type: string
             description:
               type: string
             status:
@@ -2709,6 +2857,7 @@ components:
               readOnly: true
             profileId:
               type: string
+              readOnly: true
             metadata:
               type: object
               readOnly: true
