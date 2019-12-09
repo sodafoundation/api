@@ -528,17 +528,6 @@ func TestCreateFileShareDBEntry(t *testing.T) {
 		expectedError := "fileshare name length should not be more than 255 characters. input name length is : " + strconv.Itoa(len(in.Name))
 		assertTestResult(t, err.Error(), expectedError)
 	})
-
-	t.Run("Special characters in file share description are not allowed", func(t *testing.T) {
-		in.Size, in.Name, in.ProfileId, in.Description = int64(1), "sample-fileshare-01", "b3585ebe-c42c-120g-b28e-f373746a71ca", "#FileShare Code!$! test"
-		mockClient := new(dbtest.Client)
-		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
-		db.C = mockClient
-
-		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
-		expectedError := "invalid fileshare description and it has some special characters"
-		assertTestResult(t, err.Error(), expectedError)
-	})
 }
 
 func TestDeleteFileShareDBEntry(t *testing.T) {
