@@ -182,6 +182,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 		Size:             Sector2Gb(lun.Capacity),
 		Description:      opt.GetDescription(),
 		AvailabilityZone: opt.GetAvailabilityZone(),
+		Identifier:  &model.Identifier{DurableName: lun.Wwn, DurableNameFormat: "NAA"},
 		Metadata: map[string]string{
 			KLunId: lun.Id,
 		},
