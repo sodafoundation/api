@@ -360,10 +360,9 @@ func (d *Driver) uploadSnapshotToCloud(opt *pb.CreateVolumeSnapshotOpts, bucket 
 		SnapshotId: opt.GetId(),
 		Metadata:   opt.GetMetadata(),
 		HostInfo: &pb.HostInfo{
-			Platform:  runtime.GOARCH,
-			OsType:    runtime.GOOS,
-			Host:      hostname,
-			Initiator: "",
+			Platform: runtime.GOARCH,
+			OsType:   runtime.GOOS,
+			Host:     hostname,
 		},
 	}
 
@@ -429,9 +428,8 @@ func (d *Driver) downloadSnapshotFromCloud(opt *pb.CreateVolumeOpts) error {
 		VolumeId: opt.GetId(),
 		Metadata: opt.GetMetadata(),
 		HostInfo: &pb.HostInfo{
-			Platform:  runtime.GOARCH,
-			OsType:    runtime.GOOS,
-			Initiator: "",
+			Platform: runtime.GOARCH,
+			OsType:   runtime.GOOS,
 		},
 	}
 

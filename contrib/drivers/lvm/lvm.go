@@ -26,6 +26,7 @@ import (
 	"github.com/opensds/opensds/contrib/backup"
 	"github.com/opensds/opensds/contrib/connector"
 	"github.com/opensds/opensds/contrib/drivers/lvm/targets"
+	. "github.com/opensds/opensds/contrib/drivers/utils"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -235,7 +236,7 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 
 func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 	log.V(8).Infof("lvm initialize connection information: %v", opt)
-	initiator := opt.HostInfo.GetInitiator()
+	initiator := GetInitiatorName(opt.GetHostInfo().GetInitiators(), opt.GetAccessProtocol())
 	if initiator == "" {
 		initiator = "ALL"
 	}
@@ -294,10 +295,10 @@ func (d *Driver) AttachSnapshot(snapshotId string, lvsPath string) (string, *mod
 			KLvsPath: lvsPath,
 		},
 		HostInfo: &pb.HostInfo{
-			Platform:  runtime.GOARCH,
-			OsType:    runtime.GOOS,
-			Host:      d.conf.TgtBindIp,
-			Initiator: "",
+			Platform:   runtime.GOARCH,
+			OsType:     runtime.GOOS,
+			Host:       d.conf.TgtBindIp,
+			Initiators: []*pb.Initiator{},
 		},
 	}
 
@@ -522,7 +523,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 }
 
 func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
-	initiator := opt.HostInfo.GetInitiator()
+	initiator := GetInitiatorName(opt.GetHostInfo().GetInitiators(), opt.GetAccessProtocol())
 	if initiator == "" {
 		initiator = "ALL"
 	}

@@ -35,13 +35,17 @@ var fp = map[string]PoolProperties{
 		Extras: model.StoragePoolExtraSpec{
 			DataStorage: model.DataStorageLoS{
 				ProvisioningPolicy:      "Thin",
-				IsSpaceEfficient:        false,
+				Compression:        false,
+				Deduplication:      false,
 				StorageAccessCapability: []string{"Read", "Write", "Execute"},
 			},
 			IOConnectivity: model.IOConnectivityLoS{
 				AccessProtocol: "nfs",
 				MaxIOPS:        7000000,
 				MaxBWS:         600,
+				MinIOPS:        1000000,
+				MinBWS:         100,
+				Latency:        100,
 			},
 			Advanced: map[string]interface{}{
 				"diskType": "SSD",
@@ -125,7 +129,7 @@ func TestCreateFileShare(t *testing.T) {
 		Description:     "fileshare for testing",
 		Size:            int64(1),
 		Protocols:       []string{"nfs"},
-		ExportLocations: []string{"11.242.178.20:/var/test001"},
+		ExportLocations: []string{"11.242.178.20:/mnt/test001"},
 		Metadata: map[string]string{
 			"lvPath":           "/dev/vg001/test001",
 			"nfsFileshareID":   "e1bb066c-5ce7-46eb-9336-25508cee9f71",
@@ -167,13 +171,17 @@ func TestListPools(t *testing.T) {
 			Extras: model.StoragePoolExtraSpec{
 				DataStorage: model.DataStorageLoS{
 					ProvisioningPolicy:      "Thin",
-					IsSpaceEfficient:        false,
+					Compression:        false,
+					Deduplication:      false,
 					StorageAccessCapability: []string{"Read", "Write", "Execute"},
 				},
 				IOConnectivity: model.IOConnectivityLoS{
 					AccessProtocol: "nfs",
 					MaxIOPS:        7000000,
 					MaxBWS:         600,
+					MinIOPS:        1000000,
+					MinBWS:         100,
+					Latency:        100,
 				},
 				Advanced: map[string]interface{}{
 					"diskType": "SSD",

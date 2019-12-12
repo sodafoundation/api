@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	log "github.com/golang/glog"
+	. "github.com/opensds/opensds/contrib/drivers/utils"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -181,6 +182,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 		Size:             Sector2Gb(lun.Capacity),
 		Description:      opt.GetDescription(),
 		AvailabilityZone: opt.GetAvailabilityZone(),
+		Identifier:  &model.Identifier{DurableName: lun.Wwn, DurableNameFormat: "NAA"},
 		Metadata: map[string]string{
 			KLunId: lun.Id,
 		},
@@ -277,8 +279,9 @@ func (d *Driver) InitializeConnectionIscsi(opt *pb.CreateVolumeAttachmentOpts) (
 	}
 
 	// Add initiator to the host.
-	if err = d.client.AddInitiatorToHostWithCheck(hostId, hostInfo.Initiator); err != nil {
-		log.Errorf("Add initiator to host failed, host id=%s, initiator=%s, error: %v", hostId, hostInfo.Initiator, err)
+	initiatorName := GetInitiatorName(hostInfo.GetInitiators(), opt.GetAccessProtocol())
+	if err = d.client.AddInitiatorToHostWithCheck(hostId, initiatorName); err != nil {
+		log.Errorf("Add initiator to host failed, host id=%s, initiator=%s, error: %v", hostId, initiatorName, err)
 		return nil, err
 	}
 
@@ -409,7 +412,7 @@ func (d *Driver) TerminateConnectionIscsi(opt *pb.DeleteVolumeAttachmentOpts) er
 		}
 	}
 
-	initiatorName := opt.GetHostInfo().GetInitiator()
+	initiatorName := GetInitiatorName(opt.GetHostInfo().GetInitiators(), opt.GetAccessProtocol())
 	if d.client.IsHostContainInitiator(hostId, initiatorName) {
 		if err := d.client.RemoveIscsiFromHost(initiatorName); err != nil {
 			return err
@@ -538,7 +541,8 @@ func (d *Driver) InitializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*mo
 	}
 
 	// Not use FC switch
-	tgtPortWWNs, initTargMap, err := d.connectFCUseNoSwitch(opt, opt.GetHostInfo().GetInitiator(), hostId)
+	initiatorName := GetInitiatorName(opt.GetHostInfo().GetInitiators(), opt.GetAccessProtocol())
+	tgtPortWWNs, initTargMap, err := d.connectFCUseNoSwitch(opt, initiatorName, hostId)
 	if err != nil {
 		return nil, err
 	}
@@ -663,7 +667,8 @@ func (d *Driver) TerminateConnectionFC(opt *pb.DeleteVolumeAttachmentOpts) error
 }
 
 func (d *Driver) detachVolumeFC(opt *pb.DeleteVolumeAttachmentOpts) (string, error) {
-	wwns := strings.Split(opt.GetHostInfo().GetInitiator(), ",")
+	initiatorName := GetInitiatorName(opt.GetHostInfo().GetInitiators(), opt.GetAccessProtocol())
+	wwns := strings.Split(initiatorName, ",")
 	lunId := opt.GetMetadata()[KLunId]
 
 	log.Infof("terminate connection, wwpns: %s,lun id: %s", wwns, lunId)

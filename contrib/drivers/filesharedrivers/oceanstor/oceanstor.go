@@ -53,7 +53,7 @@ func (d *Driver) Setup() error {
 }
 
 func (d *Driver) InitConf() {
-	path := config.CONF.OsdsDock.Backends.HuaweiOceanstor.ConfigPath
+	path := config.CONF.OsdsDock.Backends.HuaweiOceanStorFile.ConfigPath
 	if path == "" {
 		path = DefaultConfPath
 	}
@@ -274,7 +274,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			continue
 		}
 		host, _ := os.Hostname()
-		name := fmt.Sprintf("%s:%s:%s", host, d.Uri, p.Id)
+		name := fmt.Sprintf("%s:%s:%s", host, d.Endpoint, p.Id)
 
 		userTotalCapacity, _ := strconv.ParseInt(p.UserTotalCapacity, 10, 64)
 		userFreeCapacity, _ := strconv.ParseInt(p.UserFreeCapacity, 10, 64)
@@ -283,7 +283,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			BaseModel: &model.BaseModel{
 				Id: uuid.NewV5(uuid.NamespaceOID, name).String(),
 			},
-			Name:             p.Id,
+			Name:             p.Name,
 			TotalCapacity:    Sector2Gb(userTotalCapacity),
 			FreeCapacity:     Sector2Gb(userFreeCapacity),
 			StorageType:      c.Pool[p.Name].StorageType,

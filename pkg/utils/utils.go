@@ -21,7 +21,11 @@ import (
 	"math/rand"
 	"os"
 	"reflect"
+	"sort"
+	"strings"
 	"time"
+
+	"github.com/opensds/opensds/pkg/utils/constants"
 
 	log "github.com/golang/glog"
 )
@@ -217,6 +221,79 @@ func IsEqual(key string, value interface{}, reqValue interface{}) (bool, error) 
 	}
 }
 
+// Filter filters slice by struct field
+func Filter(arr interface{}, params map[string][]string) interface{} {
+	in := reflect.ValueOf(arr)
+	out := make([]interface{}, 0, in.Len())
+
+	for i := 0; i < in.Len(); i++ {
+		element := in.Index(i).Interface()
+		ve := reflect.ValueOf(element).Elem()
+		satisfied := true
+		for key := range params {
+			fieldValue := ve.FieldByName(strings.Title(key))
+			if !fieldValue.IsValid() {
+				continue
+			}
+			// Considering multiple input for one parameter, like: ?id=xx1&id=xx2
+			for j, value := range params[key] {
+				if reflect.DeepEqual(fmt.Sprintf("%v", fieldValue), value) {
+					break
+				}
+				if j == len(params[key])-1 {
+					satisfied = false
+				}
+			}
+
+			if !satisfied {
+				break
+			}
+		}
+
+		if satisfied {
+			out = append(out, element)
+		}
+	}
+	return out
+}
+
+// Sorting sorts slice with struct field, note: only string and int are supported now
+func Sort(arr interface{}, sortKey, sortDir string) interface{} {
+	// Sorting
+	in := reflect.ValueOf(arr)
+	sortKey = strings.Title(sortKey)
+	sort.SliceStable(arr, func(i int, j int) bool {
+		x := reflect.ValueOf(in.Index(i).Interface()).Elem().FieldByName(sortKey)
+		y := reflect.ValueOf(in.Index(j).Interface()).Elem().FieldByName(sortKey)
+		if sortDir != constants.DefaultSortDir {
+			switch x.Kind() {
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+				return x.Int() < y.Int()
+			}
+			return fmt.Sprintf("%v", x) < fmt.Sprintf("%v", y)
+		}
+
+		switch x.Kind() {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			return x.Int() > y.Int()
+		}
+		return fmt.Sprintf("%v", x) > fmt.Sprintf("%v", y)
+	})
+	return arr
+}
+
+// Slicing implements pagination
+func Slice(arr interface{}, offset, limit int) interface{} {
+	// Slicing
+	in := reflect.ValueOf(arr)
+	out := make([]interface{}, 0, limit)
+	for i := offset; i < in.Len() && i < offset+limit; i++ {
+		element := in.Index(i).Interface()
+		out = append(out, element)
+	}
+	return out
+}
+
 func RandSeqWithAlnum(n int) string {
 	alnum := []rune("1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	return RandSeq(n, alnum)
@@ -249,4 +326,13 @@ func WaitForCondition(f func() (bool, error), interval, timeout time.Duration) e
 		time.Sleep(interval - elapsed)
 	}
 	return fmt.Errorf("wait for condition timeout")
+}
+
+func ContainsIgnoreCase(a []string, x string) bool {
+	for _, n := range a {
+		if strings.EqualFold(x, n) {
+			return true
+		}
+	}
+	return false
 }

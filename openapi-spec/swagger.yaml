@@ -183,6 +183,29 @@ paths:
       tags:
         - Profiles
       description: Lists information for all profiles.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word, such as name, createdAt
+          schema:
+            type: string
+        - name: storageType
+          in: query
+          schema:
+            type: string
+            enum:
+            - block
+            - file
+            - object
+        - name: name
+          in: query
+          schema:
+            minLength: 1
+            maxLength: 255
+            type: string
       responses:
         '200':
           description: OK
@@ -191,7 +214,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ProfileSpec'
+                  $ref: '#/components/schemas/ProfileRespSpec'
               examples:
                 response:
                   value:
@@ -203,11 +226,15 @@ paths:
                         dataStorage:
                           recoveryTimeObjective: 10
                           provisioningPolicy: Thin
-                          IsSpaceEfficient: true
+                          compression: true
+                          deduplication: true
                         ioConnectivity:
                           accessProtocol: iscsi
-                          maxIOPS: 100000
+                          maxIOPS: 1000000
                           maxBWS: 60000
+                          minIOPS: 1000000
+                          minBWS: 100
+                          latency: 100
                       replicationProperties:
                         dataProtection:
                           isIsolated: true
@@ -238,6 +265,7 @@ paths:
                         key3: value3
                     - id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
                       name: Silver
+                      storageType: block
                       description: provide silver storage service
                       provisioningProperties:
                         dataStorage:
@@ -247,6 +275,8 @@ paths:
                       customProperties:
                         key1: value1
                         key2: value2
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -258,17 +288,18 @@ paths:
         - Profiles
       description: Creates a profile.
       responses:
-        '201':
+        '200':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileSpec'
+                $ref: '#/components/schemas/ProfileRespSpec'
               examples:
                 response:
                   value:
                     id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
                     name: Silver
+                    storageType: block
                     description: provide silver storage service
                     provisioningProperties:
                       dataStorage:
@@ -287,11 +318,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProfileSpec'
-        required: true
+        $ref: '#/components/requestBodies/ProfileCreateSpec'
   '/v1beta/{tenantId}/profiles/{profileId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -306,21 +333,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileSpec'
-              examples:
-                response:
-                  value:
-                    id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
-                    name: Silver
-                    description: provide silver storage service
-                    provisioningProperties:
-                      dataStorage:
-                        provisioningPolicy: Thin
-                      ioConnectivity:
-                        accessProtocol: iscsi
-                    customProperties:
-                      key1: value1
-                      key2: value2
+                $ref: '#/components/schemas/ProfileRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -339,12 +352,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfileSpec'
+                $ref: '#/components/schemas/ProfileRespSpec'
               examples:
                 response:
                   value:
                     id: 5d8c3732-a248-50ed-bebc-539a6ffd25c2
                     name: Silver
+                    storageType: block
                     description: provide silver storage service
                     provisioningProperties:
                       dataStorage:
@@ -360,10 +374,12 @@ paths:
           $ref: '#/components/responses/HTTPStatus401'
         '403':
           $ref: '#/components/responses/HTTPStatus403'
+        '404':
+          $ref: '#/components/responses/HTTPStatus404'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/Profile'
+        $ref: '#/components/requestBodies/ProfileUpdateSpec'
     delete:
       tags:
         - Profiles
@@ -379,7 +395,7 @@ paths:
           $ref: '#/components/responses/HTTPStatus404'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
-  '/v1beta/{tenantId}/profiles/{profileId}/customeProperties':
+  '/v1beta/{tenantId}/profiles/{profileId}/customProperties':
     parameters:
       - $ref: '#/components/parameters/tenantId'
       - $ref: '#/components/parameters/profileId'
@@ -471,6 +487,35 @@ paths:
       tags:
         - Block volumes
       description: Lists information for all volumes.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word, such as name, createdAt
+          schema:
+            type: string
+        - name: name
+          in: query
+          description: The volume name
+          schema:
+            type: string
+        - name: profileId
+          in: query
+          description: The UUID of profile
+          schema:
+            type: string
+        - name: poolId
+          in: query
+          description: The UUID of pool
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: The volume status
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -479,7 +524,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/VolumeSpec'
+                  $ref: '#/components/schemas/VolumeRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -496,7 +541,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSpec'
+                $ref: '#/components/schemas/VolumeRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -506,10 +551,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VolumeSpec'
+        $ref: '#/components/requestBodies/VolumeCreateSpec'
   '/v1beta/{tenantId}/block/volumes/{volumeId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -524,7 +566,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSpec'
+                $ref: '#/components/schemas/VolumeRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -543,7 +585,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSpec'
+                $ref: '#/components/schemas/VolumeRespSpec'
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -553,7 +597,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/Profile'
+        $ref: '#/components/requestBodies/VolumeUpdateSpec'
     delete:
       tags:
         - Block volumes
@@ -561,6 +605,8 @@ paths:
       responses:
         '202':
           description: Accepted
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -583,7 +629,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSpec'
+                $ref: '#/components/schemas/VolumeRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -593,10 +639,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ExtendVolumeSpec'
+        $ref: '#/components/requestBodies/VolumeExtendSpec'
   '/v1beta/{tenantId}/block/attachments':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -605,6 +648,12 @@ paths:
         - name: volumeId
           description: The UUID of the volume assosicated with the attachment.
           in: query
+          schema:
+            type: string
+            uniqueItems: true
+        - name: hostId
+          in: query
+          description: The UUID of the host assosicated with the attachment.
           schema:
             type: string
             uniqueItems: true
@@ -619,7 +668,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/VolumeAttachmentSpec'
+                  $ref: '#/components/schemas/VolumeAttachmentRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -636,10 +685,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  attachment:
-                    $ref: '#/components/schemas/VolumeAttachmentSpec'
+                $ref: '#/components/schemas/VolumeAttachmentRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -649,7 +695,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/VolumeAttachmentSpec'
+        $ref: '#/components/requestBodies/VolumeAttachmentCreateSpec'
   '/v1beta/{tenantId}/block/attachments/{attachmentId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -664,7 +710,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeAttachmentSpec'
+                $ref: '#/components/schemas/VolumeAttachmentRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -683,7 +729,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeAttachmentSpec'
+                $ref: '#/components/schemas/VolumeAttachmentRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -695,7 +741,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/VolumeAttachmentSpec'
+        $ref: '#/components/requestBodies/VolumeAttachmentUpdateSpec'
     delete:
       tags:
         - Block volume attachments
@@ -716,12 +762,24 @@ paths:
       - $ref: '#/components/parameters/tenantId'
     get:
       parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word, such as name, createdAt
+          schema:
+            type: string
         - name: volumeId
           description: The UUID of the volume assosicated with the snapshot.
           in: query
           schema:
             type: string
-            uniqueItems: true
+        - name: status
+          in: query
+          description: The volume snapshot status
+          schema:
+            type: string
       tags:
         - Block volume snapshots
       description: Lists information for all volume snapshots.
@@ -733,7 +791,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/VolumeSnapshotSpec'
+                  $ref: '#/components/schemas/VolumeSnapshotRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -750,7 +808,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSnapshotSpec'
+                $ref: '#/components/schemas/VolumeSnapshotRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -760,10 +818,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VolumeSnapshotSpec'
+        $ref: '#/components/requestBodies/VolumeSnapshotCreateSpec'
   '/v1beta/{tenantId}/block/snapshots/{snapshotId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -778,7 +833,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSnapshotSpec'
+                $ref: '#/components/schemas/VolumeSnapshotRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -797,7 +852,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeSnapshotSpec'
+                $ref: '#/components/schemas/VolumeSnapshotRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -825,6 +880,8 @@ paths:
       responses:
         '202':
           description: Accepted
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -848,7 +905,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/VolumeGroupSpec'
+                  $ref: '#/components/schemas/VolumeGroupRespSpec'
               examples:
                 response:
                   value:
@@ -877,7 +934,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeGroupSpec'
+                $ref: '#/components/schemas/VolumeGroupRespSpec'
               examples:
                 response:
                   value:
@@ -898,11 +955,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/VolumeGroupSpec'
-        required: true
+        $ref: '#/components/requestBodies/VolumeGroupCreateSpec'
   '/v1beta/{tenantId}/block/volumeGroups/{volumeGroupId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -917,7 +970,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeGroupSpec'
+                $ref: '#/components/schemas/VolumeGroupRespSpec'
               examples:
                 response:
                   value:
@@ -949,7 +1002,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VolumeGroupSpec'
+                $ref: '#/components/schemas/VolumeGroupRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -992,6 +1045,8 @@ paths:
       responses:
         '202':
           description: Accepted
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1007,6 +1062,20 @@ paths:
       tags:
         - Block Replications
       description: Lists information for all replications.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word, such as name, createdAt
+          schema:
+            type: string
+        - name: name
+          description: The replication name
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1015,13 +1084,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ReplicationSpec'
-              examples:
-                response:
-                  value:
-                    - id: e416db95-b6f4-4669-a075-5a873d050a93
-                      name: replication-demo
-                      ReplicationStatus: enabled
+                  $ref: '#/components/schemas/ReplicationRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1038,7 +1101,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReplicationSpec'
+                $ref: '#/components/schemas/ReplicationRespSpec'
               examples:
                 response:
                   value:
@@ -1079,7 +1142,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/ReplicationSpec'
+        $ref: '#/components/requestBodies/ReplicationCreateSpec'
   '/v1beta/{tenantId}/block/replications/{replicationId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1094,7 +1157,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReplicationSpec'
+                $ref: '#/components/schemas/ReplicationRespSpec'
               examples:
                 response:
                   value:
@@ -1144,7 +1207,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReplicationSpec'
+                $ref: '#/components/schemas/ReplicationRespSpec'
               examples:
                 response:
                   value:
@@ -1196,8 +1259,6 @@ paths:
                   type: string
                 description:
                   type: string
-              required:
-                - name
     delete:
       tags:
         - Block Replications
@@ -1222,6 +1283,20 @@ paths:
       tags:
         - Block Replications
       description: Lists detail information for all replications.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word, such as name, createdAt
+          schema:
+            type: string
+        - name: name
+          description: The replication name
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1230,7 +1305,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ReplicationSpec'
+                  $ref: '#/components/schemas/ReplicationRespSpec'
               examples:
                 response:
                   value:
@@ -1289,8 +1364,6 @@ paths:
           $ref: '#/components/responses/HTTPStatus404'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
-      requestBody:
-        $ref: '#/components/requestBodies/ReplicationSpec'
   '/v1beta/{tenantId}/block/replications/{replicationId}/disable':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1312,8 +1385,7 @@ paths:
           $ref: '#/components/responses/HTTPStatus404'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
-      requestBody:
-        $ref: '#/components/requestBodies/ReplicationSpec'
+
   '/v1beta/{tenantId}/block/replications/{replicationId}/failover':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1336,10 +1408,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FailoverReplicationSpec'
+        $ref: '#/components/requestBodies/FailoverReplicationSpec'
   '/v1beta/{tenantId}/file/shares':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1347,6 +1416,30 @@ paths:
       tags:
         - File Shares
       description: Lists information for all file shares.
+      parameters:
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/sortDir'
+      - name: sortKey
+        in: query
+        description: Sorting key word
+        schema:
+          type: string
+      - name: name
+        in: query
+        description: The fileshare name
+        schema:
+          type: string
+      - name: profileId
+        in: query
+        description: The UUID of profile
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: The fileshare status
+        schema:
+          type: string
       responses:
         '200':
           description: OK
@@ -1355,7 +1448,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FileShareSpec'
+                  $ref: '#/components/schemas/FileShareRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1372,7 +1465,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSpec'
+                $ref: '#/components/schemas/FileShareRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -1382,10 +1475,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FileShareSpec'
+        $ref: '#/components/requestBodies/FileShareCreateSpec'
   '/v1beta/{tenantId}/file/shares/{fileshareId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1400,7 +1490,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSpec'
+                $ref: '#/components/schemas/FileShareRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1419,7 +1509,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSpec'
+                $ref: '#/components/schemas/FileShareRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1427,7 +1517,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/Profile'
+        $ref: '#/components/requestBodies/FileShareUpdateSpec'
     delete:
       tags:
         - File Shares
@@ -1450,6 +1540,25 @@ paths:
       tags:
         - File Share Snapshots
       description: Lists information for all file share spanshots.
+      parameters:
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/offset'
+      - $ref: '#/components/parameters/sortDir'
+      - name: sortKey
+        in: query
+        description: Sorting key word
+        schema:
+          type: string
+      - name: name
+        in: query
+        description: The fileshare snapshot name
+        schema:
+          type: string
+      - name: status
+        in: query
+        description: The fileshare snapshot status
+        schema:
+          type: string
       responses:
         '200':
           description: OK
@@ -1458,7 +1567,25 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FileShareSnapshotSpec'
+                  $ref: '#/components/schemas/FileShareSnapshotRespSpec'
+              examples:
+                response:
+                  value:
+                  - id: 405ded84-b6ff-4ac6-8a3c-cb0e82dcf372
+                    createdAt: 2019-12-04T13:23:13
+                    updatedAt: 2019-12-04T13:31:03
+                    tenantId: e93b4c0934da416eb9c8d120c5d04d96
+                    userId:
+                    fileshareId: eedfbfcf-de50-4476-a2b6-058e6bfa3558
+                    name: snaptest
+                    description: Testing file share snapshot
+                    shareSize: 1
+                    snapshotSize: 1
+                    status: available
+                    profileId: ed273ef0-4602-4790-ae68-09bdbb22d133
+                    metadata: {"lvPath": "/dev/opensds-files-default/test","snapshotID": "405ded84-b6ff-4ac6-8a3c-cb0e82dcf372","snapshotName": "snaptest"}
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1475,7 +1602,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSnapshotSpec'
+                $ref: '#/components/schemas/FileShareSnapshotRespSpec'
+              examples:
+                response:
+                  value:
+                  - id: 405ded84-b6ff-4ac6-8a3c-cb0e82dcf372
+                    createdAt: 2019-12-04T13:23:13
+                    tenantId: e93b4c0934da416eb9c8d120c5d04d96
+                    userId:
+                    fileshareId: eedfbfcf-de50-4476-a2b6-058e6bfa3558
+                    name: snaptest
+                    description: Testing file share snapshot
+                    shareSize: 1
+                    snapshotSize: 1
+                    status: creating
+                    profileId: ed273ef0-4602-4790-ae68-09bdbb22d133
+                    metadata: {"lvPath": "/dev/opensds-files-default/test","snapshotID": "405ded84-b6ff-4ac6-8a3c-cb0e82dcf372","snapshotName": "snaptest"}
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -1485,10 +1627,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FileShareSnapshotSpec'
+        $ref: '#/components/requestBodies/FileShareSnapshotCreateSpec'
   '/v1beta/{tenantId}/file/snapshots/{shareSnapshotId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1503,7 +1642,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSnapshotSpec'
+                $ref: '#/components/schemas/FileShareSnapshotRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1522,7 +1661,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareSnapshotSpec'
+                $ref: '#/components/schemas/FileShareSnapshotRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1532,7 +1671,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        $ref: '#/components/requestBodies/Profile'
+        $ref: '#/components/requestBodies/FileShareSnapshotUpdateSpec'
     delete:
       tags:
         - File Share Snapshots
@@ -1563,7 +1702,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FileShareAclSpec'
+                  $ref: '#/components/schemas/FileShareAclRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1580,7 +1719,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareAclSpec'
+                $ref: '#/components/schemas/FileShareAclRespSpec'
         '400':
           $ref: '#/components/responses/HTTPStatus400'
         '401':
@@ -1590,10 +1729,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FileShareAclSpec'
+        $ref: '#/components/requestBodies/FileShareAclCreateSpec'
   '/v1beta/{tenantId}/file/acls/{fileshareaclId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
@@ -1608,7 +1744,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FileShareAclSpec'
+                $ref: '#/components/schemas/FileShareAclRespSpec'
         '401':
           $ref: '#/components/responses/HTTPStatus401'
         '403':
@@ -1630,6 +1766,259 @@ paths:
           $ref: '#/components/responses/HTTPStatus403'
         '404':
           $ref: '#/components/responses/HTTPStatus404'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+  /v1beta/{tenantId}/host/hosts:
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+    get:
+      tags:
+        - Host
+      description: Lists host information.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word, such as hostName, createdAt
+          schema:
+            type: string
+        - name: hostName
+          in: query
+          description: Host name
+          schema:
+            maxLength: 255
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HostRespSpec'
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+    post:
+      tags:
+      - Host
+      description: Creates host.
+      requestBody:
+        $ref: '#/components/requestBodies/HostCreateSpec'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HostRespSpec'
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+
+  /v1beta/{tenantId}/host/hosts/{hostId}:
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+      - $ref: '#/components/parameters/hostId'
+    get:
+      tags:
+      - Host
+      description: Get details about the host
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HostRespSpec'
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '404':
+          $ref: '#/components/responses/HTTPStatus404'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+    put:
+      tags:
+      - Host
+      description: Modify host details
+      operationId: putHost
+      requestBody:
+        $ref: '#/components/requestBodies/HostUpdateSpec'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HostRespSpec'
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '404':
+          $ref: '#/components/responses/HTTPStatus404'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+    delete:
+      tags:
+      - Host
+      description: Removes host
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '404':
+          $ref: '#/components/responses/HTTPStatus404'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+  '/v1beta/{tenantId}/metrics':
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+    get:
+      tags:
+        - Metrics
+      description: Lists metrics for the specified time series.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MetricSpec'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+    post:
+      tags:
+        - Metrics
+      description: Trigger metric collection for the specified driver.
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricSpec'
+        '400':
+          $ref: '#/components/responses/HTTPStatus400'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectMetricSpec'
+  '/v1beta/{tenantId}/metrics/urls':
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+    get:
+      tags:
+        - Metrics
+      description: Lists urls of metric management tools for visualization, alert management etc.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UrlSpec'
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+  '/v1beta/{tenantId}/metrics/downloadconf':
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+    get:
+      tags:
+        - Metrics
+      description: download a config file.
+      parameters:
+      - name: conftype
+        in: query
+        required: true
+        description: Name of the tool to which the configuration file to be downloaded from.
+        schema:
+          minimum: 1
+          type: string
+          enum:
+            - prometheus
+            - alertmanager
+            - grafana
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
+        '500':
+          $ref: '#/components/responses/HTTPStatus500'
+  '/v1beta/{tenantId}/metrics/uploadconf':
+    parameters:
+      - $ref: '#/components/parameters/tenantId'
+    post:
+      tags:
+        - Metrics
+      description: upload a config file.
+      parameters:
+      - name: conftype
+        in: query
+        required: true
+        description: Name of the tool to which the configuration file to be uploaded.
+        schema:
+          minimum: 1
+          type: string
+          enum:
+            - prometheus
+            - alertmanager
+            - grafana
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/HTTPStatus401'
+        '403':
+          $ref: '#/components/responses/HTTPStatus403'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
 security:
@@ -1741,6 +2130,38 @@ components:
       description: The UUID of the relication.
       schema:
         type: string
+    hostId:
+      name: hostId
+      in: path
+      required: true
+      description: The UUID of the host.
+      schema:
+        type: string
+    limit:
+      name: limit
+      in: query
+      description: Number of query results on multiple pages
+      schema:
+        minimum: 1
+        type: integer
+        format: int32
+    offset:
+      name: offset
+      in: query
+      description: Start position of the pagination query
+      schema:
+        minimum: 0
+        type: integer
+        format: int32
+    sortDir:
+      name: sortDir
+      in: query
+      description: Ascending or descending
+      schema:
+        type: string
+        enum:
+        - asc
+        - desc
   responses:
     HTTPStatus400:
       description: BadRequest
@@ -1773,28 +2194,132 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorSpec'
   requestBodies:
-    ReplicationSpec:
+    ReplicationCreateSpec:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ReplicationSpec'
-    Profile:
+            $ref: '#/components/schemas/ReplicationCreateSpec'
+    FailoverReplicationSpec:
+      content:
+        application/json:
+          schema:
+            description: >-
+              FailoverReplicationSpec represents failover replication relationship
+              between the volumes on the primary and secondary sites.
+            type: object
+            properties:
+              allowAttachedVolume:
+                type: boolean
+              secondaryBackendId:
+                type: string
+    ProfileCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProfileCreateSpec'
+    ProfileUpdateSpec:
       content:
         application/json:
           schema:
             type: object
-            required:
-              - name
             properties:
               name:
                 type: string
               description:
                 type: string
-    VolumeAttachmentSpec:
+    VolumeCreateSpec:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/VolumeAttachmentSpec'
+            $ref: '#/components/schemas/VolumeCreateSpec'
+    VolumeUpdateSpec:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+    VolumeExtendSpec:
+      content:
+        application/json:
+          schema:
+            type: object
+            description: 'Extends the size of a volume to a requested size, in gibibytes (GiB).'
+            required:
+              - newSize
+            properties:
+              newSize:
+                type: integer
+                format: int64
+                example: 2
+    VolumeSnapshotCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VolumeSnapshotCreateSpec'
+    VolumeGroupCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VolumeGroupCreateSpec'
+    VolumeAttachmentCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VolumeAttachmentCreateSpec'
+    VolumeAttachmentUpdateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VolumeAttachmentUpdateSpec'
+    HostCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HostCreateSpec'
+    HostUpdateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/HostUpdateSpec'
+    FileShareCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileShareCreateSpec'
+    FileShareUpdateSpec:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+    FileShareSnapshotCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileShareSnapshotCreateSpec'
+    FileShareSnapshotUpdateSpec:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+    FileShareAclCreateSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FileShareAclCreateSpec'
   securitySchemes:
     basicAuth:
       type: http
@@ -1818,66 +2343,104 @@ components:
           example: '2017-07-10T14:36:58.014Z'
           readOnly: true
     DataStorageLoS:
-      description: >-
-        DataStorageLoS can be used to describe a service option covering storage
-        provisioning and availability.
       type: object
       properties:
         recoveryTimeObjective:
+          example: 10
+          description: Recovery Time Objective(RTO) is a maximum acceptable time within which storage must be restored after disaster. For e.g 10 sec.
           type: integer
           format: int64
         provisioningPolicy:
+          default: thick
+          description: The provisioning policy of the pool. It can be thick or thin.
           type: string
           enum:
             - Thin
             - Thick
-        isSpaceEfficient:
+        compression:
+          description: The optimization policy to reduce the number of data bits to save storage space
+          default: false
+          type: boolean
+        deduplication:
+          description: The optimization policy to remove redundant data or file on the storage
+          default: false
           type: boolean
         characterCodeSet:
+          description: The code set to store the data
+          example: ASCII
           type: string
         maxFileNameLengthBytes:
+          description: The maximum filename length in bytes
+          example: 255
           type: integer
           format: int64
         storageAccessCapability:
-          type: string
-          enum:
-            - Read
-            - Write
-            - Execute
+          description: The type of access capability. This can be set of read,write or execute.
+          example: Read
+          type: array
+          items:
+            type: string
+            enum:
+              - Read
+              - Write
+              - Execute
+      description: DataStorageLoS can be used to describe a service option covering
+        storage provisioning and availability.
     IOConnectivityLoS:
-      description: >-
-        IOConnectivityLoS can be used to specify the characteristics of storage
-        connectivity.
       type: object
-      required:
-        - accessProtocol
       properties:
         accessProtocol:
+          description: The type of access protocol. This can be iscsi, rbd, fibre channel, or DSWare(Data Service Middleware), nvmeof and nfs
+          example: iscsi
           type: string
           enum:
             - iscsi
             - rbd
             - fibre_channel
-            - DSWARE
+            - nvmeof
+            - DSWare
+            - NFS
         maxIOPS:
+          example: 150
+          description: The maximum IOPS(Input/Output Operations Per Second) supported by storage. For e.g. 150IOPS
+          type: integer
+          format: int64
+        minIOPS:
+          example: 50
+          description: The minimum IOPS(Input/Output Operations Per Second) supported by storage. In other words, performance can not drop below this level. For e.g. 50IOPS
           type: integer
           format: int64
         maxBWS:
+          description: The maximum bandwidth supported by storage. For e.g. 5mbps
+          example: 5
           type: integer
           format: int64
+        minBWS:
+          description: The minimum bandwidth supported by storage. In other words, performance can not drop below this level. For e.g. 1mbps
+          example: 1
+          type: integer
+          format: int64
+        latency:
+          description: The latency of the storage in ns(nanosec.). For e.g. 1ns
+          example: 1
+          type: integer
+          format: int64
+      description: IOConnectivityLoS can be used to specify the characteristics of storage connectivity.
     DataProtectionLoS:
-      description: >-
-        DataProtectionLoS describes a replica that protects data from loss. The
-        requirements must be met collectively by the communication path and the
-        replica.
       type: object
       properties:
         isIsolated:
+          default: false
+          example: true
+          description: Isolated storage is designed to prevent data corruption and data loss
           type: boolean
         minLifetime:
+          description: It is an ISO 8601 duration that specifies the minimum lifetime required for the replica
           type: string
           example: P3Y6M4DT12H30M5S
         RecoveryGeographicObjective:
+          description: Supported failure domain from where data can be restored after disaster
+          example: datacenter
           type: string
           enum:
             - Datacenter
@@ -1887,9 +2450,12 @@ components:
             - Row
             - Server
         RecoveryPointObjectiveTime:
+          description: It's an ISO 8601 time interval that specifies the maximum source information that may be lost on failure. In the case of isIsolated = false, failure of the domain is not considered.
           type: string
           example: P3Y6M4DT12H30M5S
         RecoveryTimeObjective:
+          description: It specifies the relative time required to make a replica available as a source
+          example: offline
           type: string
           enum:
             - OnlineActive
@@ -1897,12 +2463,17 @@ components:
             - Nearline
             - Offline
         ReplicaType:
+          description: This value specify the type of replica
+          example: snapshot
           type: string
           enum:
             - Clone
             - Mirror
             - Snapshot
             - TokenizedClone
+      description: DataProtectionLoS describes a replica that protects data from loss.
+        The requirements must be met collectively by the communication path and the
+        replica.
     DockSpec:
       description: >-
         A backend is initialized by specific driver configuration. Each backend
@@ -2023,27 +2594,68 @@ components:
             key2: false
             key3:
               key31: value31
-    ProfileSpec:
-      description: >-
-        An OpenSDS profile is identified by a unique name and ID. With adding
-        extra properties, each profile can contains a set of tags of storage
+    ProfileCreateSpec:
+      description: An OpenSDS profile is identified by a unique name and ID. With
+        adding extra properties, each profile can contain a set of tags of storage
+        capabilities which are desirable features for a class of applications.
+      required:
+        - name
+        - storageType
+      type: object
+      properties:
+        name:
+          description: The name of the profile
+          minLength: 1
+          maxLength: 255
+          pattern: '[A-Za-z0-9_-]'
+          type: string
+          example: File_Profile
+        storageType:
+          description: The type of the storage. It can be either block, file or object
+          example: block
+          type: string
+          enum:
+          - block
+          - file
+          - object
+        description:
+          description: The description of the profile
+          type: string
+        provisioningProperties:
+          $ref: '#/components/schemas/ProvisioningPropertiesSpec'
+        replicationProperties:
+          $ref: '#/components/schemas/ReplicationPropertiesSpec'
+        snapshotProperties:
+          $ref: '#/components/schemas/SnapshotPropertiesSpec'
+        dataProtectionProperties:
+          $ref: '#/components/schemas/DataProtectionPropertiesSpec'
+        customProperties:
+          $ref: '#/components/schemas/CustomPropertiesSpec'
+    ProfileRespSpec:
+      description: An OpenSDS profile is identified by a unique name and ID. With
+        adding extra properties, each profile can contain a set of tags of storage
         capabilities which are desirable features for a class of applications.
       allOf:
-        - $ref: '#/components/schemas/BaseModel'
-        - type: object
-          required:
-            - name
-            - description
-          properties:
+      - $ref: '#/components/schemas/BaseModel'
+      - type: object
+        properties:
             name:
+              description: The name of the profile
+              minLength: 1
+              maxLength: 255
+              pattern: '[A-Za-z0-9_-]'
               type: string
+              example: File_Profile
             storageType:
+              description: The type of the storage. It can be either block, file or object
+              example: block
               type: string
               enum:
-                - block
-                - file
-                - object
+              - block
+              - file
+              - object
             description:
+              description: The is description of the profile
               type: string
             provisioningProperties:
               $ref: '#/components/schemas/ProvisioningPropertiesSpec'
@@ -2055,20 +2667,36 @@ components:
               $ref: '#/components/schemas/DataProtectionPropertiesSpec'
             customProperties:
               $ref: '#/components/schemas/CustomPropertiesSpec'
-    FileShareSpec:
+    FileShareCreateSpec:
+      type: object
+      required:
+        - name
+        - size
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: '[A-Za-z0-9_-]'
+        description:
+          type: string
+        size:
+          type: integer
+          format: int64
+          example: 2
+        availabilityZone:
+          type: string
+          default: default
+        profileId:
+          type: string
+
+    FileShareRespSpec:
       description: >-
         FileShare is a file system created by nfs southbound driver, it can be
         mounted on to physical machine or virtual machine instance.
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
-          required:
-            - tenantId
-            - name
-            - availabilityZone
-            - size
-            - profileId
-            - poolId
           properties:
             tenantId:
               type: string
@@ -2092,6 +2720,11 @@ components:
               readOnly: true
             profileId:
               type: string
+            protocols:
+              type: array
+              items:
+                type: string
+              readOnly: true
             exportLocations:
               type: array
               items:
@@ -2106,62 +2739,109 @@ components:
                 lvPath: string
                 nfsFileshareID: string
                 nfsFileshareName: string
-    FileShareSnapshotSpec:
-      description: Snapshot is a description of fileshare snapshot resource.
+    FileShareSnapshotCreateSpec:
+      type: object
+      required:
+      - name
+      - fileshareId
+      properties:
+        fileshareId:
+          type: string
+        name:
+          minLength: 1
+          maxLength: 255
+          type: string
+        description:
+          type: string
+    FileShareSnapshotRespSpec:
+      description: Snapshot of file share has following specification.
       allOf:
-        - $ref: '#/components/schemas/BaseModel'
-        - type: object
-          required:
-            - tenantId
-            - name
-            - status
-            - snapshotId
-            - fileshareId
-          properties:
-            fileshareId:
+      - $ref: '#/components/schemas/BaseModel'
+      - type: object
+        properties:
+          fileshareId:
+            type: string
+          snapId:
+            type: string
+          createdAt:
+            type: string
+          updatedAt:
+            type: string
+          tenantId:
+            type: string
+            readOnly: true
+          userId:
+            type: string
+            readOnly: true
+          name:
+            type: string
+          description:
+            type: string
+          shareSize:
+            type: integer
+            format: int64
+            example: 2
+          snapshotSize:
+            type: integer
+            format: int64
+            example: 2
+          status:
+            type: string
+            readOnly: true
+          profileId:
+            type: string
+          metadata:
+            type: object
+            readOnly: true
+            additionalProperties:
               type: string
-            tenantId:
-              type: string
-              readOnly: true
-            userId:
-              type: string
-              readOnly: true
-            name:
-              type: string
-            description:
-              type: string
-            status:
-              type: string
-              readOnly: true
-            profileId:
-              type: string
-            metadata:
-              type: object
-              readOnly: true
-              additionalProperties:
-                type: string
-              example:
-                snapshotId: string
-                snapshotName: string
-                lvPath: string
-    FileShareAclSpec:
+            example:
+              snapshotId: string
+              snapshotName: string
+              lvPath: string
+    FileShareAclCreateSpec:
+      type: object
+      required:
+        - fileshareId
+        - type
+        - accessCapability
+        - accessTo
+      properties:
+        fileshareId:
+          type: string
+        type:
+          type: string
+        accessCapability:
+          type: array
+          items:
+            type: string
+            enum:
+              - Read
+              - Write
+              - Execute
+        accessTo:
+          type: string
+        description:
+          type: string
+
+    FileShareAclRespSpec:
       description: File Share Acl API describes the  acl of file share resource
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
-          required:
-            - tenantId
-            - fileshareId
-            - type
-            - accessCapability
-            - accessTo
           properties:
             fileshareId:
               type: string
             type:
               type: string
             accessCapability:
-              type: string
+              type: array
+              items:
+                type: string
+                enum:
+                  - Read
+                  - Write
+                  - Execute
             accessTo:
               type: string
             tenantId:
@@ -2170,8 +2850,6 @@ components:
             userId:
               type: string
               readOnly: true
-            name:
-              type: string
             description:
               type: string
             status:
@@ -2179,6 +2857,7 @@ components:
               readOnly: true
             profileId:
               type: string
+              readOnly: true
             metadata:
               type: object
               readOnly: true
@@ -2198,9 +2877,6 @@ components:
         ioConnectivity:
           $ref: '#/components/schemas/IOConnectivityLoS'
     ReplicationPropertiesSpec:
-      description: >-
-        ReplicationPropertiesSpec represents some suggested properties for
-        performing replication policies.
       type: object
       properties:
         dataProtection:
@@ -2209,33 +2885,43 @@ components:
           type: object
           properties:
             replicaUpdateMode:
+              description: It specify the replica update mode. It can be Active, Adaptive, Asynchronous, Synchronous
+              example: Active
               type: string
               enum:
                 - Active
                 - Adaptive
                 - Asynchronous
                 - Synchronous
-            consistencyEnalbed:
-              type: boolean
-            replicationPeriod:
-              type: string
-              example: P3Y6M4DT12H30M5S
             replcationBandwidth:
+              description: The bandwidth required for replication in MB
+              example: 5
               type: integer
               format: int64
+            replicationPeriod:
+              description: It is an ISO 8601 interval that specify the required time for replication
+              type: string
+              example: P3Y6M4DT12H30M5S
+            consistencyEnalbed:
+              description: It specify the data consitency in replication
+              default: false
+              example: true
+              type: boolean
+      description: ReplicationPropertiesSpec represents some suggested properties
+        for performing replication policies.
     SnapshotPropertiesSpec:
-      description: >-
-        SnapshotPropertiesSpec represents some suggested properties for
-        performing snapshot policies.
       type: object
       properties:
         schedule:
           type: object
           properties:
             datetime:
+              example: "2019-09-07T07:02:35.389"
               type: string
               format: date-time
             occurrence:
+              description: The occurence of snapshot creation
+              example: Daily
               type: string
               enum:
                 - Daily
@@ -2244,54 +2930,88 @@ components:
         retention:
           type: object
           properties:
-            number:
+            duration:
+              description: The retention time of snapshot in days
+              example: 15
               type: integer
               format: int64
-            duration:
+            number:
+              description: The number of snapshot at a particular time
+              example: 10
               type: integer
               format: int64
         topology:
           type: object
           properties:
             bucket:
+
               type: string
+      description: SnapshotPropertiesSpec represents some suggested properties for
+        performing snapshot policies.
     DataProtectionPropertiesSpec:
-      description: >-
-        DataProtectionPropertiesSpec represents some suggested properties for
-        performing data protection policies.
       type: object
       properties:
         dataProtection:
           $ref: '#/components/schemas/DataProtectionLoS'
         consistencyEnalbed:
+          description: It specify the data consitency in dataprotection
+          default: false
+          example: true
           type: boolean
+      description: DataProtectionPropertiesSpec represents some suggested properties
+        for performing data protection policies.
     CustomPropertiesSpec:
-      description: >-
-        CustomPropertiesSpec is a map of keys and JSON object that represents
-        the customized properties of profile, such as requested capabilities
-        including diskType, latency, deduplicaiton, compression and so forth.
       type: object
-      additionalProperties:
-        type: object
+      additionalProperties: {}
+      description: CustomPropertiesSpec is a map of keys and JSON object that represents
+        the customized properties of profile, such as requested capabilities including
+        disk type, latency, de-duplicaiton, compression and so forth.
       example:
         key1: value1
         key2: false
         key3:
           key31: value31
-    VolumeSpec:
+    VolumeCreateSpec:
+      description: >-
+        Volume is an block device created by storage service, it can be attached
+        to physical machine or virtual machine instance.
+      type: object
+      required:
+        - name
+        - size
+      properties:
+        name:
+          type: string
+        multiAttach:
+          type: boolean
+        description:
+          type: string
+        size:
+          type: integer
+          format: int64
+          example: 2
+        availabilityZone:
+          type: string
+          default: default
+        profileId:
+          type: string
+        poolId:
+          type: string
+        snapshotId:
+          type: string
+        groupId:
+          type: string
+        snapshotFromCloud:
+          type: boolean
+        replicationId:
+          type: string
+    VolumeRespSpec:
       description: >-
         Volume is an block device created by storage service, it can be attached
         to physical machine or virtual machine instance.
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
-          required:
-            - tenantId
-            - name
-            - availabilityZone
-            - size
-            - profileId
-            - poolId
           properties:
             tenantId:
               type: string
@@ -2327,6 +3047,13 @@ components:
               type: boolean
             replicationId:
               type: string
+            identifier:
+              type: object
+              properties:
+                durableName:
+                  type: string
+                durableNameFormat:
+                  type: string
             replicationDriverData:
               type: object
               additionalProperties:
@@ -2341,72 +3068,60 @@ components:
               example:
                 key1: value1
                 key2: value2
-    ExtendVolumeSpec:
-      description: 'Extends the size of a volume to a requested size, in gibibytes (GiB).'
-      type: object
+
+    VolumeAttachmentCreateSpec:
+      description: Attachment is a description of volume attached resource.
       required:
-        - newSize
+      - volumeId
+      - hostId
+      type: object
       properties:
-        newSize:
-          type: integer
-          format: int64
-          example: 2
-    VolumeAttachmentSpec:
+        hostId:
+          type: string
+        volumeId:
+          type: string
+        attachMode:
+          type: string
+          enum:
+          - ro
+          - rw
+    VolumeAttachmentRespSpec:
       description: Attachment is a description of volume attached resource.
       allOf:
-        - $ref: '#/components/schemas/BaseModel'
-        - type: object
-          required:
-            - tenantId
-            - hostInfo
-            - connectionInfo
-            - mountpoint
-            - status
-            - volumeId
-          properties:
-            tenantId:
-              type: string
-              readOnly: true
-            userId:
-              type: string
-              readOnly: true
-            attachMode:
-              type: string
-              enum:
-                - rw
-                - ro
-            hostInfo:
-              $ref: '#/components/schemas/HostInfo'
-            connectionInfo:
-              $ref: '#/components/schemas/ConnectionInfo'
-            mountpoint:
-              type: string
-            status:
-              type: string
-              readOnly: true
-            volumeId:
-              type: string
-    HostInfo:
-      description: >-
-        HostInfo is a structure for all properties of host when create a volume
-        attachment.
+      - $ref: '#/components/schemas/BaseModel'
+      - type: object
+        properties:
+          tenantId:
+            type: string
+            readOnly: true
+          userId:
+            type: string
+            readOnly: true
+          attachMode:
+            type: string
+            enum:
+            - rw
+            - ro
+          hostId:
+            type: string
+          volumeId:
+            type: string
+          mountpoint:
+            type: string
+          status:
+            type: string
+            readOnly: true
+          connectionInfo:
+            $ref: '#/components/schemas/ConnectionInfo'
+
+
+    VolumeAttachmentUpdateSpec:
       type: object
-      required:
-        - platform
-        - osType
-        - ip
-        - host
       properties:
-        platform:
+        mountpoint:
           type: string
-        osType:
-          type: string
-        ip:
-          type: string
-        host:
-          type: string
-        initiator:
-          type: string
+
+
     ConnectionInfo:
       description: >-
         ConnectionInfo is a structure for all properties of connection when
@@ -2433,17 +3148,25 @@ components:
             key2: false
             key3:
               key31: value31
-    VolumeSnapshotSpec:
+    VolumeSnapshotCreateSpec:
+      type: object
+      required:
+        - name
+        - volumeId
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        volumeId:
+          type: string
+        profileId:
+          type: string
+    VolumeSnapshotRespSpec:
       description: Snapshot is a description of volume snapshot resource.
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
-          required:
-            - tenantId
-            - name
-            - status
-            - volumeId
-            - profileId
           properties:
             tenantId:
               type: string
@@ -2471,20 +3194,32 @@ components:
               example:
                 key1: value1
                 key2: value2
-    VolumeGroupSpec:
+    VolumeGroupCreateSpec:
+      type: object
+      required:
+        - profiles
+        - name
+      properties:
+        name:
+          type: string
+          example: volumeGroup-demo
+        description:
+          type: string
+          example: volume group test
+        profiles:
+          type: array
+          items:
+            type: string
+          example:
+            - 993c87dc-1928-498b-9767-9da8f901d6ce
+            - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
+    VolumeGroupRespSpec:
       description: >-
         Volume group contains a list of volumes that are used in the same
         application.
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
-          required:
-            - tenantId
-            - profiles
-            - name
-            - description
-            - availabilityZone
-            - status
           properties:
             tenantId:
               type: string
@@ -2515,22 +3250,51 @@ components:
               example:
                 - 993c87dc-1928-498b-9767-9da8f901d6ce
                 - 90d667f0-e9a9-427c-8a7f-cc714217c7bd
-    ReplicationSpec:
+    ReplicationCreateSpec:
+      type: object
+      required:
+        - name
+        - primaryVolumeId
+        - secondaryVolumeId
+        - availabilityZone
+        - replicationPeriod
+        - replicationMode
+        - profileId
+      properties:
+        name:
+          type: string
+          example: replication-demo
+        description:
+          type: string
+          example: This is replication demo api specs
+        availabilityZone:
+          type: string
+          example: default
+        primaryVolumeId:
+          type: string
+          example: 655ec3e2-5840-4138-b5bd-bce930d2acda
+        secondaryVolumeId:
+          type: string
+          example: 8cfa9839-7fb8-4b16-ae7a-5eb7f2dafd0b
+        replicationMode:
+          type: string
+          enum:
+            - sync
+            - async
+        replicationPeriod:
+          type: integer
+          format: int64
+          minimum: 0
+        profileId:
+          type: string
+          example: a66976e0-9fbf-4cf3-912a-e891dd41b1a5
+    ReplicationRespSpec:
       description: >-
         Replication represents a replication relationship between the volumes on
         the primary and secondary sites.
       allOf:
         - $ref: '#/components/schemas/BaseModel'
         - type: object
-          required:
-            - tenantId
-            - name
-            - primaryVolumeId
-            - scondaryVolumeId
-            - availabilityZone
-            - replicationPeriod
-            - replicationMode
-            - profileId
           properties:
             tenantId:
               type: string
@@ -2599,16 +3363,7 @@ components:
             profileId:
               type: string
               example: a66976e0-9fbf-4cf3-912a-e891dd41b1a5
-    FailoverReplicationSpec:
-      description: >-
-        FailoverReplicationSpec represents failover replication relationship
-        between the volumes on the primary and secondary sites.
-      type: object
-      properties:
-        allowAttachedVolume:
-          type: boolean
-        secondaryBackendId:
-          type: string
+
     ErrorSpec:
       description: >-
         Detailed HTTP error response, which consists of a HTTP status code, and
@@ -2646,3 +3401,276 @@ components:
           type: string
           format: date-time
           example: '2017-04-10T14:36:58.014Z'
+    HostCreateSpec:
+      required:
+      - accessMode
+      - osType
+      - ip
+      - hostName
+      type: object
+      properties:
+        osType:
+          type: string
+          enum:
+          - linux
+          - windows
+          - esxi
+        hostName:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
+          description: Only numbers, letters, '-', '.' in ASCII characters are allowed.
+          example: opensds-node1
+        ip:
+          type: string
+          description: IP address of the host, mandatory
+          pattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+          example: 8.8.8.8
+        port:
+          maximum: 65535
+          minimum: 1
+          type: integer
+          description: Host access port
+          format: int32
+          example: 22
+        accessMode:
+          type: string
+          description: The way to access host, system will access host to get more information and install agent if accessMode is 'agent'. 'port', 'username'and 'password' are requried in 'agent' mode.
+          enum:
+          - agent
+          - agentless
+        username:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: username to access Host
+          example: root
+        password:
+          maxLength: 1024
+          minLength: 1
+          type: string
+          description: password to access Host
+          example: password
+        availabilityZones:
+          type: array
+          items:
+            type: string
+            maxLength: 64
+            minLength: 1
+            description: name or uuid of availablity zone
+          uniqueItems: true
+        initiators:
+          type: array
+          description: Initiator of host
+          items:
+            type: object
+            properties:
+              portName:
+                maxLength: 255
+                minLength: 1
+                type: string
+                description: Host initiator. Set the wwn, iSCSI type of the host whose
+                  FC type is set to iqn of the host
+                example: 20000024ff5bb888
+              protocol:
+                type: string
+                description: Initiator type FC or iSCSI
+                example: iscsi
+                enum:
+                - iscsi
+                - fibre_channel
+                - nvmeof
+      description: Host is a consumer of volume from storage.
+
+    HostUpdateSpec:
+      type: object
+      properties:
+        hostName:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
+          description: Only numbers, letters, '-', '.' in ASCII characters are allowed.
+          example: opensds-node1
+        ip:
+          type: string
+          description: IP address of the host, mandatory
+          pattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+          example: 8.8.8.8
+        port:
+          maximum: 65535
+          minimum: 1
+          type: integer
+          description: Host access port
+          format: int32
+          example: 22
+        accessMode:
+          type: string
+          description: The way to access host, system will access host to get more information and install agent if accessMode is 'agent'. 'port', 'username'and 'password' are requried in 'agent' mode.
+          enum:
+          - agent
+          - agentless
+        username:
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: username to access Host
+          example: root
+        password:
+          maxLength: 1024
+          minLength: 1
+          type: string
+          description: password to access Host
+          example: password
+        availabilityZones:
+          type: array
+          items:
+            type: string
+            maxLength: 64
+            minLength: 1
+            description: name or uuid of availablity zone
+          uniqueItems: true
+        initiators:
+          type: array
+          description: Initiator of host
+          items:
+            type: object
+            properties:
+              portName:
+                maxLength: 255
+                minLength: 1
+                type: string
+                description: Host initiator. Set the wwn, iSCSI type of the host whose
+                  FC type is set to iqn of the host
+                example: 20000024ff5bb888
+              protocol:
+                type: string
+                description: Initiator type FC or iSCSI
+                example: iscsi
+                enum:
+                - iscsi
+                - fibre_channel
+                - nvmeof
+      description: Host is a consumer of volume from storage.
+    HostRespSpec:
+      allOf:
+      - $ref: '#/components/schemas/BaseModel'
+      - type: object
+        properties:
+          id:
+            type: string
+          tenantId:
+            type: string
+          hostName:
+            type: string
+          osType:
+            type: string
+          accessMode:
+            type: string
+          ip:
+            type: string
+          port:
+            type: string
+          username:
+            type: string
+          availabilityZones:
+            type: array
+            items:
+              type: string
+          initiators:
+            type: array
+            items:
+              type: object
+              properties:
+                portName:
+                  type: string
+                  example: 20000024ff5bb888
+                protocol:
+                  type: string
+                  example: iscsi
+                  enum:
+                  - iscsi
+                  - fibre_channel
+                  - nvmeof
+
+      description: Host is a consumer of volume from storage.
+    MetricSpec:
+      description: >-
+        Metric spec represents metrics of different type, which has name, instanceID label, timestamp , value etc..
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          required:
+            - name
+          properties:
+            instanceID:
+              type: string
+              readOnly: true
+            instanceName:
+              type: string
+              readOnly: true
+            job:
+              type: string
+            name:
+              type: string
+              default: default
+            unit:
+              type: string
+              readOnly: true
+            aggrType:
+              type: string
+            metricValues:
+              type: array
+              description: Metric values for the timestamp
+              items:
+                type: object
+                properties:
+                  timestamp:
+                    type: integer
+                    format: int64
+                    description: Timestamp of the metric
+                    example: 1575363783
+                  value:
+                    type: number
+                    description: Value of the metric for this timestamp
+                    example: 16.74
+            labels:
+              type: object
+              additionalProperties:
+                type: string
+              example:
+                key1: value1
+                key2: value2
+    CollectMetricSpec:
+      description: >-
+        Collect Metric spec specifies the driver to trigger collect metrics action.
+      allOf:
+        - type: object
+          required:
+            - driverType
+          properties:
+            driverType:
+              type: string
+              enum:
+                - lvm
+                - ceph
+                - huawei_oceanstor_block
+    UrlSpec:
+      description: >-
+        Lists information for all url which can be used to access telemetry related services like grafana and alert manager.
+      type: object
+      required:
+        - name
+        - url
+        - desc
+      properties:
+        name:
+          type: string
+          example: Grafana
+        url:
+          type: string
+          example: http://localhost:3000
+        desc:
+          type: string
+          example: Open Grafana tool to visualize collected metric
