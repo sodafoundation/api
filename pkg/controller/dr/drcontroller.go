@@ -297,6 +297,9 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 	var host *HostSpec
 	if len(hosts) == 0 {
 		host = &HostSpec{
+			BaseModel: &BaseModel{
+				Id: "",
+			},
 			HostName: attacherDock.NodeId,
 			IP:       attacherDock.Metadata["HostIp"],
 			OsType:   attacherDock.Metadata["OsType"],
