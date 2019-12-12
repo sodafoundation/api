@@ -135,7 +135,7 @@ func (s *selector) SelectSupportedPoolForVolume(vol *model.VolumeSpec) (*model.S
 				filterRequest["extras.dataProtection.isIsolated"] =
 					"<is> " + strconv.FormatBool(dp.IsIsolated)
 				if dp.RecoveryGeographicObject != "" {
-					filterRequest["extras.dataProtection.recoveryGeographicObject"] =
+					filterRequest["extras.dataProtection.recoveryGeographicObjective"] =
 						dp.RecoveryGeographicObject
 				}
 				if dp.RecoveryTimeObjective != "" {
