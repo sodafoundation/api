@@ -140,8 +140,23 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 	// Clear existing pool info
 	pdd.pols = pdd.pols[:0]
 	var pols []*model.StoragePoolSpec
-	var polsInDb []*model.StoragePoolSpec
 	var err error
+	var polsInDb []*model.StoragePoolSpec
+	ctx := c.NewAdminContext()
+	polsInDb, err = pdd.c.ListPools(ctx)
+	if err != nil {
+		return fmt.Errorf("can not read pools in db")
+	}
+	dbPolsMap := make(map[string]map[string]*model.StoragePoolSpec)
+	for _, dck := range pdd.dcks {
+		dbPolsMap[dck.Id] = make(map[string]*model.StoragePoolSpec)
+	}
+	for _, polInDb := range polsInDb {
+		if dbPolsMap[polInDb.DockId] != nil {
+			polInDb.Status = unavailableStatus
+			dbPolsMap[polInDb.DockId][polInDb.Id] = polInDb
+		}
+	}
 	for _, dck := range pdd.dcks {
 		// Call function of StorageDrivers configured by storage drivers.
 		if utils.Contains(filesharedrivers, dck.DriverName) {
@@ -150,6 +165,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 			pols, err = d.ListPools()
 			for _, pol := range pols {
 				log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
+				delete(dbPolsMap[dck.Id], pol.Id)
 				pol.DockId = dck.Id
 				pol.Status = availableStatus
 			}
@@ -166,6 +182,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 			}
 			for _, pol := range pols {
 				log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
+				delete(dbPolsMap[dck.Id], pol.Id)
 				pol.DockId = dck.Id
 				pol.ReplicationType = replicationType
 				pol.ReplicationDriverName = replicationDriverName
@@ -182,22 +199,10 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 		}
 
 		pdd.pols = append(pdd.pols, pols...)
-	}
-	ctx := c.NewAdminContext()
-	polsInDb, err = pdd.c.ListPools(ctx)
-	if err != nil {
-		return fmt.Errorf("can not read pools in db")
-	}
-	dbPolsMap := make(map[string]*model.StoragePoolSpec)
-	for _, polInDb := range polsInDb {
-		dbPolsMap[polInDb.Id] = polInDb
-	}
-	for _, pol := range pdd.pols {
-		delete(dbPolsMap, pol.Id)
-	}
-	for _, unavailablePol := range dbPolsMap {
-		unavailablePol.Status = unavailableStatus
-		pdd.pols = append(pdd.pols, unavailablePol)
+		for _, pol := range dbPolsMap[dck.Id] {
+			pdd.pols = append(pdd.pols, pol)
+		}
+
 	}
 	if len(pdd.pols) == 0 {
 		return fmt.Errorf("there is no pool can be found")
