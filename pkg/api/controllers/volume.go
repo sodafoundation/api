@@ -69,6 +69,11 @@ func (v *VolumePortal) CreateVolume() {
 	if volume.ProfileId == "" {
 		log.Warning("Use default profile when user doesn't specify profile.")
 		prf, err = db.C.GetDefaultProfile(ctx)
+		if err != nil {
+			errMsg := fmt.Sprintf("get default profile failed: %s", err.Error())
+			v.ErrorHandle(model.ErrorBadRequest, errMsg)
+			return
+		}
 		// Assign the default profile id to volume so that users can know which
 		// profile is used for creating a volume.
 		volume.ProfileId = prf.Id
