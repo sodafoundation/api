@@ -34,6 +34,7 @@ const (
 	ManilaDriverType               = "manila"
 	FujitsuEternusDriverType       = "fujitsu_eternus"
 	ChubaofsDriverType             = "chubaofs"
+	NetappOntapSanDriverType       = "ontap"
 )
 
 const (
