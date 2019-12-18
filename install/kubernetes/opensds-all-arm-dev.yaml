@@ -48,7 +48,7 @@ spec:
     spec:
       containers:
       - name: apiserver
-        image: opensdsio/opensds-apiserver-arm64:ci
+        image: opensdsio/opensds-apiserver-arm64:latest
         imagePullPolicy: IfNotPresent
         command: ["bin/sh"]
         args: ["-c", "/usr/bin/osdsapiserver -logtostderr"]
@@ -99,7 +99,7 @@ spec:
     spec:
       containers:
       - name: controller
-        image: opensdsio/opensds-controller-arm64:ci
+        image: opensdsio/opensds-controller-arm64:latest
         imagePullPolicy: IfNotPresent
         command: ["bin/sh"]
         args: ["-c", "/usr/bin/osdslet -logtostderr"]
@@ -155,7 +155,7 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-          image: opensdsio/opensds-dock-arm64:ci
+          image: opensdsio/opensds-dock-arm64:latest
           imagePullPolicy: IfNotPresent
           command: ["bin/sh"]
           args: ["-c", "/usr/sbin/tgtd; /usr/bin/osdsdock -logtostderr"]
@@ -212,56 +212,6 @@ spec:
             type: Directory
 ---
 ##################################################################################################
-# Dashboard service
-##################################################################################################
-# apiVersion: v1
-# kind: Service
-# metadata:
-  # name: dashboard
-  # namespace: opensds
-  # labels:
-    # app: dashboard
-    # service: dashboard
-# spec:
-  # ports:
-  # - port: 8088
-    # nodePort: 31975
-    # name: http-dashboard
-  # selector:
-    # app: dashboard
-  # type: NodePort
-# ---
-# apiVersion: extensions/v1beta1
-# kind: Deployment
-# metadata:
-  # name: dashboard-v1beta
-  # namespace: opensds
-  # labels:
-    # app: dashboard
-    # version: v1beta
-# spec:
-  # replicas: 1
-  # template:
-    # metadata:
-      # labels:
-        # app: dashboard
-        # version: v1beta
-    # spec:
-      # containers:
-      # - name: dashboard
-        # image: opensdsio/dashboard:latest
-        # env:
-        # - name: OPENSDS_AUTH_URL
-          # value: http://authchecker.opensds.svc.cluster.local/identity
-        # - name: OPENSDS_HOTPOT_URL
-          # value: http://apiserver.opensds.svc.cluster.local:50040
-        # - name: OPENSDS_GELATO_URL
-          # value: http://127.0.0.1:8089
-        # imagePullPolicy: IfNotPresent
-        # ports:
-        # - containerPort: 8088
----
-##################################################################################################
 # DB service
 ##################################################################################################
 apiVersion: v1
@@ -299,7 +249,7 @@ spec:
     spec:
       containers:
       - name: db
-        image: opensdsio/etcd-arm64:v3.3.18
+        image: quay.io/coreos/etcd:v3.3.18-arm64
         imagePullPolicy: IfNotPresent
         env:
         - name: ETCD_UNSUPPORTED_ARCH
@@ -323,50 +273,4 @@ spec:
         hostPath:
           path: /usr/share/ca-certificates/
           type: Directory
----
-##################################################################################################
-# Authchecker service
-##################################################################################################
-# apiVersion: v1
-# kind: Service
-# metadata:
-  # name: authchecker
-  # namespace: opensds
-  # labels:
-    # app: authchecker
-    # service: authchecker
-# spec:
-  # ports:
-  # - port: 80
-    # name: http-authchecker
-  # selector:
-    # app: authchecker
-# ---
-# apiVersion: extensions/v1beta1
-# kind: Deployment
-# metadata:
-  # name: authchecker-v1
-  # namespace: opensds
-  # labels:
-    # app: authchecker
-    # version: v1
-# spec:
-  # replicas: 1
-  # template:
-    # metadata:
-      # labels:
-        # app: authchecker
-        # version: v1
-    # spec:
-      # containers:
-      # - name: authchecker
-        # securityContext:
-          # privileged: true
-          # capabilities:
-            # add: ["SYS_ADMIN"]
-          # allowPrivilegeEscalation: true
-        # image: opensdsio/opensds-authchecker:latest
-        # imagePullPolicy: IfNotPresent
-        # ports:
-        # - containerPort: 80
 ---
