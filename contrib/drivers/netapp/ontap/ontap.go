@@ -102,7 +102,7 @@ func (d *Driver) Setup() error {
 
 	defer func() {
 		if r := recover(); r != nil {
-			log.Errorf("Unable to instantiate backend")
+			log.Error("unable to instantiate ontap backend.")
 		}
 	}()
 
@@ -123,7 +123,7 @@ func (d *Driver) Setup() error {
 	}
 	marshaledJSON, err := json.Marshal(config)
 	if err != nil {
-		log.Fatal("Unable to marshal ONTAP config:  ", err)
+		log.Fatal("unable to marshal ONTAP config:  ", err)
 	}
 	configJSON := string(marshaledJSON)
 
@@ -147,11 +147,11 @@ func (d *Driver) Setup() error {
 	}
 
 	// Initialize the driver.
-	if err = d.sanStorageDriver.Initialize("csi", configJSON, commonConfig); err != nil {
-		log.Errorf("Could not initialize storage driver.")
+	if err = d.sanStorageDriver.Initialize(driverContext, configJSON, commonConfig); err != nil {
+		log.Errorf("could not initialize storage driver (%s). failed: %v", commonConfig.StorageDriverName, err)
 		return err
 	}
-	log.Infof("Storage driver (%s) initialized.", commonConfig.StorageDriverName)
+	log.Infof("storage driver (%s) initialized successfully.", commonConfig.StorageDriverName)
 
 	return nil
 }
@@ -180,15 +180,20 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (vol *model.VolumeSpec, 
 
 	err = d.sanStorageDriver.Create(volConfig, storagePool, make(map[string]sa.Request))
 	if err != nil {
-		log.Info("create volume failed")
+		log.Errorf("create volume (%s) failed: %v", opt.GetId(), err)
 		return nil, err
 	}
-	log.Info("create volume success")
 
 	lunPath := lunPath(name)
 
 	// Get LUN Serial Number
 	lunSerialNumber, err := d.getLunSerialNumber(lunPath)
+	if err != nil {
+		log.Errorf("create volume (%s) failed: %v", opt.GetId(), err)
+		return nil, err
+	}
+
+	log.Infof("volume (%s) created successfully.", opt.GetId())
 
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
@@ -216,11 +221,21 @@ func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.Volu
 	volConfig.CloneSourceSnapshot = snapName
 
 	err := d.sanStorageDriver.CreateClone(volConfig)
+	if err != nil {
+		log.Errorf("create volume (%s) from snapshot (%s) failed: %v", opt.GetId(), opt.GetSnapshotId(), err)
+		return nil, err
+	}
 
 	lunPath := lunPath(name)
 
 	// Get LUN Serial Number
 	lunSerialNumber, err := d.getLunSerialNumber(lunPath)
+	if err != nil {
+		log.Errorf("create volume (%s) from snapshot (%s) failed: %v", opt.GetId(), opt.GetSnapshotId(), err)
+		return nil, err
+	}
+
+	log.Infof("volume (%s) created from snapshot (%s) successfully.", opt.GetId(), opt.GetSnapshotId())
 
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
@@ -245,11 +260,11 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	var name = getVolumeName(opt.GetId())
 	err := d.sanStorageDriver.Destroy(name)
 	if err != nil {
-		msg := fmt.Sprintf("Delete Volume (%s) Failed: %v", opt.GetId(), err)
+		msg := fmt.Sprintf("delete volume (%s) failed: %v", opt.GetId(), err)
 		log.Error(msg)
 		return err
 	}
-	log.Infof("Delete Volume (%s) Success.", opt.GetId())
+	log.Infof("volume (%s) deleted successfully.", opt.GetId())
 	return nil
 }
 
@@ -260,9 +275,11 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 
 	newSize := uint64(opt.GetSize() * bytesGB)
 	if err := d.sanStorageDriver.Resize(volConfig, newSize); err != nil {
-		log.Errorf("Extend Volume (%s) Failed, error: %v", name, err)
+		log.Errorf("extend volume (%s) failed, error: %v", name, err)
 		return nil, err
 	}
+
+	log.Infof("volume (%s) extended successfully.", opt.GetId())
 	return &model.VolumeSpec{
 		BaseModel: &model.BaseModel{
 			Id: opt.GetId(),
@@ -289,10 +306,12 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 
 	err := d.sanStorageDriver.Publish(name, publishInfo)
 	if err != nil {
-		msg := fmt.Sprintf("Attachment is Failed: %v", err)
+		msg := fmt.Sprintf("volume (%s) attachment is failed: %v", opt.GetVolumeId(), err)
 		log.Errorf(msg)
 		return nil, err
 	}
+
+	log.Infof("volume (%s) attachment is created successfully", opt.GetVolumeId())
 
 	connInfo := &model.ConnectionInfo{
 		DriverVolumeType: opt.GetAccessProtocol(),
@@ -310,7 +329,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 		},
 	}
 
-	log.Infof("initialize connection success: %v", connInfo)
+	log.Infof("initialize connection successfully: %v", connInfo)
 	return connInfo, nil
 }
 
@@ -320,10 +339,10 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	// Validate Flexvol exists before trying to Unmount
 	volExists, err := d.sanStorageDriver.API.VolumeExists(name)
 	if err != nil {
-		return fmt.Errorf("error checking for existing volume: %v", err)
+		return fmt.Errorf("error checking for existing volume (%s), error: %v", name, err)
 	}
 	if !volExists {
-		log.Infof("Volume %s already deleted, skipping destroy.", name)
+		log.Infof("volume %s already deleted, skipping destroy.", name)
 		return nil
 	}
 
@@ -336,7 +355,7 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 		return fmt.Errorf("error destroying volume %v: %v", name, zerr.Error())
 	}
 
-	log.Infof("termination connection success")
+	log.Infof("termination connection successfully")
 	return nil
 }
 
@@ -354,7 +373,7 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (snap *model.V
 		return nil, err
 	}
 
-	log.Infof("Create Snapshot %s (%s) Success.", opt.GetName(), opt.GetId())
+	log.Infof("snapshot %s (%s) created successfully.", opt.GetName(), opt.GetId())
 
 	return &model.VolumeSnapshotSpec{
 		BaseModel: &model.BaseModel{
@@ -392,7 +411,7 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 		log.Error(msg)
 		return err
 	}
-	log.Infof("remove volume snapshot (%s) success", opt.GetId())
+	log.Infof("volume snapshot (%s) deleted successfully", opt.GetId())
 	return nil
 }
 
@@ -435,7 +454,7 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 		pools = append(pools, pool)
 	}
 
-	log.Info("list pools success")
+	log.Info("list pools successfully")
 	return pools, nil
 }
 
