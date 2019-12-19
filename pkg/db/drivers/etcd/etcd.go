@@ -297,7 +297,7 @@ func (c *Client) CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSp
 
 	for _, acl := range acls {
 		if acl.AccessTo == fshare.AccessTo {
-			errstr :=  "acl already exists for this ip: "+acl.AccessTo+". If you want to set new acl, first delete the existing one"
+			errstr := "acl already exists for this ip: " + acl.AccessTo + ". If you want to set new acl, first delete the existing one"
 			log.Error(errstr)
 			return nil, fmt.Errorf(errstr)
 		}
@@ -2823,6 +2823,9 @@ func (c *Client) UpdateHost(ctx *c.Context, host *model.HostSpec) (*model.HostSp
 	}
 	if host.HostName != "" {
 		result.HostName = host.HostName
+	}
+	if host.OsType != "" {
+		result.OsType = host.OsType
 	}
 	if host.IP != "" {
 		result.IP = host.IP
