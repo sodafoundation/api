@@ -227,20 +227,17 @@ func TestCreateVolumeAttachment(t *testing.T) {
 		t.Error("failed to run volume prepare function:", err)
 		return
 	}
+	host, err := prepareHost(t)
+	if err != nil {
+		t.Error("failed to run host prepare function:", err)
+		return
+	}
 	defer cleanVolumeIfFailedOrFinished(t, vol.Id)
 
 	t.Log("Start creating volume attachment...")
-	host, _ := os.Hostname()
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{
-			Host:      host,
-			Platform:  runtime.GOARCH,
-			OsType:    runtime.GOOS,
-			Ip:        getHostIp(),
-			Initiator: localIqn,
-		},
-		AccessProtocol: iscsiProtocol,
+		HostId:   host.Id,
 	}
 	atc, err := c.CreateVolumeAttachment(body)
 	if err != nil {
@@ -256,64 +253,25 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	t.Log("create volume attachment success!")
 
 	t.Log("Start cleaning volume attachment...")
-	if err := c.DeleteVolumeAttachment(atc.Id, nil); err != nil {
-		t.Error("clean volume attachment failed:", err)
+	atcs, err := c.ListVolumeAttachments()
+	if err != nil {
+		t.Error("list volume attachments failed:", err)
 		return
+	}
+	for _, e := range atcs {
+		if err := c.DeleteVolumeAttachment(e.Id, nil); err != nil {
+			t.Error("delete volume attachment failed:", err)
+			return
+		}
 	}
 	t.Log("End cleaning volume attachment...")
-}
 
-func TestGetVolumeAttachment(t *testing.T) {
-	atc, err := prepareVolumeAttachment(t)
-	if err != nil {
-		t.Error("failed to run volume attachment prepare function:", err)
+	t.Log("Start cleaning host...")
+	if err := c.DeleteHost(host.Id); err != nil {
+		t.Error("delete host failed:", err)
 		return
 	}
-	defer cleanVolumeAndAttachmentIfFailedOrFinished(t, atc.VolumeId, atc.Id)
-
-	t.Log("Start checking volume attachment...")
-	atc, err = c.GetVolumeAttachment(atc.Id)
-	if err != nil {
-		t.Error("check volume attachment failed:", err)
-		return
-	}
-	if atc.Status != model.VolumeAttachAvailable {
-		t.Errorf("status expected is %s, got %s\n", model.VolumeAttachAvailable, atc.Status)
-		return
-	}
-	t.Log("Check volume attachment success!")
-}
-
-func TestListVolumeAttachments(t *testing.T) {
-	atc, err := prepareVolumeAttachment(t)
-	if err != nil {
-		t.Error("failed to run volume attachment prepare function:", err)
-		return
-	}
-	defer cleanVolumeAndAttachmentIfFailedOrFinished(t, atc.VolumeId, atc.Id)
-
-	t.Log("Start checking all volume attachments...")
-	if _, err := c.ListVolumeAttachments(); err != nil {
-		t.Error("check all volume attachments failed:", err)
-		return
-	}
-	t.Log("list volume attachments success!")
-}
-
-func TestDeleteVolumeAttachment(t *testing.T) {
-	atc, err := prepareVolumeAttachment(t)
-	if err != nil {
-		t.Error("failed to run volume attachment prepare function:", err)
-		return
-	}
-	defer cleanVolumeIfFailedOrFinished(t, atc.VolumeId)
-
-	t.Log("Start deleting volume attachment...")
-	if err := c.DeleteVolumeAttachment(atc.Id, nil); err != nil {
-		t.Error("delete volume attachment failed:", err)
-		return
-	}
-	t.Log("Delete volume attachment success!")
+	t.Log("End cleaning host...")
 }
 
 func TestCreateVolumeSnapshot(t *testing.T) {
@@ -433,9 +391,10 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 func prepareVolume(t *testing.T) (*model.VolumeSpec, error) {
 	t.Log("Start preparing volume...")
 	var body = &model.VolumeSpec{
-		Name:        "test",
-		Description: "This is a test",
-		Size:        int64(1),
+		Name:             "test",
+		Description:      "This is a test",
+		Size:             int64(1),
+		AvailabilityZone: "default",
 	}
 	vol, err := c.CreateVolume(body)
 	if err != nil {
@@ -450,42 +409,30 @@ func prepareVolume(t *testing.T) (*model.VolumeSpec, error) {
 	return vol, nil
 }
 
-func prepareVolumeAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) {
-	vol, err := prepareVolume(t)
-	if err != nil {
-		t.Error("failed to run volume prepare function:", err)
-		return nil, err
-	}
-
-	t.Log("Start preparing volume attachment...")
-	host, _ := os.Hostname()
-	var body = &model.VolumeAttachmentSpec{
-		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{
-			Host:      host,
-			Platform:  runtime.GOARCH,
-			OsType:    runtime.GOOS,
-			Ip:        getHostIp(),
-			Initiator: localIqn,
+func prepareHost(t *testing.T) (*model.HostSpec, error) {
+	t.Log("Start preparing host...")
+	hostName, _ := os.Hostname()
+	var body = &model.HostSpec{
+		HostName:          hostName,
+		IP:                getHostIp(),
+		OsType:            runtime.GOOS,
+		AccessMode:        "agentless",
+		AvailabilityZones: []string{"default", "az2"},
+		Initiators: []*model.Initiator{
+			&model.Initiator{
+				PortName: localIqn,
+				Protocol: "iscsi",
+			},
 		},
-		AccessProtocol: iscsiProtocol,
 	}
-	atc, err := c.CreateVolumeAttachment(body)
+	host, err := c.CreateHost(body)
 	if err != nil {
-		t.Error("prepare volume attachment failed:", err)
-		// Run volume clean function if failed to prepare volume attachment.
-		cleanVolumeIfFailedOrFinished(t, atc.VolumeId)
+		t.Error("prepare host failed:", err)
 		return nil, err
 	}
-	atc, _ = c.GetVolumeAttachment(atc.Id)
-	if atc.Status != model.VolumeAttachAvailable {
-		// Run volume clean function if failed to prepare volume attachment.
-		cleanVolumeIfFailedOrFinished(t, atc.VolumeId)
-		return nil, fmt.Errorf("the status of volume attachment is not available!")
-	}
 
-	t.Log("End preparing volume attachment...")
-	return atc, nil
+	t.Log("End preparing host...")
+	return host, nil
 }
 
 func prepareVolumeSnapshot(t *testing.T) (*model.VolumeSnapshotSpec, error) {
