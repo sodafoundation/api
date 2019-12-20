@@ -3462,6 +3462,7 @@ components:
           uniqueItems: true
         initiators:
           type: array
+          nullable: true
           description: Initiator of host
           items:
             type: object
@@ -3533,6 +3534,7 @@ components:
           uniqueItems: true
         initiators:
           type: array
+          nullable: true
           description: Initiator of host
           items:
             type: object
