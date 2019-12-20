@@ -2521,6 +2521,14 @@ func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) err
 			return errUpdate
 		}
 
+	case *model.FileShareAclSpec:
+		fileshareAcl := in.(*model.FileShareAclSpec)
+		fileshareAcl.Status = status
+		if _, errUpdate := c.UpdateFileShareAcl(ctx, fileshareAcl); errUpdate != nil {
+			log.Error("when update fileshare acl status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
 	case *model.FileShareSnapshotSpec:
 		fsnap := in.(*model.FileShareSnapshotSpec)
 		fsnap.Status = status
