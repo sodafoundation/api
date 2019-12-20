@@ -322,9 +322,9 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 			"description":       "NetApp ONTAP Attachment",
 			"host":              hostName,
 			"initiator":         initiator,
-			"targetIQN":         publishInfo.IscsiTargetIQN,
-			"targetPortal":      publishInfo.IscsiPortals,
-			"lunNumber":         publishInfo.IscsiLunNumber,
+			"targetIQN":         []string{publishInfo.IscsiTargetIQN},
+			"targetPortal":      []string{hostInfo.GetIp() + ":3260"},
+			"targetLun":         publishInfo.IscsiLunNumber,
 			"igroup":            publishInfo.IscsiIgroup,
 		},
 	}
