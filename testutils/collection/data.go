@@ -405,6 +405,23 @@ var (
 			SnapshotId:       "3769855c-a102-11e7-b772-17b880d2f537",
 		},
 	}
+	SampleVolumeWithDurableName = []model.VolumeSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			},
+			Name:             "sample-volume-01",
+			Description:      "This is a sample volume for testing",
+			AvailabilityZone: "default",
+			Size:             int64(2),
+			Status:           "available",
+			PoolId:           "084bf71e-a102-11e7-88a8-e31fe6d52248",
+			ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
+			SnapshotId:       "",
+			Identifier:		  &model.Identifier{DurableName:"6216b2326e974b5fb0b3d2af5cd6b25b",DurableNameFormat:"NAA"},
+
+		},
+	}
 
 	SampleShareNames = []string{}
 

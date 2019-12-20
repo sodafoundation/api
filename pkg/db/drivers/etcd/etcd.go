@@ -1619,6 +1619,19 @@ func (c *Client) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([
 		log.Error("List volumes failed: ", err)
 		return nil, err
 	}
+	// If DurableName is there in filter we need to parse the sub structure 'identifier' to filter out matching volume spec
+	var vols = []*model.VolumeSpec{}
+	if val, ok := m["DurableName"]; ok {
+		for _,vol := range volumes {
+			v :=c.FindVolumeValue("DurableName",vol)
+			if v == val[0] {
+				vols =append(vols,vol)
+				return vols,nil
+			}
+		}
+
+		return vols,nil
+	}
 
 	tmpVolumes := c.FilterAndSort(volumes, m, sortableKeysMap[typeVolumes])
 	var res = []*model.VolumeSpec{}
