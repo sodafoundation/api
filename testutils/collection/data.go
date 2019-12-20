@@ -418,8 +418,7 @@ var (
 			PoolId:           "084bf71e-a102-11e7-88a8-e31fe6d52248",
 			ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
 			SnapshotId:       "",
-			Identifier:		  &model.Identifier{DurableName:"6216b2326e974b5fb0b3d2af5cd6b25b",DurableNameFormat:"NAA"},
-
+			Identifier:       &model.Identifier{DurableName: "6216b2326e974b5fb0b3d2af5cd6b25b", DurableNameFormat: "NAA"},
 		},
 	}
 
