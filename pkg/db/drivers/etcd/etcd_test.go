@@ -1210,6 +1210,18 @@ func TestListVolumesWithFilter(t *testing.T) {
 				&SampleMultiVolumes[1],
 			},
 		},
+		// DurableName Filter
+		{
+			input: []*model.VolumeSpec{
+				&SampleVolumeWithDurableName[0],
+			},
+			param: map[string][]string{
+				"DurableName":  {"6216b2326e974b5fb0b3d2af5cd6b25b"},
+			},
+			expected: []*model.VolumeSpec{
+				&SampleVolumeWithDurableName[0],
+			},
+		},
 	}
 	for _, testcase := range tests {
 		ret := fc.FilterAndSort(testcase.input, testcase.param, sortableKeysMap[typeVolumes])
