@@ -109,7 +109,7 @@ func Init(resourceType string) VolumeDriver {
 		d = &eternus.Driver{}
 		break
 	case config.NetappOntapSanDriverType:
-		d = &ontap.Driver{}
+		d = &ontap.SANDriver{}
 		break
 	default:
 		d = &sample.Driver{}
@@ -137,7 +137,7 @@ func Clean(d VolumeDriver) VolumeDriver {
 		break
 	case *eternus.Driver:
 		break
-	case *ontap.Driver:
+	case *ontap.SANDriver:
 		break
 	default:
 		break

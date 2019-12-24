@@ -19,7 +19,7 @@ const (
 	DefaultAZ         = "default"
 	volumePrefix      = "opensds_"
 	snapshotPrefix    = "opensds_snapshot_"
-	naaPrefix         = "600a0980"
+	naaPrefix         = "60a98000" //Applicable to Clustered Data ONTAP and Data ONTAP 7-Mode
 	KLvPath           = "lunPath"
 	KLvIdFormat       = "NAA"
 	StorageDriverName = "ontap-san"
@@ -28,5 +28,5 @@ const (
 	SnapshotVersion   = "1"
 	accessMode        = ""
 	volumeMode        = "Block"
-	bytesGB           = 1073741824
+	bytesGiB           = 1073741824
 )

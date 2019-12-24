@@ -99,7 +99,7 @@ type Backends struct {
 	Manila               BackendProperties `conf:"manila"`
 	FujitsuEternus       BackendProperties `conf:"fujitsu_eternus"`
 	Chubaofs             BackendProperties `conf:"chubaofs"`
-	NetappOntapSan       BackendProperties `conf:"ontap"`
+	NetappOntapSan       BackendProperties `conf:"netapp_ontap_san"`
 }
 
 type KeystoneAuthToken struct {

@@ -35,7 +35,7 @@ type ONTAPConfig struct {
 	Pool           map[string]PoolProperties `yaml:"pool,flow"`
 }
 
-type Driver struct {
+type SANDriver struct {
 	sanStorageDriver *ontap.SANStorageDriver
 	conf             *ONTAPConfig
 }

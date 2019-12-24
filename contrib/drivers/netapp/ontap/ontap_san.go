@@ -53,7 +53,7 @@ func getSnapshotName(id string) string {
 }
 
 // Get LUN Serial Number
-func (d *Driver) getLunSerialNumber(lunPath string) (string, error) {
+func (d *SANDriver) getLunSerialNumber(lunPath string) (string, error) {
 
 	lunSrNumber, err := d.sanStorageDriver.API.LunGetSerialNumber(lunPath)
 	if err != nil {
@@ -63,12 +63,12 @@ func (d *Driver) getLunSerialNumber(lunPath string) (string, error) {
 	return naaPrefix + hex.EncodeToString([]byte(lunSrNumber.Result.SerialNumber())), nil
 }
 
-func (d *Driver) GetVolumeConfig(name string, size int64) (volConfig *storage.VolumeConfig) {
+func (d *SANDriver) GetVolumeConfig(name string, size int64) (volConfig *storage.VolumeConfig) {
 	volConfig = &storage.VolumeConfig{
 		Version:      VolumeVersion,
 		Name:         name,
 		InternalName: name,
-		Size:         strconv.FormatInt(size*bytesGB, 10),
+		Size:         strconv.FormatInt(size*bytesGiB, 10),
 		Protocol:     d.sanStorageDriver.GetProtocol(),
 		AccessMode:   accessMode,
 		VolumeMode:   volumeMode,
@@ -77,7 +77,7 @@ func (d *Driver) GetVolumeConfig(name string, size int64) (volConfig *storage.Vo
 	return volConfig
 }
 
-func (d *Driver) GetSnapshotConfig(snapName string, volName string) (snapConfig *storage.SnapshotConfig) {
+func (d *SANDriver) GetSnapshotConfig(snapName string, volName string) (snapConfig *storage.SnapshotConfig) {
 	snapConfig = &storage.SnapshotConfig{
 		Version:            SnapshotVersion,
 		Name:               snapName,
@@ -88,7 +88,7 @@ func (d *Driver) GetSnapshotConfig(snapName string, volName string) (snapConfig 
 	return snapConfig
 }
 
-func (d *Driver) Setup() error {
+func (d *SANDriver) Setup() error {
 	// Read NetApp ONTAP config file
 	d.conf = &ONTAPConfig{}
 
@@ -156,13 +156,13 @@ func (d *Driver) Setup() error {
 	return nil
 }
 
-func (d *Driver) Unset() error {
+func (d *SANDriver) Unset() error {
 	//driver to clean up and stop any ongoing operations.
 	d.sanStorageDriver.Terminate()
 	return nil
 }
 
-func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (vol *model.VolumeSpec, err error) {
+func (d *SANDriver) CreateVolume(opt *pb.CreateVolumeOpts) (vol *model.VolumeSpec, err error) {
 
 	if opt.GetSnapshotId() != "" {
 		return d.createVolumeFromSnapshot(opt)
@@ -209,7 +209,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (vol *model.VolumeSpec, 
 	}, nil
 }
 
-func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
+func (d *SANDriver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, error) {
 
 	var snapName = getSnapshotName(opt.GetSnapshotId())
 	var volName = opt.GetMetadata()["volume"]
@@ -251,12 +251,12 @@ func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.Volu
 	}, err
 }
 
-func (d *Driver) PullVolume(volId string) (*model.VolumeSpec, error) {
+func (d *SANDriver) PullVolume(volId string) (*model.VolumeSpec, error) {
 
 	return nil, &model.NotImplementError{"method PullVolume has not been implemented yet"}
 }
 
-func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
+func (d *SANDriver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 	var name = getVolumeName(opt.GetId())
 	err := d.sanStorageDriver.Destroy(name)
 	if err != nil {
@@ -269,11 +269,11 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 }
 
 // ExtendVolume ...
-func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
+func (d *SANDriver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
 	var name = getVolumeName(opt.GetId())
 	volConfig := d.GetVolumeConfig(name, opt.GetSize())
 
-	newSize := uint64(opt.GetSize() * bytesGB)
+	newSize := uint64(opt.GetSize() * bytesGiB)
 	if err := d.sanStorageDriver.Resize(volConfig, newSize); err != nil {
 		log.Errorf("extend volume (%s) failed, error: %v", name, err)
 		return nil, err
@@ -291,7 +291,7 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 	}, nil
 }
 
-func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *SANDriver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
 
 	var name = getVolumeName(opt.GetVolumeId())
 	hostInfo := opt.GetHostInfo()
@@ -333,7 +333,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 	return connInfo, nil
 }
 
-func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
+func (d *SANDriver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	var name = getVolumeName(opt.GetVolumeId())
 
 	// Validate Flexvol exists before trying to Unmount
@@ -359,7 +359,7 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 	return nil
 }
 
-func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (snap *model.VolumeSnapshotSpec, err error) {
+func (d *SANDriver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (snap *model.VolumeSnapshotSpec, err error) {
 	var snapName = getSnapshotName(opt.GetId())
 	var volName = getVolumeName(opt.GetVolumeId())
 
@@ -387,17 +387,17 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (snap *model.V
 			"name":         snapName,
 			"volume":       volName,
 			"creationTime": snapshot.Created,
-			"size":         strconv.FormatInt(snapshot.SizeBytes/bytesGB, 10) + "GB",
+			"size":         strconv.FormatInt(snapshot.SizeBytes/bytesGiB, 10) + "G",
 		},
 	}, nil
 }
 
-func (d *Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error) {
+func (d *SANDriver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error) {
 	// not used, do nothing
 	return nil, &model.NotImplementError{"method PullSnapshot has not been implemented yet"}
 }
 
-func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
+func (d *SANDriver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 
 	var snapName = getSnapshotName(opt.GetId())
 	var volName = getVolumeName(opt.GetVolumeId())
@@ -415,7 +415,7 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
 	return nil
 }
 
-func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
+func (d *SANDriver) ListPools() ([]*model.StoragePoolSpec, error) {
 
 	var pools []*model.StoragePoolSpec
 
@@ -433,8 +433,8 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 			continue
 		}
 		aggregate, _ := d.sanStorageDriver.API.AggregateCommitment(aggr)
-		aggregateCapacity := aggregate.AggregateSize / bytesGB
-		aggregateAllocatedCapacity := aggregate.TotalAllocated / bytesGB
+		aggregateCapacity := aggregate.AggregateSize / bytesGiB
+		aggregateAllocatedCapacity := aggregate.TotalAllocated / bytesGiB
 
 		pool := &model.StoragePoolSpec{
 			BaseModel: &model.BaseModel{
@@ -458,25 +458,25 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 	return pools, nil
 }
 
-func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
+func (d *SANDriver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
 
 	return nil, &model.NotImplementError{S: "method InitializeSnapshotConnection has not been implemented yet."}
 }
 
-func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
+func (d *SANDriver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
 
 	return &model.NotImplementError{S: "method TerminateSnapshotConnection has not been implemented yet."}
 
 }
 
-func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+func (d *SANDriver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
 	return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
+func (d *SANDriver) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
 	return nil, &model.NotImplementError{"method UpdateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
+func (d *SANDriver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 	return &model.NotImplementError{"method DeleteVolumeGroup has not been implemented yet"}
 }
