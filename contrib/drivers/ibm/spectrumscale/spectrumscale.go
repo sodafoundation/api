@@ -32,7 +32,7 @@ const (
 	username          = "root"
 	password          = "ibm"
 	port              = "2022"
-	defaultConfPath   = "/etc/opensds/driver/ibm.yaml"
+	defaultConfPath   = "/etc/opensds/driver/spectrumscale.yaml"
 	volumePrefix      = "volume-"
 	snapshotPrefix    = "_snapshot-"
 	blocksize         = 4096
@@ -41,12 +41,12 @@ const (
 	nvmeofAccess      = "nvmeof"
 	iscsiAccess       = "iscsi"
 	storageType       = "block"
-  timeoutForssh        = 60
+	timeoutForssh     = 60
 )
 
 const (
-	KLvIdFormat = "NAA"
-	FileSetPath = "FilesetPath"
+	KLvIdFormat  = "NAA"
+	FileSetPath  = "FilesetPath"
 	SnapshotName = "SnapshotName"
 )
 
@@ -68,11 +68,11 @@ type Driver struct {
 func (d *Driver) Setup() error {
 	// Read ibm config file
 	d.conf = &IBMConfig{
-	TgtBindIp: defaultTgtBindIp,
-	TgtConfDir: defaultTgtConfDir,
-	UserName: username,
-	Port: port,
-	Password: password,
+		TgtBindIp:  defaultTgtBindIp,
+		TgtConfDir: defaultTgtConfDir,
+		UserName:   username,
+		Port:       port,
+		Password:   password,
 	}
 	p := config.CONF.OsdsDock.Backends.IBMSpectrumScale.ConfigPath
 	if "" == p {
@@ -81,7 +81,7 @@ func (d *Driver) Setup() error {
 	if _, err := Parse(d.conf, p); err != nil {
 		return err
 	}
-	err:= login()
+	err := login()
 	if err != nil {
 		return err
 	}
@@ -93,55 +93,54 @@ func (*Driver) Unset() error { return nil }
 
 // first get the status of spectrumstate. If it is not active just return
 func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (vol *model.VolumeSpec, err error) {
-		 err = d.cli.GetSpectrumScaleStatus()
-		 if err != nil{
-			 log.Error("the GPFS cluster is not active")
-			 return &model.VolumeSpec{}, err
-		 }
+	err = d.cli.GetSpectrumScaleStatus()
+	if err != nil {
+		log.Error("the GPFS cluster is not active")
+		return &model.VolumeSpec{}, err
+	}
 
-		 // if spectrumscale service is active, get the mountPoint and filesystem
-     var mountPoint, filesystem string
- 		 mountPoint, filesystem, err = d.cli.GetSpectrumScaleMountPoint()
- 		 if err != nil{
- 			log.Error("not able to find spectrumscale mount point")
- 			return &model.VolumeSpec{}, err
- 		 }
-     log.Infof("the cluster filesystem name:%v and mounpoint is:%v", filesystem, mountPoint)
+	// if spectrumscale service is active, get the mountPoint and filesystem
+	var mountPoint, filesystem string
+	mountPoint, filesystem, err = d.cli.GetSpectrumScaleMountPoint()
+	if err != nil {
+		log.Error("not able to find spectrumscale mount point")
+		return &model.VolumeSpec{}, err
+	}
+	log.Infof("the cluster filesystem name:%v and mounpoint is:%v", filesystem, mountPoint)
 
+	log.Info("IBM driver receive create volume request, vr =", opt)
+	var volName = volumePrefix + opt.GetId()
+	var volSize = opt.GetSize()
+	size := strconv.FormatInt(int64(volSize), 10)
+	if err = d.cli.CreateVolume(volName, size, filesystem, mountPoint); err != nil {
+		return &model.VolumeSpec{}, err
+	}
 
-		 log.Info("IBM driver receive create volume request, vr =", opt)
-		 var volName = volumePrefix + opt.GetId()
-		 var volSize = opt.GetSize()
-		 size := strconv.FormatInt(int64(volSize), 10)
-		 if err = d.cli.CreateVolume(volName, size); err != nil {
-			return &model.VolumeSpec{}, err
-		}
-
-		return &model.VolumeSpec{
-			BaseModel: &model.BaseModel{
-				Id: opt.GetId(),
-			},
-			Name:        opt.GetName(),
-			Size:        opt.GetSize(),
-			Description: opt.GetDescription(),
-			Identifier:  &model.Identifier{DurableName:opt.GetId(),
-				DurableNameFormat: KLvIdFormat,
-			},
-			Metadata: map[string]string{
-				FileSetPath: mountPoint + "/" + volName,
-			},
-		}, nil
+	return &model.VolumeSpec{
+		BaseModel: &model.BaseModel{
+			Id: opt.GetId(),
+		},
+		Name:        opt.GetName(),
+		Size:        opt.GetSize(),
+		Description: opt.GetDescription(),
+		Identifier: &model.Identifier{DurableName: opt.GetId(),
+			DurableNameFormat: KLvIdFormat,
+		},
+		Metadata: map[string]string{
+			FileSetPath: mountPoint + "/" + volName,
+		},
+	}, nil
 }
 
 // discover the pool from spectrumscale
 func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
-	var mountPoint,filesystem string
+	var mountPoint, filesystem string
 	mountPoint, filesystem, stderr := d.cli.GetSpectrumScaleMountPoint()
 	if stderr != nil {
-    log.Error("failed to get mountpoint")
+		log.Error("failed to get mountpoint")
 		return nil, stderr
 	}
-  log.Infof("the cluster filesystem name:%v and mounpoint is:%v", filesystem, mountPoint)
+	log.Infof("the cluster filesystem name:%v and mounpoint is:%v", filesystem, mountPoint)
 
 	pools, err := d.cli.ListPools(mountPoint, filesystem)
 	if err != nil {
@@ -171,8 +170,8 @@ func (d *Driver) ListPools() ([]*model.StoragePoolSpec, error) {
 }
 
 // this function is for deleting the spectrumscale volume(fileset)
-func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error{
-	fileSetPath:= opt.GetMetadata()[FileSetPath]
+func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
+	fileSetPath := opt.GetMetadata()[FileSetPath]
 	field := strings.Split(fileSetPath, "/")
 	name := field[3]
 	if err := d.cli.Delete(name); err != nil {
@@ -180,12 +179,12 @@ func (d *Driver) DeleteVolume(opt *pb.DeleteVolumeOpts) error{
 		return err
 	}
 	log.Info("volume is successfully deleted!")
-  return nil
+	return nil
 }
 
 // this function is for extending the volume(fileset). It sets the quota for block and files
 func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, error) {
-	fileSetPath:= opt.GetMetadata()[FileSetPath]
+	fileSetPath := opt.GetMetadata()[FileSetPath]
 	field := strings.Split(fileSetPath, "/")
 	name := field[3]
 	var volsize = opt.GetSize()
@@ -207,7 +206,7 @@ func (d *Driver) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, erro
 
 // this function is for creating the snapshot of spectrumscale volume(fileset)
 func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.VolumeSnapshotSpec, error) {
-	fileSetPath:= opt.GetMetadata()[FileSetPath]
+	fileSetPath := opt.GetMetadata()[FileSetPath]
 	field := strings.Split(fileSetPath, "/")
 	volName := field[3]
 	var snapName = opt.GetName()
@@ -223,16 +222,16 @@ func (d *Driver) CreateSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*model.Volume
 		Size:        opt.GetSize(),
 		Description: opt.GetDescription(),
 		VolumeId:    opt.GetVolumeId(),
-		Metadata:    map[string]string{
-			FileSetPath: fileSetPath,
+		Metadata: map[string]string{
+			FileSetPath:  fileSetPath,
 			SnapshotName: snapName,
 		},
 	}, nil
 }
 
 // this function is for deleting the snapshot
-func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error{
-	fileSetPath:= opt.GetMetadata()[FileSetPath]
+func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error {
+	fileSetPath := opt.GetMetadata()[FileSetPath]
 	field := strings.Split(fileSetPath, "/")
 	volName := field[3]
 	snapName := opt.GetMetadata()[SnapshotName]
@@ -240,7 +239,7 @@ func (d *Driver) DeleteSnapshot(opt *pb.DeleteVolumeSnapshotOpts) error{
 		log.Error("failed to delete the snapshot:", err)
 		return err
 	}
-		return nil
+	return nil
 }
 
 func (d *Driver) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.VolumeGroupSpec, error) {
@@ -256,25 +255,25 @@ func (d *Driver) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 }
 
 func (d *Driver) PullVolume(volIdentifier string) (*model.VolumeSpec, error) {
-        return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
+	return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
 }
 
 func (d *Driver) PullSnapshot(snapIdentifier string) (*model.VolumeSnapshotSpec, error) {
-        return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
+	return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
 }
 
 func (d *Driver) InitializeSnapshotConnection(opt *pb.CreateSnapshotAttachmentOpts) (*model.ConnectionInfo, error) {
-        return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
+	return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error{
-        return nil
+func (d *Driver) TerminateSnapshotConnection(opt *pb.DeleteSnapshotAttachmentOpts) error {
+	return nil
 }
 
 func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*model.ConnectionInfo, error) {
-        return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
+	return nil, &model.NotImplementError{"method CreateVolumeGroup has not been implemented yet"}
 }
 
-func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error{
-        return nil
+func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
+	return nil
 }
