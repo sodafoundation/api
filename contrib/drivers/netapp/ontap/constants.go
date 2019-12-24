@@ -15,7 +15,7 @@ package ontap
 
 //  default value for driver
 const (
-	defaultConfPath   = "/etc/opensds/driver/ontap.yaml"
+	defaultConfPath   = "/etc/opensds/driver/netapp_ontap_san.yaml"
 	DefaultAZ         = "default"
 	volumePrefix      = "opensds_"
 	snapshotPrefix    = "opensds_snapshot_"
