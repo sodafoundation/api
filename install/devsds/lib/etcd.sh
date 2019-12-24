@@ -41,13 +41,13 @@ osds::etcd::download() {
 
 osds::etcd::install() {
     # validate before running
-    which etcd >/dev/null || {
-    osds::etcd::download
-    }
+    if [ ! -f "${OPT_DIR}/bin/etcd" ]; then
+        osds::etcd::download
+    fi
 
     # Start etcd
     mkdir -p $ETCD_DIR
-    nohup etcd --advertise-client-urls http://${ETCD_HOST}:${ETCD_PORT} --listen-client-urls http://${ETCD_HOST}:${ETCD_PORT}\
+    nohup ${OPT_DIR}/bin/etcd --advertise-client-urls http://${ETCD_HOST}:${ETCD_PORT} --listen-client-urls http://${ETCD_HOST}:${ETCD_PORT}\
     --listen-peer-urls http://${ETCD_HOST}:${ETCD_PEER_PORT} --data-dir ${ETCD_DATADIR} --debug 2> "${ETCD_LOGFILE}" >/dev/null &
     echo $! > $ETCD_DIR/etcd.pid
 

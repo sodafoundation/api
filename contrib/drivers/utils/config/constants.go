@@ -25,6 +25,7 @@ const (
 	CinderDriverType               = "cinder"
 	CephDriverType                 = "ceph"
 	LVMDriverType                  = "lvm"
+	IBMSpectrumScaleDriverType     = "spectrumscale"
 	HuaweiOceanStorBlockDriverType = "huawei_oceanstor_block"
 	HuaweiFusionStorageDriverType  = "huawei_fusionstorage"
 	HuaweiOceanStorFileDriverType  = "huawei_oceanstor_file"
@@ -34,6 +35,7 @@ const (
 	ManilaDriverType               = "manila"
 	FujitsuEternusDriverType       = "fujitsu_eternus"
 	ChubaofsDriverType             = "chubaofs"
+	NetappOntapSanDriverType       = "netapp_ontap_san"
 )
 
 const (

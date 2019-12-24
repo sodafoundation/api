@@ -91,6 +91,7 @@ type Backends struct {
 	Cinder               BackendProperties `conf:"cinder"`
 	Sample               BackendProperties `conf:"sample"`
 	LVM                  BackendProperties `conf:"lvm"`
+	IBMSpectrumScale     BackendProperties `conf:"spectrumscale"`
 	HuaweiOceanStorBlock BackendProperties `conf:"huawei_oceanstor_block"`
 	HuaweiFusionStorage  BackendProperties `conf:"huawei_fusionstorage"`
 	HuaweiOceanStorFile  BackendProperties `conf:"huawei_oceanstor_file"`
@@ -99,6 +100,7 @@ type Backends struct {
 	Manila               BackendProperties `conf:"manila"`
 	FujitsuEternus       BackendProperties `conf:"fujitsu_eternus"`
 	Chubaofs             BackendProperties `conf:"chubaofs"`
+	NetappOntapSan       BackendProperties `conf:"netapp_ontap_san"`
 }
 
 type KeystoneAuthToken struct {

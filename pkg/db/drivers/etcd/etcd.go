@@ -289,7 +289,7 @@ func (c *Client) FindFileShareValue(k string, p *model.FileShareSpec) string {
 }
 
 func (c *Client) CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
-	acls, err := c.ListFileSharesAcl(ctx)
+	acls, err := c.ListFileShareAclsByShareId(ctx, fshare.FileShareId)
 	if err != nil {
 		log.Error("failed to list acls")
 		return nil, err
@@ -297,7 +297,7 @@ func (c *Client) CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSp
 
 	for _, acl := range acls {
 		if acl.AccessTo == fshare.AccessTo {
-			errstr :=  "acl already exists for this ip: "+acl.AccessTo+". If you want to set new acl, first delete the existing one"
+			errstr :=  "for fileshareID: "+acl.FileShareId+", acl is already set with ip: "+acl.AccessTo+". If you want to set new acl, first delete the existing one"
 			log.Error(errstr)
 			return nil, fmt.Errorf(errstr)
 		}
@@ -1619,6 +1619,19 @@ func (c *Client) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([
 		log.Error("List volumes failed: ", err)
 		return nil, err
 	}
+	// If DurableName is there in filter we need to parse the sub structure 'identifier' to filter out matching volume spec
+	var vols = []*model.VolumeSpec{}
+	if val, ok := m["DurableName"]; ok {
+		for _,vol := range volumes {
+			v :=c.FindVolumeValue("DurableName",vol)
+			if v == val[0] {
+				vols =append(vols,vol)
+				return vols,nil
+			}
+		}
+
+		return vols,nil
+	}
 
 	tmpVolumes := c.FilterAndSort(volumes, m, sortableKeysMap[typeVolumes])
 	var res = []*model.VolumeSpec{}
@@ -2521,6 +2534,14 @@ func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) err
 			return errUpdate
 		}
 
+	case *model.FileShareAclSpec:
+		fileshareAcl := in.(*model.FileShareAclSpec)
+		fileshareAcl.Status = status
+		if _, errUpdate := c.UpdateFileShareAcl(ctx, fileshareAcl); errUpdate != nil {
+			log.Error("when update fileshare acl status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
 	case *model.FileShareSnapshotSpec:
 		fsnap := in.(*model.FileShareSnapshotSpec)
 		fsnap.Status = status
@@ -2823,6 +2844,9 @@ func (c *Client) UpdateHost(ctx *c.Context, host *model.HostSpec) (*model.HostSp
 	}
 	if host.HostName != "" {
 		result.HostName = host.HostName
+	}
+	if host.OsType != "" {
+		result.OsType = host.OsType
 	}
 	if host.IP != "" {
 		result.IP = host.IP
