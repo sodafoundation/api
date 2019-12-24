@@ -46,7 +46,7 @@ func CreateFileShareAclDBEntry(ctx *c.Context, in *model.FileShareAclSpec) (*mod
 	if in.UpdatedAt == "" {
 		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
 	}
-
+	in.Status = model.FileShareAclAvailable
 	// validate profileId
 	if in.ProfileId == "" {
 		errMsg := "profile id can not be empty when creating fileshare acl in db!"
