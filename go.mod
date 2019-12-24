@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/LINBIT/godrbdutils v0.0.0-20180425110027-65b98a0f103a
 	github.com/RoaringBitmap/roaring v0.4.21 // indirect
+	github.com/appleboy/easyssh-proxy v1.2.0
 	github.com/astaxie/beego v1.11.1
 	github.com/beorn7/perks v1.0.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
