@@ -113,6 +113,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (vol *model.VolumeSpec, 
 	var volSize = opt.GetSize()
 	size := strconv.FormatInt(int64(volSize), 10)
 	if err = d.cli.CreateVolume(volName, size, filesystem, mountPoint); err != nil {
+		log.Errorf("failed to create spectrumscale volume.")
 		return &model.VolumeSpec{}, err
 	}
 

@@ -53,7 +53,7 @@ type Cli struct {
 func login() error {
 	stdout, stderr, done, err := Executer().Run("uname", timeoutForssh*time.Second)
 	if err != nil {
-		glog.Infof("unable to establish connection, stderr:%v", stderr)
+		glog.Errorf("unable to establish connection, stderr:%v", stderr)
 		return err
 	}
 	glog.Infof("connection established. stdout:%v done:%v", stdout, done)
@@ -85,8 +85,7 @@ func (c *Cli) GetSpectrumScaleStatus() error {
 	// now parse the output lines to get the status of spectrumscale cluster
 	// the expected state is active
 	lines := strings.Split(stdout, "\n")
-	var bool = strings.Contains(lines[2], "active")
-	if bool != true {
+	if !(strings.Contains(lines[2], "active")) {
 		glog.Errorf("cluster state is not active")
 		return err
 	}
