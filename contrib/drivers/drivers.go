@@ -29,6 +29,7 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/huawei/fusionstorage"
 	"github.com/opensds/opensds/contrib/drivers/huawei/oceanstor"
 	"github.com/opensds/opensds/contrib/drivers/lvm"
+	"github.com/opensds/opensds/contrib/drivers/ibm/spectrumscale"
 	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
@@ -96,6 +97,9 @@ func Init(resourceType string) VolumeDriver {
 	case config.LVMDriverType:
 		d = &lvm.Driver{}
 		break
+	case config.IBMSpectrumScaleDriverType:
+		d = &lvm.Driver{}
+		break
 	case config.HuaweiOceanStorBlockDriverType:
 		d = &oceanstor.Driver{}
 		break
@@ -124,6 +128,8 @@ func Clean(d VolumeDriver) VolumeDriver {
 	case *ceph.Driver:
 		break
 	case *lvm.Driver:
+		break
+	case *spectrumscale.Driver:
 		break
 	case *oceanstor.Driver:
 		break
