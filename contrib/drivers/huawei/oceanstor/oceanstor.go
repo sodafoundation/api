@@ -182,7 +182,7 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 		Size:             Sector2Gb(lun.Capacity),
 		Description:      opt.GetDescription(),
 		AvailabilityZone: opt.GetAvailabilityZone(),
-		Identifier:  &model.Identifier{DurableName: lun.Wwn, DurableNameFormat: "NAA"},
+		Identifier:       &model.Identifier{DurableName: lun.Wwn, DurableNameFormat: "NAA"},
 		Metadata: map[string]string{
 			KLunId: lun.Id,
 		},
@@ -564,12 +564,12 @@ func (d *Driver) InitializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*mo
 		DriverVolumeType: opt.GetAccessProtocol(),
 		ConnectionData: map[string]interface{}{
 			"targetDiscovered":     true,
-			"target_wwn":           tgtPortWWNs,
-			"volume_id":            opt.GetVolumeId(),
+			"targetWWNs":           tgtPortWWNs,
+			"volumeId":             opt.GetVolumeId(),
 			"initiator_target_map": initTargMap,
 			"description":          "huawei",
-			"host_name":            opt.GetHostInfo().Host,
-			"target_lun":           tgtLun,
+			"hostName":             opt.GetHostInfo().Host,
+			"targetLun":            tgtLun,
 		},
 	}
 	return fcInfo, nil
@@ -733,7 +733,7 @@ func (d *Driver) deleteZoneAndRemoveFCInitiators(wwns []string, hostId, hostGrpI
 		}
 	}
 
-	return fmt.Sprintf("driver_volume_type: fibre_channel, target_wwn: %s, initiator_target_map: %s", tgtPortWWNs, initTargMap), nil
+	return fmt.Sprintf("driver_volume_type: fibre_channel, target_wwns: %s, initiator_target_map: %s", tgtPortWWNs, initTargMap), nil
 }
 
 func (d *Driver) getMappedInfo(hostName string) (string, string, string, string, error) {

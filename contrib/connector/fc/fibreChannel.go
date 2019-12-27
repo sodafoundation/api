@@ -37,9 +37,9 @@ type ConnectorInfo struct {
 	AuthPass   string   `mapstructure:"authPassword"`
 	AuthMethod string   `mapstructure:"authMethod"`
 	TgtDisco   bool     `mapstructure:"targetDiscovered"`
-	TargetWWN  []string `mapstructure:"targetWWN"`
+	TargetWWNs []string `mapstructure:"targetWWNs"`
 	VolumeID   string   `mapstructure:"volumeId"`
-	TgtLun     string   `mapstructure:"targetLun"`
+	TgtLun     int      `mapstructure:"targetLun"`
 	Encrypted  bool     `mapstructure:"encrypted"`
 }
 
@@ -48,7 +48,7 @@ func parseFCConnectInfo(connectInfo map[string]interface{}) (*ConnectorInfo, err
 	var con ConnectorInfo
 	mapstructure.Decode(connectInfo, &con)
 
-	if len(con.TargetWWN) == 0 || con.TgtLun == "0" {
+	if len(con.TargetWWNs) == 0 || con.TgtLun == 0 {
 		return nil, errors.New("fibrechannel connection data invalid.")
 	}
 
@@ -71,7 +71,7 @@ func connectVolume(connMap map[string]interface{}) (map[string]string, error) {
 		return nil, errors.New(errMsg)
 	}
 
-	devicePath, deviceName := volPathDiscovery(volPaths, tries, conn.TargetWWN, hbas)
+	devicePath, deviceName := volPathDiscovery(volPaths, tries, conn.TargetWWNs, hbas)
 	if devicePath != "" && deviceName != "" {
 		log.Printf("Found Fibre Channel volume name, devicePath is %s, deviceName is %s\n", devicePath, deviceName)
 	}
@@ -85,7 +85,7 @@ func connectVolume(connMap map[string]interface{}) (map[string]string, error) {
 }
 
 func getVolumePaths(conn *ConnectorInfo, hbas []map[string]string) []string {
-	wwnports := conn.TargetWWN
+	wwnports := conn.TargetWWNs
 	devices := getDevices(hbas, wwnports)
 	lun := conn.TgtLun
 	hostPaths := getHostDevices(devices, lun)
@@ -107,7 +107,7 @@ func volPathDiscovery(volPaths []string, tries int, tgtWWN []string, hbas []map[
 	return "", ""
 }
 
-func getHostDevices(devices []map[string]string, lun string) []string {
+func getHostDevices(devices []map[string]string, lun int) []string {
 	var hostDevices []string
 	for _, device := range devices {
 		var hostDevice string
@@ -199,12 +199,11 @@ func getDevices(hbas []map[string]string, wwnports []string) []map[string]string
 	return device
 }
 
-func processLunID(lunID string) string {
-	lunIDInt, _ := strconv.Atoi(lunID)
-	if lunIDInt < 256 {
-		return lunID
+func processLunID(lunID int) string {
+	if lunID < 256 {
+		return strconv.Itoa(lunID)
 	}
-	return fmt.Sprintf("0x%04x%04x00000000", lunIDInt&0xffff, lunIDInt>>16&0xffff)
+	return fmt.Sprintf("0x%04x%04x00000000", lunID&0xffff, lunID>>16&0xffff)
 }
 
 func getFChbasInfo() ([]map[string]string, error) {

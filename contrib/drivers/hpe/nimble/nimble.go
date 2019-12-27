@@ -285,10 +285,10 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*mode
 				DriverVolumeType: FCProtocol,
 				ConnectionData: map[string]interface{}{
 					"targetDiscovered": true,
-					"target_wwn":       []string{tgtIqnWwn},
-					"volume_id":        opt.GetVolumeId(),
+					"targetWWNs":       []string{tgtIqnWwn},
+					"volumeId":         opt.GetVolumeId(),
 					"description":      "hpe",
-					"host_name":        opt.GetHostInfo().Host,
+					"hostName":         opt.GetHostInfo().Host,
 					"targetLun":        attachRespBody.Lun,
 				},
 			}, nil
