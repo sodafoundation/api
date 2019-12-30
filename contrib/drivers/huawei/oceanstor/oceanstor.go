@@ -541,8 +541,8 @@ func (d *Driver) InitializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*mo
 	}
 
 	// Not use FC switch
-	initiatorName := GetInitiatorName(opt.GetHostInfo().GetInitiators(), opt.GetAccessProtocol())
-	tgtPortWWNs, initTargMap, err := d.connectFCUseNoSwitch(opt, initiatorName, hostId)
+	initiators := GetInitiatorsByProtocol(opt.GetHostInfo().GetInitiators(), opt.GetAccessProtocol())
+	tgtPortWWNs, initTargMap, err := d.connectFCUseNoSwitch(opt, initiators, hostId)
 	if err != nil {
 		return nil, err
 	}
@@ -575,8 +575,8 @@ func (d *Driver) InitializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*mo
 	return fcInfo, nil
 }
 
-func (d *Driver) connectFCUseNoSwitch(opt *pb.CreateVolumeAttachmentOpts, wwpns string, hostId string) ([]string, map[string][]string, error) {
-	wwns := strings.Split(wwpns, ",")
+func (d *Driver) connectFCUseNoSwitch(opt *pb.CreateVolumeAttachmentOpts, initiators []string, hostId string) ([]string, map[string][]string, error) {
+	wwns := initiators
 
 	onlineWWNsInHost, err := d.client.GetHostOnlineFCInitiators(hostId)
 	if err != nil {
