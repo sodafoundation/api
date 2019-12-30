@@ -59,6 +59,7 @@ func IsNotFoundError(err error) bool {
 type OceanStorClient struct {
 	user       string
 	passwd     string
+	vstoreName string
 	endpoints  []string
 	urlPrefix  string
 	deviceId   string
@@ -82,10 +83,11 @@ func NewClient(opt *AuthOptions) (*OceanStorClient, error) {
 	}
 
 	c := &OceanStorClient{
-		user:      opt.Username,
-		passwd:    pwdCiphertext,
-		endpoints: endpoints,
-		insecure:  opt.Insecure,
+		user:       opt.Username,
+		passwd:     pwdCiphertext,
+		vstoreName: opt.VstoreName,
+		endpoints:  endpoints,
+		insecure:   opt.Insecure,
 	}
 	err := c.login()
 	return c, err
@@ -171,6 +173,11 @@ func (c *OceanStorClient) login() error {
 		"password": c.passwd,
 		"scope":    "0",
 	}
+
+	if len(c.vstoreName) > 0 {
+		data["vstorename"] = c.vstoreName
+	}
+
 	c.deviceId = ""
 	for _, ep := range c.endpoints {
 		url := ep + "/xxxxx/sessions"
@@ -597,6 +604,11 @@ func (c *OceanStorClient) CreateHostGroup(groupName string) (string, error) {
 	if hostGrpResp.Error.Code != 0 {
 		log.Errorf("Create host group failed, group name: %s, error code:%d, description:%s",
 			groupName, hostGrpResp.Error.Code, hostGrpResp.Error.Description)
+
+		if hostGrpResp.Error.Code == ErrorObjectNameAlreadyExist {
+			return c.FindHostGroup(groupName)
+		}
+
 		return "", fmt.Errorf("code: %d, description: %s",
 			hostGrpResp.Error.Code, hostGrpResp.Error.Description)
 	}
