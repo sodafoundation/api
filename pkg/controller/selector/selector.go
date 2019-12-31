@@ -85,6 +85,7 @@ func (s *selector) SelectSupportedPoolForVolume(vol *model.VolumeSpec) (*model.S
 			filterRequest["id"] = vol.PoolId
 		}
 		filterRequest["storageType"] = prf.StorageType
+		filterRequest["status"] = "available"
 		// Insert some rules of provisioning properties.
 		if pp := prf.ProvisioningProperties; !pp.IsEmpty() {
 			if ds := pp.DataStorage; !ds.IsEmpty() {
