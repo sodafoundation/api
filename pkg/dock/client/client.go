@@ -34,8 +34,6 @@ type Client interface {
 	pb.FileShareDockClient
 
 	Connect(edp string) error
-
-	Close()
 }
 
 // DockClient structure is one implementation of Client interface and will be
