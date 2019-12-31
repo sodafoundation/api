@@ -265,7 +265,7 @@ func (add *attachDockDiscoverer) Discover() error {
 	}
 
 	var wwpns []string
-	for _, v := range strings.Split(fcInitiator, ",") {
+	for _, v := range fcInitiator {
 		if strings.Contains(v, "node_name") {
 			wwpns = append(wwpns, strings.Split(v, ":")[1])
 		}
@@ -284,7 +284,7 @@ func (add *attachDockDiscoverer) Discover() error {
 			"Platform":  runtime.GOARCH,
 			"OsType":    runtime.GOOS,
 			"HostIp":    bindIp,
-			"Initiator": localIqn,
+			"Initiator": localIqn[0],
 			"WWPNS":     strings.Join(wwpns, ","),
 		},
 	}

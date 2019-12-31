@@ -33,6 +33,6 @@ func (n *NFS) Detach(conn map[string]interface{}) error {
 }
 
 // GetInitiatorInfo implementation
-func (n *NFS) GetInitiatorInfo() (string, error) {
+func (n *NFS) GetInitiatorInfo() ([]string, error) {
 	return getInitiatorInfo()
 }

@@ -33,6 +33,6 @@ func (isc *Iscsi) Detach(conn map[string]interface{}) error {
 }
 
 // GetInitiatorInfo implementation
-func (isc *Iscsi) GetInitiatorInfo() (string, error) {
+func (isc *Iscsi) GetInitiatorInfo() ([]string, error) {
 	return getInitiatorInfo()
 }

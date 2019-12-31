@@ -35,6 +35,6 @@ func (nof *Nvmeof) Detach(conn map[string]interface{}) error {
 }
 
 // GetInitiatorInfo implementation
-func (nof *Nvmeof) GetInitiatorInfo() (string, error) {
+func (nof *Nvmeof) GetInitiatorInfo() ([]string, error) {
 	return getInitiatorInfo()
 }

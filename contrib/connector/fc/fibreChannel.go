@@ -227,22 +227,23 @@ func getFChbasInfo() ([]map[string]string, error) {
 	return hbasInfos, nil
 }
 
-func getInitiatorInfo() (string, error) {
+func getInitiatorInfo() ([]string, error) {
 	hbas, err := getFChbasInfo()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	var initiatorInfo []string
-
 	for _, hba := range hbas {
 		if v, ok := hba[connector.PortName]; ok {
-			initiatorInfo = append(initiatorInfo, "port_name:"+v)
-		}
-		if v, ok := hba[connector.NodeName]; ok {
-			initiatorInfo = append(initiatorInfo, "node_name:"+v)
+			initiatorInfo = append(initiatorInfo, v)
 		}
 	}
 
-	return strings.Join(initiatorInfo, ","), nil
+	//Check for atleast one initiator
+	if (0 == len(initiatorInfo)){
+		return nil, errors.New("No initiator info found.")
+	}
+
+	return initiatorInfo, nil
 }
