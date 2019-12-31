@@ -86,7 +86,6 @@ func (r *ReplicationPortal) CreateReplication() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer r.CtrClient.Close()
 
 	opt := &pb.CreateReplicationOpts{
 		Id:                result.Id,
@@ -273,7 +272,6 @@ func (r *ReplicationPortal) DeleteReplication() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer r.CtrClient.Close()
 
 	opt := &pb.DeleteReplicationOpts{
 		Id:                rep.Id,
@@ -326,7 +324,6 @@ func (r *ReplicationPortal) EnableReplication() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer r.CtrClient.Close()
 
 	opt := &pb.EnableReplicationOpts{
 		Id:                rep.Id,
@@ -379,7 +376,6 @@ func (r *ReplicationPortal) DisableReplication() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer r.CtrClient.Close()
 
 	opt := &pb.DisableReplicationOpts{
 		Id:                rep.Id,
@@ -439,7 +435,6 @@ func (r *ReplicationPortal) FailoverReplication() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer r.CtrClient.Close()
 
 	opt := &pb.FailoverReplicationOpts{
 		Id:                  rep.Id,

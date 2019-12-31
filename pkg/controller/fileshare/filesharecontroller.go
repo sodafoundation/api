@@ -71,7 +71,6 @@ func (c *controller) CreateFileShareAcl(opt *pb.CreateFileShareAclOpts) (*model.
 		log.Error("create file share acl failed in file share controller:", err)
 		return nil, err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil,
@@ -100,7 +99,6 @@ func (c *controller) DeleteFileShareAcl(opt *pb.DeleteFileShareAclOpts) error {
 		log.Error("delete file share acl failed in file share controller:", err)
 		return err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return fmt.Errorf("failed to delete file share acl in file share controller, code: %v, message: %v",
@@ -123,7 +121,6 @@ func (c *controller) CreateFileShare(opt *pb.CreateFileShareOpts) (*model.FileSh
 		log.Error("create file share failed in file share controller:", err)
 		return nil, err
 	}
-	defer c.Client.Close()
 
 	log.V(5).Infof("dock create fleshare:  Sent to driver : %+v", c.DockInfo.DriverName)
 
@@ -154,7 +151,6 @@ func (c *controller) DeleteFileShare(opt *pb.DeleteFileShareOpts) error {
 		log.Error("delete file share failed in file share controller:", err)
 		return err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return errors.New(errorMsg.GetDescription())
@@ -178,7 +174,6 @@ func (c *controller) CreateFileShareSnapshot(opt *pb.CreateFileShareSnapshotOpts
 		log.Error("create file share snapshot failed in file share controller:", err)
 		return nil, err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil,
@@ -206,7 +201,6 @@ func (c *controller) DeleteFileShareSnapshot(opt *pb.DeleteFileShareSnapshotOpts
 		log.Error("delete file share snapshot failed in file share controller:", err)
 		return err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return errors.New(errorMsg.GetDescription())

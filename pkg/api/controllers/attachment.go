@@ -144,7 +144,6 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer v.CtrClient.Close()
 
 	// // Note: In some protocols, there is no related initiator
 	// var initiatorPort = ""
@@ -328,7 +327,6 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer v.CtrClient.Close()
 
 	var initiators []*pb.Initiator
 	for _, e := range host.Initiators {

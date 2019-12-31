@@ -15,9 +15,13 @@
 package client
 
 import (
+	"time"
+
 	log "github.com/golang/glog"
 	pb "github.com/opensds/opensds/pkg/model/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
+	"google.golang.org/grpc/keepalive"
 )
 
 // Client interface provides an abstract description about how to interact
@@ -48,7 +52,15 @@ func NewClient() Client { return &DockClient{} }
 
 func (c *DockClient) Connect(edp string) error {
 	// Set up a connection to the Dock server.
-	conn, err := grpc.Dial(edp, grpc.WithInsecure())
+	if c.ClientConn != nil && c.ClientConn.GetState() == connectivity.Ready {
+		return nil
+	}
+	var kacp = keepalive.ClientParameters{
+		Time:                10 * time.Second, // send pings every 10 seconds if there is no activity
+		Timeout:             time.Second,      // wait 1 second for ping ack before considering the connection dead
+		PermitWithoutStream: true,             // send pings even without active streams
+	}
+	conn, err := grpc.Dial(edp, grpc.WithInsecure(), grpc.WithKeepaliveParams(kacp))
 	if err != nil {
 		log.Errorf("did not connect: %+v\n", err)
 		return err
@@ -60,8 +72,4 @@ func (c *DockClient) Connect(edp string) error {
 	c.ClientConn = conn
 
 	return nil
-}
-
-func (c *DockClient) Close() {
-	c.ClientConn.Close()
 }
