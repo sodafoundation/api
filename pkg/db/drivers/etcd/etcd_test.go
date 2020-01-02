@@ -1216,7 +1216,7 @@ func TestListVolumesWithFilter(t *testing.T) {
 				&SampleVolumeWithDurableName[0],
 			},
 			param: map[string][]string{
-				"DurableName":  {"6216b2326e974b5fb0b3d2af5cd6b25b"},
+				"DurableName": {"6216b2326e974b5fb0b3d2af5cd6b25b"},
 			},
 			expected: []*model.VolumeSpec{
 				&SampleVolumeWithDurableName[0],
