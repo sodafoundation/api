@@ -667,8 +667,7 @@ func (d *Driver) TerminateConnectionFC(opt *pb.DeleteVolumeAttachmentOpts) error
 }
 
 func (d *Driver) detachVolumeFC(opt *pb.DeleteVolumeAttachmentOpts) (string, error) {
-	initiatorName := GetInitiatorName(opt.GetHostInfo().GetInitiators(), opt.GetAccessProtocol())
-	wwns := strings.Split(initiatorName, ",")
+	wwns := GetInitiatorsByProtocol(opt.GetHostInfo().GetInitiators(), opt.GetAccessProtocol())
 	lunId := opt.GetMetadata()[KLunId]
 
 	log.Infof("terminate connection, wwpns: %s,lun id: %s", wwns, lunId)

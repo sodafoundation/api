@@ -176,3 +176,28 @@ func trimDoubleQuotesInText(str string) string {
 	}
 	return str
 }
+
+func getMultipathDevice(deviceWWN string) (string, error) {
+	cmd := fmt.Sprintf("ls -l /dev/disk/by-id/ | grep %s", deviceWWN)
+	out, err := connector.ExecCmd("/bin/bash", "-c", cmd)
+	if err != nil {
+		errMsg := fmt.Sprintf("error occurred when find DM of wwn %s: %s, %v", deviceWWN, out, err)
+		log.Println(errMsg)
+		return "", errors.New(errMsg)
+	}
+
+	lines := strings.Split(strings.TrimSpace(out), "\n")
+	for _, line := range lines {
+		splits := strings.Split(line, "../../")
+		if len(splits) == 2 {
+			name := splits[1]
+			if strings.HasPrefix(name, "dm") {
+				return fmt.Sprintf("/dev/%s", name), nil
+			}
+		}
+	}
+
+	msg := fmt.Sprintf("No DM of wwn %s exist", deviceWWN)
+	log.Println(msg)
+	return "", nil
+}

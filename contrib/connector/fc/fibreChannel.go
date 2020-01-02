@@ -81,6 +81,14 @@ func connectVolume(connMap map[string]interface{}) (map[string]string, error) {
 		return nil, err
 	}
 
+	dmPath, err := getMultipathDevice(deviceWWN)
+	if err != nil {
+		return nil, err
+	}
+	if len(dmPath) > 0 {
+		devicePath = dmPath
+	}
+
 	return map[string]string{"scsi_wwn": deviceWWN, "path": devicePath}, nil
 }
 
