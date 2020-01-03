@@ -18,11 +18,12 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/ghodss/yaml"
 	log "github.com/golang/glog"
 	uuid "github.com/satori/go.uuid"
-	"strconv"
-	"strings"
 
 	"github.com/netapp/trident/storage"
 	sa "github.com/netapp/trident/storage_attribute"
@@ -317,10 +318,10 @@ func (d *SANDriver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*m
 		DriverVolumeType: opt.GetAccessProtocol(),
 		ConnectionData: map[string]interface{}{
 			"target_discovered": true,
-			"volume_id":         opt.GetVolumeId(),
+			"volumeId":          opt.GetVolumeId(),
 			"volume":            name,
 			"description":       "NetApp ONTAP Attachment",
-			"host":              hostName,
+			"hostName":          hostName,
 			"initiator":         initiator,
 			"targetIQN":         []string{publishInfo.IscsiTargetIQN},
 			"targetPortal":      []string{hostInfo.GetIp() + ":3260"},

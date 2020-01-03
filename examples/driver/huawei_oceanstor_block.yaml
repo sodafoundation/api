@@ -1,6 +1,7 @@
 authOptions:
   username: "root"
   password: "Admin@123"
+  vstoreName: ""
   # Whether to encrypt the password. If enabled, the value of the password must be ciphertext.
   EnableEncrypted: false
   # Encryption and decryption tool. Default value is aes. The decryption tool can only decrypt the corresponding ciphertext.

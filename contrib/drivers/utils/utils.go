@@ -27,3 +27,15 @@ func GetInitiatorName(initiators []*pb.Initiator, protocol string) string {
 	}
 	return ""
 }
+
+func GetInitiatorsByProtocol(initiators []*pb.Initiator, protocol string) []string {
+	var protocolInitiators []string
+
+	for _, initiator := range initiators {
+		if initiator.Protocol == protocol {
+			protocolInitiators = append(protocolInitiators, initiator.PortName)
+		}
+	}
+
+	return protocolInitiators
+}

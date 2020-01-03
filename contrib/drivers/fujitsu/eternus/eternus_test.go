@@ -17,6 +17,7 @@ package eternus
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -519,9 +520,9 @@ func TestInitializeConnection_Iscsi(t *testing.T) {
 		t.Error("Test InitializeConnection failed")
 	}
 	connData := ret.ConnectionData
-	if connData["targetIQN"] != "iqn.eternus-dx1" ||
-		connData["targetPortal"] != "192.168.1.1:3260" ||
-		connData["targetLun"] != "21" {
+	if !reflect.DeepEqual(connData["targetIQN"], []string{"iqn.eternus-dx1"}) ||
+		!reflect.DeepEqual(connData["targetPortal"], []string{"192.168.1.1:3260"}) ||
+		connData["targetLun"] != 21 {
 		t.Error("Test InitializeConnection failed")
 	}
 }
@@ -694,9 +695,9 @@ func TestInitializeConnection_FC(t *testing.T) {
 		t.Error("Test InitializeConnection failed")
 	}
 	connData := ret.ConnectionData
-	if connData["targetWwn"] != "0000000000000001" ||
-		connData["hostname"] != hostname ||
-		connData["targetLun"] != "21" {
+	if !reflect.DeepEqual(connData["targetWWNs"], []string{"0000000000000001"}) ||
+		connData["hostName"] != hostname ||
+		connData["targetLun"] != 21 {
 
 		t.Error("Test InitializeConnection failed")
 	}
@@ -797,9 +798,9 @@ func TestInitializeConnection_FCNoInitiator(t *testing.T) {
 		t.Error("Test InitializeConnection failed")
 	}
 	connData := ret.ConnectionData
-	if connData["targetWwn"] != "0000000000000001" ||
-		connData["hostname"] != hostname ||
-		connData["targetLun"] != "1" {
+	if !reflect.DeepEqual(connData["targetWWNs"], []string{"0000000000000001"}) ||
+		connData["hostName"] != hostname ||
+		connData["targetLun"] != 1 {
 		t.Error("Test InitializeConnection failed")
 	}
 }
