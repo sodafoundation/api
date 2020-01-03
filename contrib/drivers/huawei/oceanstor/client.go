@@ -221,12 +221,17 @@ func (c *OceanStorClient) logout() error {
 	return c.request("DELETE", "/sessions", nil, nil)
 }
 
-func (c *OceanStorClient) CreateVolume(name string, size int64, desc string, poolId string) (*Lun, error) {
+func (c *OceanStorClient) CreateVolume(name string, size int64, desc string, poolId string, provPolicy string) (*Lun, error) {
+	// default alloc type is thick
+	allocType := ThickLunType
+	if provPolicy == "Thin" {
+		allocType = ThinLunType
+	}
 	data := map[string]interface{}{
 		"NAME":        name,
 		"CAPACITY":    Gb2Sector(size),
 		"DESCRIPTION": desc,
-		"ALLOCTYPE":   ThinLunType,
+		"ALLOCTYPE":   allocType,
 		"PARENTID":    poolId,
 		"WRITEPOLICY": 1,
 	}
