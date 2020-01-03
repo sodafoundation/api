@@ -14,6 +14,7 @@ import (
 type AuthOptions struct {
 	Username        string `yaml:"username,omitempty"`
 	Password        string `yaml:"password,omitempty"`
+	VstoreName      string `yaml:"vstoreName,omitempty"`
 	PwdEncrypter    string `yaml:"PwdEncrypter,omitempty"`
 	EnableEncrypted bool   `yaml:"EnableEncrypted,omitempty"`
 	Endpoints       string `yaml:"endpoints,omitempty"`
