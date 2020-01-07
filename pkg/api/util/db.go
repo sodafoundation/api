@@ -350,7 +350,7 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	reg, err := regexp.Compile("^[a-zA-Z0-9_-]+$")
+	reg, err := regexp.Compile("^[a-zA-Z0-9 _-]+$")
 	if err != nil {
 		errMsg := fmt.Sprintf("regex compilation for volume name validation failed")
 		log.Error(errMsg)
