@@ -14,10 +14,6 @@
 
 package pwd
 
-import (
-	"fmt"
-)
-
 type PwdEncrypter interface {
 	Encrypter(password string) (string, error)
 	Decrypter(code string) (string, error)
@@ -28,7 +24,6 @@ func NewPwdEncrypter(encrypter string) PwdEncrypter {
 	case "aes":
 		return NewAES()
 	default:
-		fmt.Println("Use default encryption tool: aes.")
 		return NewAES()
 	}
 }
