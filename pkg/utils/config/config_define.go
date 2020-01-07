@@ -21,6 +21,7 @@ type Default struct{}
 type OsdsApiServer struct {
 	ApiEndpoint        string        `conf:"api_endpoint,localhost:50040"`
 	AuthStrategy       string        `conf:"auth_strategy,noauth"`
+	ApiSpecPath        string        `conf:"api_spec_path,/etc/opensds/swagger.yaml"`
 	Daemon             bool          `conf:"daemon,false"`
 	PolicyPath         string        `conf:"policy_path,/etc/opensds/policy.json"`
 	LogFlushFrequency  time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
@@ -90,14 +91,16 @@ type Backends struct {
 	Cinder               BackendProperties `conf:"cinder"`
 	Sample               BackendProperties `conf:"sample"`
 	LVM                  BackendProperties `conf:"lvm"`
+	IBMSpectrumScale     BackendProperties `conf:"spectrumscale"`
 	HuaweiOceanStorBlock BackendProperties `conf:"huawei_oceanstor_block"`
 	HuaweiFusionStorage  BackendProperties `conf:"huawei_fusionstorage"`
-	HuaweiOceanstor      BackendProperties `conf:"huawei_oceanstor"`
+	HuaweiOceanStorFile  BackendProperties `conf:"huawei_oceanstor_file"`
 	HpeNimble            BackendProperties `conf:"hpe_nimble"`
 	NFS                  BackendProperties `conf:"nfs"`
 	Manila               BackendProperties `conf:"manila"`
 	FujitsuEternus       BackendProperties `conf:"fujitsu_eternus"`
 	Chubaofs             BackendProperties `conf:"chubaofs"`
+	NetappOntapSan       BackendProperties `conf:"netapp_ontap_san"`
 }
 
 type KeystoneAuthToken struct {

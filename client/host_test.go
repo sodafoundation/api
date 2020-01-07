@@ -35,7 +35,7 @@ func TestCreateHost(t *testing.T) {
 		AccessMode:        "agentless",
 		HostName:          "sap1",
 		IP:                "192.168.56.12",
-		AvailabilityZones: []string{"az1", "az2"},
+		AvailabilityZones: []string{"default", "az2"},
 		Initiators: []*model.Initiator{
 			&model.Initiator{
 				PortName: "20000024ff5bb888",
@@ -71,7 +71,7 @@ func TestGetHost(t *testing.T) {
 		AccessMode:        "agentless",
 		HostName:          "sap1",
 		IP:                "192.168.56.12",
-		AvailabilityZones: []string{"az1", "az2"},
+		AvailabilityZones: []string{"default", "az2"},
 		Initiators: []*model.Initiator{
 			&model.Initiator{
 				PortName: "20000024ff5bb888",
@@ -107,7 +107,7 @@ func TestListHosts(t *testing.T) {
 			AccessMode:        "agentless",
 			HostName:          "sap1",
 			IP:                "192.168.56.12",
-			AvailabilityZones: []string{"az1", "az2"},
+			AvailabilityZones: []string{"default", "az2"},
 			Initiators: []*model.Initiator{
 				&model.Initiator{
 					PortName: "20000024ff5bb888",
@@ -128,7 +128,7 @@ func TestListHosts(t *testing.T) {
 			AccessMode:        "agentless",
 			HostName:          "sap2",
 			IP:                "192.168.56.13",
-			AvailabilityZones: []string{"az1", "az2"},
+			AvailabilityZones: []string{"default", "az2"},
 			Initiators: []*model.Initiator{
 				&model.Initiator{
 					PortName: "20012324ff5ac132",
@@ -175,7 +175,7 @@ func TestUpdateHost(t *testing.T) {
 		AccessMode:        "agentless",
 		HostName:          "sap1",
 		IP:                "192.168.56.12",
-		AvailabilityZones: []string{"az1", "az2"},
+		AvailabilityZones: []string{"default", "az2"},
 		Initiators: []*model.Initiator{
 			&model.Initiator{
 				PortName: "20000024ff5bb888",

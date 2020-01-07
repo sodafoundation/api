@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/opensds/opensds/pkg/model"
+	"github.com/opensds/opensds/pkg/utils/constants"
 )
 
 func TestRvRepElement(t *testing.T) {
@@ -127,8 +128,8 @@ func TestStructToMap(t *testing.T) {
 		FreeCapacity:     int64(50),
 		AvailabilityZone: "az1",
 		Extras: model.StoragePoolExtraSpec{
-			DataStorage:    model.DataStorageLoS{ProvisioningPolicy: "Thin", IsSpaceEfficient: false},
-			IOConnectivity: model.IOConnectivityLoS{AccessProtocol: "iscsi", MaxIOPS: 700000, MaxBWS: 600},
+			DataStorage:    model.DataStorageLoS{ProvisioningPolicy: "Thin", Compression: false, Deduplication: false},
+			IOConnectivity: model.IOConnectivityLoS{AccessProtocol: "iscsi", MaxIOPS: 700000, MaxBWS: 600, MinIOPS: 100000, MinBWS: 100, Latency: 100},
 			DataProtection: model.DataProtectionLoS{IsIsolated: true, ReplicaType: "Mirror"},
 			Advanced:       map[string]interface{}{"diskType": "SSD", "latency": 5},
 		},
@@ -222,5 +223,304 @@ func TestIsEqual(t *testing.T) {
 	expectedErr := "the type of keyA must be string"
 	if expectedErr != err.Error() {
 		t.Errorf("Expected %v, get %v", expectedErr, err.Error())
+	}
+}
+
+type animal struct {
+	Name string
+	Kind string
+	Age  int
+}
+
+func TestFilter(t *testing.T) {
+
+	testCases := []struct {
+		animals  []*animal
+		params   map[string][]string
+		expected []*animal
+	}{
+		{
+			animals: []*animal{
+				&animal{
+					Name: "Tony",
+					Kind: "dog",
+					Age:  5,
+				},
+				&animal{
+					Name: "Jack",
+					Kind: "horse",
+					Age:  10,
+				},
+				&animal{
+					Name: "Huhu",
+					Kind: "tiger",
+					Age:  3,
+				},
+			},
+			params: map[string][]string{"kind": []string{"tiger"}},
+			expected: []*animal{
+				&animal{
+					Name: "Huhu",
+					Kind: "tiger",
+					Age:  3,
+				},
+			},
+		},
+		{
+			animals: []*animal{
+				&animal{
+					Name: "Tony",
+					Kind: "dog",
+					Age:  5,
+				},
+				&animal{
+					Name: "Jack",
+					Kind: "horse",
+					Age:  10,
+				},
+				&animal{
+					Name: "Huhu",
+					Kind: "tiger",
+					Age:  3,
+				},
+			},
+			params: map[string][]string{"name": []string{"Tony", "Jack"}},
+			expected: []*animal{
+				&animal{
+					Name: "Tony",
+					Kind: "dog",
+					Age:  5,
+				},
+				&animal{
+					Name: "Jack",
+					Kind: "horse",
+					Age:  10,
+				},
+			},
+		},
+		{
+			animals: []*animal{
+				&animal{
+					Name: "Tony",
+					Kind: "dog",
+					Age:  5,
+				},
+			},
+			params:   map[string][]string{"name": []string{"Kio"}},
+			expected: nil,
+		},
+	}
+	for _, c := range testCases {
+		results := Filter(c.animals, c.params).([]interface{})
+		if len(results) != len(c.expected) {
+			t.Errorf("Expected %v, get %v", len(c.expected), len(results))
+		}
+		for i, actual := range results {
+			if !reflect.DeepEqual(actual, c.expected[i]) {
+				t.Errorf("Expected %v, get %v", c.expected[i], actual)
+			}
+		}
+
+	}
+}
+
+func TestSort(t *testing.T) {
+
+	testCases := []struct {
+		animals  []*animal
+		sortKey  string
+		sortDir  string
+		expected []*animal
+	}{
+		{
+			animals: []*animal{
+				&animal{
+					Name: "Tony",
+					Kind: "dog",
+					Age:  5,
+				},
+				&animal{
+					Name: "Huhu",
+					Kind: "tiger",
+					Age:  3,
+				},
+				&animal{
+					Name: "Jack",
+					Kind: "horse",
+					Age:  10,
+				},
+			},
+			sortKey: "name",
+			sortDir: "asc",
+			expected: []*animal{
+				&animal{
+					Name: "Huhu",
+					Kind: "tiger",
+					Age:  3,
+				},
+				&animal{
+					Name: "Jack",
+					Kind: "horse",
+					Age:  10,
+				},
+				&animal{
+					Name: "Tony",
+					Kind: "dog",
+					Age:  5,
+				},
+			},
+		},
+		{
+			animals: []*animal{
+				&animal{
+					Name: "Tony",
+					Kind: "dog",
+					Age:  5,
+				},
+				&animal{
+					Name: "Jack",
+					Kind: "horse",
+					Age:  10,
+				},
+				&animal{
+					Name: "Huhu",
+					Kind: "tiger",
+					Age:  3,
+				},
+			},
+			sortKey: "age",
+			sortDir: constants.DefaultSortDir,
+			expected: []*animal{
+				&animal{
+					Name: "Jack",
+					Kind: "horse",
+					Age:  10,
+				},
+				&animal{
+					Name: "Tony",
+					Kind: "dog",
+					Age:  5,
+				},
+				&animal{
+					Name: "Huhu",
+					Kind: "tiger",
+					Age:  3,
+				},
+			},
+		},
+	}
+	for _, c := range testCases {
+		results := Sort(c.animals, c.sortKey, c.sortDir).([]*animal)
+		if len(results) != len(c.expected) {
+			t.Errorf("Expected %v, get %v", len(c.expected), len(results))
+		}
+		for i, actual := range results {
+			if !reflect.DeepEqual(actual, c.expected[i]) {
+				t.Errorf("Expected %v, get %v", c.expected[i], actual)
+			}
+		}
+
+	}
+}
+
+func TestSlice(t *testing.T) {
+
+	testCases := []struct {
+		animals  []*animal
+		offset   int
+		limit    int
+		expected []*animal
+	}{
+		{
+			animals: []*animal{
+				&animal{
+					Name: "Tony",
+					Kind: "dog",
+					Age:  5,
+				},
+				&animal{
+					Name: "Huhu",
+					Kind: "tiger",
+					Age:  3,
+				},
+				&animal{
+					Name: "Jack",
+					Kind: "horse",
+					Age:  10,
+				},
+			},
+			offset: 1,
+			limit:  2,
+			expected: []*animal{
+				&animal{
+					Name: "Huhu",
+					Kind: "tiger",
+					Age:  3,
+				},
+				&animal{
+					Name: "Jack",
+					Kind: "horse",
+					Age:  10,
+				},
+			},
+		},
+		{
+			animals: []*animal{
+				&animal{
+					Name: "Tony",
+					Kind: "dog",
+					Age:  5,
+				},
+				&animal{
+					Name: "Huhu",
+					Kind: "tiger",
+					Age:  3,
+				},
+				&animal{
+					Name: "Jack",
+					Kind: "horse",
+					Age:  10,
+				},
+			},
+			offset:   3,
+			limit:    3,
+			expected: nil,
+		},
+	}
+	for _, c := range testCases {
+		results := Slice(c.animals, c.offset, c.limit).([]interface{})
+		if len(results) != len(c.expected) {
+			t.Errorf("Expected %v, get %v", len(c.expected), len(results))
+		}
+		for i, actual := range results {
+			if !reflect.DeepEqual(actual, c.expected[i]) {
+				t.Errorf("Expected %v, get %v", c.expected[i], actual)
+			}
+		}
+
+	}
+}
+
+func TestContainsIgnoreCase(t *testing.T) {
+	var permissions = []string{"Read", "Write", "Execute"}
+	var testkey1 = "READ"
+	var testkey2 = "Read"
+	var testkey3 = "read"
+	var testkey4 = "Raed"
+	contains := ContainsIgnoreCase(permissions, testkey1)
+	if contains != true {
+		t.Errorf("%v should contains %v", permissions, testkey1)
+	}
+	contains = ContainsIgnoreCase(permissions, testkey2)
+	if contains != true {
+		t.Errorf("%v should contains %v", permissions, testkey2)
+	}
+	contains = ContainsIgnoreCase(permissions, testkey3)
+	if contains != true {
+		t.Errorf("%v should contains %v", permissions, testkey3)
+	}
+	contains = ContainsIgnoreCase(permissions, testkey4)
+	if contains != false {
+		t.Errorf("%v shouldn't contains %v", permissions, testkey4)
 	}
 }

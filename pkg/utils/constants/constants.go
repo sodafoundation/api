@@ -28,6 +28,9 @@ const (
 	AuthTokenHeader    = "X-Auth-Token"
 	SubjectTokenHeader = "X-Subject-Token"
 
+	// ContentType for api
+	ContentType = "application/json"
+
 	// OpenSDS current api version
 	APIVersion = "v1beta"
 
@@ -56,4 +59,9 @@ const (
 	Read    = "Read"
 	Write   = "Write"
 	Execute = "Execute"
+
+	// Default value for pagination and sorting
+	DefaultSortDir = "desc"
+	DefaultLimit   = 50
+	DefaultOffset  = 0
 )

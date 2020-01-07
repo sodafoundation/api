@@ -89,12 +89,16 @@ func TestListProfiles(t *testing.T) {
 			CustomProperties: model.CustomPropertiesSpec{
 				"dataStorage": map[string]interface{}{
 					"provisioningPolicy": "Thin",
-					"isSpaceEfficient":   true,
+					"compression":   true,
+					"deduplication": true,
 				},
 				"ioConnectivity": map[string]interface{}{
 					"accessProtocol": "rbd",
 					"maxIOPS":        float64(5000000),
 					"maxBWS":         float64(500),
+					"minIOPS":        float64(1000000),
+					"minBWS":         float64(100),
+					"latency":        float64(100),
 				},
 			},
 		},
@@ -126,12 +130,16 @@ func TestAddCustomProperty(t *testing.T) {
 	expected := &model.CustomPropertiesSpec{
 		"dataStorage": map[string]interface{}{
 			"provisioningPolicy": "Thin",
-			"isSpaceEfficient":   true,
+			"compression":   true,
+			"deduplication": true,
 		},
 		"ioConnectivity": map[string]interface{}{
 			"accessProtocol": "rbd",
 			"maxIOPS":        float64(5000000),
 			"maxBWS":         float64(500),
+			"minIOPS":        float64(1000000),
+			"minBWS":         float64(100),
+			"latency":        float64(100),
 		},
 	}
 
@@ -152,12 +160,16 @@ func TestListCustomProperties(t *testing.T) {
 	expected := &model.CustomPropertiesSpec{
 		"dataStorage": map[string]interface{}{
 			"provisioningPolicy": "Thin",
-			"isSpaceEfficient":   true,
+			"compression":   true,
+			"deduplication": true,
 		},
 		"ioConnectivity": map[string]interface{}{
 			"accessProtocol": "rbd",
 			"maxIOPS":        float64(5000000),
 			"maxBWS":         float64(500),
+			"minIOPS":        float64(1000000),
+			"minBWS":         float64(100),
+			"latency":        float64(100),
 		},
 	}
 

@@ -28,6 +28,7 @@ import (
 	"github.com/opensds/opensds/pkg/api/filter/accesslog"
 	"github.com/opensds/opensds/pkg/api/filter/auth"
 	"github.com/opensds/opensds/pkg/api/filter/context"
+	"github.com/opensds/opensds/pkg/api/filter/validation"
 	cfg "github.com/opensds/opensds/pkg/utils/config"
 	"github.com/opensds/opensds/pkg/utils/constants"
 
@@ -77,6 +78,7 @@ func Run(apiServerCfg cfg.OsdsApiServer) {
 	beego.InsertFilter(pattern, beego.BeforeExec, context.Factory())
 	beego.InsertFilter(pattern, beego.BeforeExec, auth.Factory())
 	beego.InsertFilter("*", beego.BeforeExec, accesslog.Factory())
+	beego.InsertFilter("*", beego.BeforeExec, validation.Factory(apiServerCfg.ApiSpecPath))
 
 	// start service
 	beego.Run(apiServerCfg.ApiEndpoint)

@@ -33,6 +33,7 @@ import (
 	snapshotsv2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/snapshots"
 	volumesv2 "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/opensds/opensds/contrib/drivers/utils"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -289,7 +290,7 @@ func (d *Driver) InitializeConnection(req *pb.CreateVolumeAttachmentOpts) (*mode
 	opts := &volumeactions.InitializeConnectionOpts{
 		IP:        req.HostInfo.GetIp(),
 		Host:      req.HostInfo.GetHost(),
-		Initiator: req.HostInfo.GetInitiator(),
+		Initiator: utils.GetInitiatorName(req.HostInfo.Initiators, req.AccessProtocol),
 		Platform:  req.HostInfo.GetPlatform(),
 		OSType:    req.HostInfo.GetOsType(),
 		Multipath: &req.MultiPath,
@@ -330,7 +331,7 @@ func (d *Driver) TerminateConnection(req *pb.DeleteVolumeAttachmentOpts) error {
 	opts := volumeactions.TerminateConnectionOpts{
 		IP:        req.HostInfo.GetIp(),
 		Host:      req.HostInfo.GetHost(),
-		Initiator: req.HostInfo.GetInitiator(),
+		Initiator: utils.GetInitiatorName(req.HostInfo.Initiators, req.AccessProtocol),
 		Platform:  req.HostInfo.GetPlatform(),
 		OSType:    req.HostInfo.GetOsType(),
 	}
