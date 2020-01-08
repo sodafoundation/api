@@ -23,6 +23,7 @@ import (
 
 	"github.com/astaxie/beego/httplib"
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/drivers/utils"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -532,13 +533,13 @@ func (c *NimbleClient) RegisterInitiatorIntoDefaultGrp(poolId string, opt *pb.Cr
 	// For iSCSI initiator
 	if opt.GetAccessProtocol() == ISCSIProtocol {
 		reqOptions.AccessProtocol = "iscsi"
-		reqOptions.Iqn = opt.GetHostInfo().Initiator
+		reqOptions.Iqn = utils.GetInitiatorName(opt.GetHostInfo().GetInitiators(), opt.GetAccessProtocol())
 		reqOptions.Label = opt.GetId()
 	}
 	// For FC initiator
 	if opt.GetAccessProtocol() == FCProtocol {
 		reqOptions.AccessProtocol = "fc"
-		reqOptions.Wwpn = opt.GetHostInfo().Initiator
+		reqOptions.Wwpn = utils.GetInitiatorName(opt.GetHostInfo().GetInitiators(), opt.GetAccessProtocol())
 		reqOptions.Alias = opt.GetId()
 	}
 

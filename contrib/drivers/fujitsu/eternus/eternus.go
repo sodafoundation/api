@@ -21,6 +21,7 @@ import (
 	"strconv"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/drivers/utils"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -198,7 +199,7 @@ func (d *Driver) initializeConnectionIscsi(opt *pb.CreateVolumeAttachmentOpts) (
 	hostExist := false
 
 	// check initiator is specified
-	initiator := hostInfo.GetInitiator()
+	initiator := utils.GetInitiatorName(hostInfo.GetInitiators(), opt.GetAccessProtocol())
 	needHostAffinity := true
 	if initiator == "" {
 		needHostAffinity = false
@@ -214,7 +215,7 @@ func (d *Driver) initializeConnectionIscsi(opt *pb.CreateVolumeAttachmentOpts) (
 	// Create host if not exist.
 	if needHostAffinity {
 		// Create resource name
-		initiator := hostInfo.GetInitiator()
+		initiator := utils.GetInitiatorName(hostInfo.GetInitiators(), opt.GetAccessProtocol())
 		ipAddr := hostInfo.GetIp()
 		rscName := GetFnvHash(initiator + ipAddr)
 		hostID, hostExist, err = d.client.AddIscsiHostWithCheck(rscName, initiator, ipAddr)
@@ -252,14 +253,15 @@ func (d *Driver) initializeConnectionIscsi(opt *pb.CreateVolumeAttachmentOpts) (
 	}
 
 	log.Infof("initialize iscsi connection (%s) success.", opt.GetId())
+	targetLun, _ := strconv.Atoi(hostLun)
 	connInfo := &model.ConnectionInfo{
 		DriverVolumeType: ISCSIProtocol,
 		ConnectionData: map[string]interface{}{
 			"targetDiscovered": true,
-			"targetIQN":        iscsiPortInfo.IscsiName,
-			"targetPortal":     iscsiPortInfo.Ip + ":" + strconv.Itoa(iscsiPortInfo.TcpPort),
+			"targetIQN":        []string{iscsiPortInfo.IscsiName},
+			"targetPortal":     []string{iscsiPortInfo.Ip + ":" + strconv.Itoa(iscsiPortInfo.TcpPort)},
 			"discard":          false,
-			"targetLun":        hostLun,
+			"targetLun":        targetLun,
 		},
 	}
 	return connInfo, nil
@@ -276,7 +278,7 @@ func (d *Driver) initializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*mo
 	hostExist := false
 
 	// check initiator is specified
-	initiator := hostInfo.GetInitiator()
+	initiator := utils.GetInitiatorName(hostInfo.GetInitiators(), opt.GetAccessProtocol())
 	needHostAffinity := true
 	if initiator == "" {
 		needHostAffinity = false
@@ -291,7 +293,7 @@ func (d *Driver) initializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*mo
 
 	// initiator is specified
 	if needHostAffinity {
-		wwnName := hostInfo.GetInitiator()
+		wwnName := utils.GetInitiatorName(hostInfo.GetInitiators(), opt.GetAccessProtocol())
 		rscName := GetFnvHash(wwnName)
 		// Create host if not exist.
 		hostID, hostExist, err = d.client.AddFcHostWithCheck(rscName, wwnName)
@@ -328,13 +330,15 @@ func (d *Driver) initializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*mo
 	}
 
 	log.Infof("initialize fc connection (%s) success.", opt.GetId())
+
+	targetLun, _ := strconv.Atoi(hostLun)
 	fcInfo := &model.ConnectionInfo{
 		DriverVolumeType: FCProtocol,
 		ConnectionData: map[string]interface{}{
 			"targetDiscovered": true,
-			"targetWwn":        fcPortInfo.Wwpn,
-			"hostname":         opt.GetHostInfo().Host,
-			"targetLun":        hostLun,
+			"targetWWNs":       []string{fcPortInfo.Wwpn},
+			"hostName":         opt.GetHostInfo().Host,
+			"targetLun":        targetLun,
 		},
 	}
 	return fcInfo, nil
@@ -407,7 +411,7 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 
 	lunID := opt.GetMetadata()[KLunId]
 	hostInfo := opt.GetHostInfo()
-	initiator := hostInfo.GetInitiator()
+	initiator := utils.GetInitiatorName(hostInfo.GetInitiators(), opt.GetAccessProtocol())
 	needHostAffinity := true
 	if initiator == "" {
 		needHostAffinity = false

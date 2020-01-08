@@ -88,8 +88,10 @@ func (s *selector) SelectSupportedPoolForVolume(vol *model.VolumeSpec) (*model.S
 		// Insert some rules of provisioning properties.
 		if pp := prf.ProvisioningProperties; !pp.IsEmpty() {
 			if ds := pp.DataStorage; !ds.IsEmpty() {
-				filterRequest["extras.dataStorage.isSpaceEfficient"] =
-					"<is> " + strconv.FormatBool(ds.IsSpaceEfficient)
+				filterRequest["extras.dataStorage.compression"] =
+					"<is> " + strconv.FormatBool(ds.Compression)
+				filterRequest["extras.dataStorage.deduplication"] =
+					"<is> " + strconv.FormatBool(ds.Deduplication)
 				if ds.ProvisioningPolicy != "" {
 					filterRequest["extras.dataStorage.provisioningPolicy"] =
 						ds.ProvisioningPolicy
@@ -112,6 +114,19 @@ func (s *selector) SelectSupportedPoolForVolume(vol *model.VolumeSpec) (*model.S
 					filterRequest["extras.ioConnectivity.maxBWS"] =
 						">= " + strconv.Itoa(int(ic.MaxBWS))
 				}
+				if ic.MinIOPS != 0 {
+					filterRequest["extras.ioConnectivity.minIOPS"] =
+						">= " + strconv.Itoa(int(ic.MinIOPS))
+				}
+				if ic.MinBWS != 0 {
+					filterRequest["extras.ioConnectivity.minBWS"] =
+						">= " + strconv.Itoa(int(ic.MinBWS))
+				}
+				if ic.Latency != 0 {
+					filterRequest["extras.ioConnectivity.latency"] =
+						">= " + strconv.Itoa(int(ic.Latency))
+				}
+
 			}
 		}
 		// Insert some rules of replication properties.
@@ -120,7 +135,7 @@ func (s *selector) SelectSupportedPoolForVolume(vol *model.VolumeSpec) (*model.S
 				filterRequest["extras.dataProtection.isIsolated"] =
 					"<is> " + strconv.FormatBool(dp.IsIsolated)
 				if dp.RecoveryGeographicObject != "" {
-					filterRequest["extras.dataProtection.recoveryGeographicObject"] =
+					filterRequest["extras.dataProtection.recoveryGeographicObjective"] =
 						dp.RecoveryGeographicObject
 				}
 				if dp.RecoveryTimeObjective != "" {
@@ -236,8 +251,10 @@ func (s *selector) SelectSupportedPoolForFileShare(in *model.FileShareSpec) (*mo
 		// Insert some rules of provisioning properties.
 		if pp := prf.ProvisioningProperties; !pp.IsEmpty() {
 			if ds := pp.DataStorage; !ds.IsEmpty() {
-				filterRequest["extras.dataStorage.isSpaceEfficient"] =
-					"<is> " + strconv.FormatBool(ds.IsSpaceEfficient)
+				filterRequest["extras.dataStorage.compression"] =
+					"<is> " + strconv.FormatBool(ds.Compression)
+				filterRequest["extras.dataStorage.deduplication"] =
+					"<is> " + strconv.FormatBool(ds.Deduplication)
 				if ds.ProvisioningPolicy != "" {
 					filterRequest["extras.dataStorage.provisioningPolicy"] =
 						ds.ProvisioningPolicy
@@ -271,6 +288,18 @@ func (s *selector) SelectSupportedPoolForFileShare(in *model.FileShareSpec) (*mo
 				if ic.MaxBWS != 0 {
 					filterRequest["extras.ioConnectivity.maxBWS"] =
 						">= " + strconv.Itoa(int(ic.MaxBWS))
+				}
+				if ic.MinBWS != 0 {
+					filterRequest["extras.ioConnectivity.minBWS"] =
+						">= " + strconv.Itoa(int(ic.MinBWS))
+				}
+				if ic.MinIOPS != 0 {
+					filterRequest["extras.ioConnectivity.minIOPS"] =
+						">= " + strconv.Itoa(int(ic.MinIOPS))
+				}
+				if ic.Latency != 0 {
+					filterRequest["extras.ioConnectivity.latency"] =
+						">= " + strconv.Itoa(int(ic.Latency))
 				}
 			}
 		}

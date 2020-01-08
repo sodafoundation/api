@@ -17,6 +17,7 @@ package eternus
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -308,11 +309,16 @@ func TestInitializeConnection_IscsiNoPort(t *testing.T) {
 		DoLocalAttach: false,
 		MultiPath:     false,
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      "hostname",
-			Ip:        "1.1.1.1",
-			Initiator: "iqn.testtest",
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     "hostname",
+			Ip:       "1.1.1.1",
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: "iscsi",
+					PortName: "iqn.testtest",
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "1",
@@ -357,11 +363,16 @@ func TestInitializeConnection_Iscsi(t *testing.T) {
 		DoLocalAttach: false,
 		MultiPath:     false,
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      hostname,
-			Ip:        ipAddr,
-			Initiator: initiator,
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     hostname,
+			Ip:       ipAddr,
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: "iscsi",
+					PortName: initiator,
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "21",
@@ -509,9 +520,9 @@ func TestInitializeConnection_Iscsi(t *testing.T) {
 		t.Error("Test InitializeConnection failed")
 	}
 	connData := ret.ConnectionData
-	if connData["targetIQN"] != "iqn.eternus-dx1" ||
-		connData["targetPortal"] != "192.168.1.1:3260" ||
-		connData["targetLun"] != "21" {
+	if !reflect.DeepEqual(connData["targetIQN"], []string{"iqn.eternus-dx1"}) ||
+		!reflect.DeepEqual(connData["targetPortal"], []string{"192.168.1.1:3260"}) ||
+		connData["targetLun"] != 21 {
 		t.Error("Test InitializeConnection failed")
 	}
 }
@@ -527,11 +538,16 @@ func TestInitializeConnection_FC(t *testing.T) {
 		DoLocalAttach: false,
 		MultiPath:     false,
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      hostname,
-			Ip:        ipAddr,
-			Initiator: initiator,
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     hostname,
+			Ip:       ipAddr,
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: FCProtocol,
+					PortName: initiator,
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "21",
@@ -679,9 +695,9 @@ func TestInitializeConnection_FC(t *testing.T) {
 		t.Error("Test InitializeConnection failed")
 	}
 	connData := ret.ConnectionData
-	if connData["targetWwn"] != "0000000000000001" ||
-		connData["hostname"] != hostname ||
-		connData["targetLun"] != "21" {
+	if !reflect.DeepEqual(connData["targetWWNs"], []string{"0000000000000001"}) ||
+		connData["hostName"] != hostname ||
+		connData["targetLun"] != 21 {
 
 		t.Error("Test InitializeConnection failed")
 	}
@@ -697,11 +713,16 @@ func TestInitializeConnection_FCNoInitiator(t *testing.T) {
 		DoLocalAttach: false,
 		MultiPath:     false,
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      hostname,
-			Ip:        ipAddr,
-			Initiator: initiator,
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     hostname,
+			Ip:       ipAddr,
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: FCProtocol,
+					PortName: initiator,
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "21",
@@ -777,9 +798,9 @@ func TestInitializeConnection_FCNoInitiator(t *testing.T) {
 		t.Error("Test InitializeConnection failed")
 	}
 	connData := ret.ConnectionData
-	if connData["targetWwn"] != "0000000000000001" ||
-		connData["hostname"] != hostname ||
-		connData["targetLun"] != "1" {
+	if !reflect.DeepEqual(connData["targetWWNs"], []string{"0000000000000001"}) ||
+		connData["hostName"] != hostname ||
+		connData["targetLun"] != 1 {
 		t.Error("Test InitializeConnection failed")
 	}
 }
@@ -793,11 +814,16 @@ func TestTerminateConnection_Iscsi(t *testing.T) {
 		Id:       "id",
 		VolumeId: "volumeid",
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      hostname,
-			Ip:        ipAddr,
-			Initiator: initiator,
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     hostname,
+			Ip:       ipAddr,
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: "iscsi",
+					PortName: initiator,
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "21",
@@ -882,11 +908,16 @@ func TestTerminateConnection_IscsiDLunGroup(t *testing.T) {
 		Id:       "id",
 		VolumeId: "volumeid",
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      hostname,
-			Ip:        ipAddr,
-			Initiator: initiator,
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     hostname,
+			Ip:       ipAddr,
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: "iscsi",
+					PortName: initiator,
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "21",
@@ -992,11 +1023,16 @@ func TestTerminateConnection_FcDLunGroup(t *testing.T) {
 		Id:       "id",
 		VolumeId: "volumeid",
 		HostInfo: &pb.HostInfo{
-			Platform:  "linux",
-			OsType:    "ubuntu",
-			Host:      hostname,
-			Ip:        ipAddr,
-			Initiator: initiator,
+			Platform: "linux",
+			OsType:   "ubuntu",
+			Host:     hostname,
+			Ip:       ipAddr,
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: FCProtocol,
+					PortName: initiator,
+				},
+			},
 		},
 		Metadata: map[string]string{
 			KLunId: "21",

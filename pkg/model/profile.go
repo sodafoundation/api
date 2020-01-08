@@ -66,7 +66,7 @@ type ProfileSpec struct {
 
 	// CustomProperties is a map of keys and JSON object that represents the
 	// customized properties of profile, such as requested capabilities
-	// including diskType, latency, deduplicaiton, compression and so forth.
+	// including diskType, latency, deduplication, compression and so forth.
 	// +optional
 	CustomProperties CustomPropertiesSpec `json:"customProperties,omitempty"`
 }

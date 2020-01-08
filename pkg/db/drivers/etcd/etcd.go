@@ -40,9 +40,6 @@ import (
 )
 
 const (
-	defaultLimit            = 50
-	defaultOffset           = 0
-	defaultSortDir          = "desc"
 	defaultSortKey          = "ID"
 	defaultBlockProfileName = "default_block"
 	defaultFileProfileName  = "default_file"
@@ -51,6 +48,28 @@ const (
 )
 
 var validKey = []string{"limit", "offset", "sortDir", "sortKey"}
+
+const (
+	typeFileShares         string = "FileShares"
+	typeFileShareSnapshots string = "FileShareSnapshots"
+	typeDocks              string = "Docks"
+	typePools              string = "Pools"
+	typeProfiles           string = "Profiles"
+	typeVolumes            string = "Volumes"
+	typeAttachments        string = "Attachments"
+	typeVolumeSnapshots    string = "VolumeSnapshots"
+)
+
+var sortableKeysMap = map[string][]string{
+	typeFileShares:         {"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "TENANTID", "SIZE", "POOLID", "DESCRIPTION"},
+	typeFileShareSnapshots: {"ID", "NAME", "VOLUMEID", "STATUS", "USERID", "TENANTID", "SIZE"},
+	typeDocks:              {"ID", "NAME", "STATUS", "ENDPOINT", "DRIVERNAME", "DESCRIPTION"},
+	typePools:              {"ID", "NAME", "STATUS", "AVAILABILITYZONE", "DOCKID"},
+	typeProfiles:           {"ID", "NAME", "DESCRIPTION"},
+	typeVolumes:            {"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "TENANTID", "SIZE", "POOLID", "DESCRIPTION", "GROUPID"},
+	typeAttachments:        {"ID", "VOLUMEID", "STATUS", "USERID", "TENANTID", "SIZE"},
+	typeVolumeSnapshots:    {"ID", "NAME", "VOLUMEID", "STATUS", "USERID", "TENANTID", "SIZE"},
+}
 
 func IsAdminContext(ctx *c.Context) bool {
 	return ctx.IsAdmin
@@ -106,11 +125,11 @@ func (c *Client) GetLimit(m map[string][]string) int {
 		limit, err = strconv.Atoi(v[0])
 		if err != nil || limit < 0 {
 			log.Warning("Invalid input limit:", limit, ",use default value instead:50")
-			return defaultLimit
+			return constants.DefaultLimit
 		}
 	} else {
 		log.Warning("The parameter limit is not present,use default value instead:50")
-		return defaultLimit
+		return constants.DefaultLimit
 	}
 	return limit
 }
@@ -127,12 +146,12 @@ func (c *Client) GetOffset(m map[string][]string, size int) int {
 		if err != nil || offset < 0 || offset > size {
 			log.Warning("Invalid input offset or input offset is out of bounds:", offset, ",use default value instead:0")
 
-			return defaultOffset
+			return constants.DefaultOffset
 		}
 
 	} else {
 		log.Warning("The parameter offset is not present,use default value instead:0")
-		return defaultOffset
+		return constants.DefaultOffset
 	}
 	return offset
 }
@@ -145,11 +164,11 @@ func (c *Client) GetSortDir(m map[string][]string) string {
 		sortDir = v[0]
 		if !strings.EqualFold(sortDir, "desc") && !strings.EqualFold(sortDir, "asc") {
 			log.Warning("Invalid input sortDir:", sortDir, ",use default value instead:desc")
-			return defaultSortDir
+			return constants.DefaultSortDir
 		}
 	} else {
 		log.Warning("The parameter sortDir is not present,use default value instead:desc")
-		return defaultSortDir
+		return constants.DefaultSortDir
 	}
 	return sortDir
 }
@@ -172,6 +191,16 @@ func (c *Client) GetSortKey(m map[string][]string, sortKeys []string) string {
 	return sortKey
 }
 
+func (c *Client) FilterAndSort(src interface{}, params map[string][]string, sortableKeys []string) interface{} {
+	var ret interface{}
+	ret = utils.Filter(src, params)
+	if len(params["sortKey"]) > 0 && utils.ContainsIgnoreCase(sortableKeys, params["sortKey"][0]) {
+		ret = utils.Sort(ret, params["sortKey"][0], c.GetSortDir(params))
+	}
+	ret = utils.Slice(ret, c.GetOffset(params, reflect.ValueOf(src).Len()), c.GetLimit(params))
+	return ret
+}
+
 //ParameterFilter
 func (c *Client) ParameterFilter(m map[string][]string, size int, sortKeys []string) *Parameter {
 
@@ -182,7 +211,7 @@ func (c *Client) ParameterFilter(m map[string][]string, size int, sortKeys []str
 	endIdx := limit + offset
 
 	// If use not specified the limit return all the items.
-	if limit == defaultLimit || endIdx > size {
+	if limit == constants.DefaultLimit || endIdx > size {
 		endIdx = size
 	}
 
@@ -260,6 +289,19 @@ func (c *Client) FindFileShareValue(k string, p *model.FileShareSpec) string {
 }
 
 func (c *Client) CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSpec) (*model.FileShareAclSpec, error) {
+	acls, err := c.ListFileShareAclsByShareId(ctx, fshare.FileShareId)
+	if err != nil {
+		log.Error("failed to list acls")
+		return nil, err
+	}
+
+	for _, acl := range acls {
+		if acl.AccessTo == fshare.AccessTo {
+			errstr :=  "for fileshareID: "+acl.FileShareId+", acl is already set with ip: "+acl.AccessTo+". If you want to set new acl, first delete the existing one"
+			log.Error(errstr)
+			return nil, fmt.Errorf(errstr)
+		}
+	}
 
 	fshare.TenantId = ctx.TenantId
 	fshareBody, err := json.Marshal(fshare)
@@ -331,33 +373,6 @@ func (c *Client) CreateFileShare(ctx *c.Context, fshare *model.FileShareSpec) (*
 	}
 
 	return fshare, nil
-}
-
-func (c *Client) SelectFileShares(m map[string][]string, fileshares []*model.FileShareSpec) []*model.FileShareSpec {
-	if !c.SelectOrNot(m) {
-		return fileshares
-	}
-
-	var fshares = []*model.FileShareSpec{}
-	var flag bool
-	for _, fshare := range fileshares {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			f := c.FindFileShareValue(key, fshare)
-			if !strings.EqualFold(m[key][0], f) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			fshares = append(fshares, fshare)
-		}
-	}
-	return fshares
-
 }
 
 func (c *Client) SortFileShares(shares []*model.FileShareSpec, p *Parameter) []*model.FileShareSpec {
@@ -449,9 +464,12 @@ func (c *Client) ListFileSharesWithFilter(ctx *c.Context, m map[string][]string)
 		return nil, err
 	}
 
-	vols := c.SelectFileShares(m, fileshares)
-	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "CRETEDAT", "UPDATEDAT", "PROTOCOLS", "EXPORTLOCATIONS", "SNAPSHOTID"})
-	return c.SortFileShares(vols, p), nil
+	tmpFileshares := c.FilterAndSort(fileshares, m, sortableKeysMap[typeFileShares])
+	var res = []*model.FileShareSpec{}
+	for _, data := range tmpFileshares.([]interface{}) {
+		res = append(res, data.(*model.FileShareSpec))
+	}
+	return res, nil
 }
 
 // ListFileShares
@@ -763,100 +781,6 @@ func (c *Client) ListFileShareSnapshots(ctx *c.Context) ([]*model.FileShareSnaps
 	return fss, nil
 }
 
-var fileshareSnapshotSortKey string
-
-type FileShareSnapshotSlice []*model.FileShareSnapshotSpec
-
-func (fileshareSnapshot FileShareSnapshotSlice) Len() int { return len(fileshareSnapshot) }
-
-func (fileshareSnapshot FileShareSnapshotSlice) Swap(i, j int) {
-
-	fileshareSnapshot[i], fileshareSnapshot[j] = fileshareSnapshot[j], fileshareSnapshot[i]
-}
-
-func (fileshareSnapshot FileShareSnapshotSlice) Less(i, j int) bool {
-	switch fileshareSnapshotSortKey {
-	case "ID":
-		return fileshareSnapshot[i].Id < fileshareSnapshot[j].Id
-	case "VOLUMEID":
-		return fileshareSnapshot[i].FileShareId < fileshareSnapshot[j].FileShareId
-	case "STATUS":
-		return fileshareSnapshot[i].Status < fileshareSnapshot[j].Status
-	case "USERID":
-		return fileshareSnapshot[i].UserId < fileshareSnapshot[j].UserId
-	case "TENANTID":
-		return fileshareSnapshot[i].TenantId < fileshareSnapshot[j].TenantId
-	case "SIZE":
-		return fileshareSnapshot[i].SnapshotSize < fileshareSnapshot[j].SnapshotSize
-	}
-	return false
-}
-
-func (c *Client) FindFileShareSnapshotsValue(k string, p *model.FileShareSnapshotSpec) string {
-	switch k {
-	case "Id":
-		return p.Id
-	case "CreatedAt":
-		return p.CreatedAt
-	case "UpdatedAt":
-		return p.UpdatedAt
-	case "TenantId":
-		return p.TenantId
-	case "UserId":
-		return p.UserId
-	case "Name":
-		return p.Name
-	case "Description":
-		return p.Description
-	case "Status":
-		return p.Status
-	case "Size":
-		return strconv.FormatInt(p.SnapshotSize, 10)
-	case "FileShareId":
-		return p.FileShareId
-	}
-	return ""
-}
-
-func (c *Client) SelectFileShareSnapshots(m map[string][]string, snapshots []*model.FileShareSnapshotSpec) []*model.FileShareSnapshotSpec {
-	if !c.SelectOrNot(m) {
-		return snapshots
-	}
-
-	var snps = []*model.FileShareSnapshotSpec{}
-	var flag bool
-	for _, snapshot := range snapshots {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			v := c.FindFileShareSnapshotsValue(key, snapshot)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			snps = append(snps, snapshot)
-		}
-	}
-	return snps
-
-}
-
-func (c *Client) SortFileShareSnapshots(snapshots []*model.FileShareSnapshotSpec, p *Parameter) []*model.FileShareSnapshotSpec {
-	fileshareSnapshotSortKey = p.sortKey
-
-	if strings.EqualFold(p.sortDir, "asc") {
-		sort.Sort(FileShareSnapshotSlice(snapshots))
-	} else {
-		sort.Sort(sort.Reverse(FileShareSnapshotSlice(snapshots)))
-	}
-	return snapshots
-
-}
-
 func (c *Client) ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.FileShareSnapshotSpec, error) {
 	fileshareSnapshots, err := c.ListFileShareSnapshots(ctx)
 	if err != nil {
@@ -864,10 +788,12 @@ func (c *Client) ListFileShareSnapshotsWithFilter(ctx *c.Context, m map[string][
 		return nil, err
 	}
 
-	snps := c.SelectFileShareSnapshots(m, fileshareSnapshots)
-	p := c.ParameterFilter(m, len(snps), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
-
-	return c.SortFileShareSnapshots(snps, p)[p.beginIdx:p.endIdx], nil
+	tmpFileshareSnapshots := c.FilterAndSort(fileshareSnapshots, m, sortableKeysMap[typeFileShareSnapshots])
+	var res = []*model.FileShareSnapshotSpec{}
+	for _, data := range tmpFileshareSnapshots.([]interface{}) {
+		res = append(res, data.(*model.FileShareSnapshotSpec))
+	}
+	return res, nil
 }
 
 // UpdateFileShareSnapshot
@@ -1037,93 +963,6 @@ func (c *Client) ListDocks(ctx *c.Context) ([]*model.DockSpec, error) {
 	return dcks, nil
 }
 
-var dockSortKey string
-
-type DockSlice []*model.DockSpec
-
-func (dock DockSlice) Len() int { return len(dock) }
-
-func (dock DockSlice) Swap(i, j int) { dock[i], dock[j] = dock[j], dock[i] }
-
-func (dock DockSlice) Less(i, j int) bool {
-	switch dockSortKey {
-
-	case "ID":
-		return dock[i].Id < dock[j].Id
-	case "NAME":
-		return dock[i].Name < dock[j].Name
-	case "STATUS":
-		return dock[i].Status < dock[j].Status
-	case "ENDPOINT":
-		return dock[i].Endpoint < dock[j].Endpoint
-	case "DRIVERNAME":
-		return dock[i].DriverName < dock[j].DriverName
-	case "DESCRIPTION":
-		return dock[i].Description < dock[j].Description
-	}
-	return false
-}
-
-func (c *Client) FindDockValue(k string, d *model.DockSpec) string {
-	switch k {
-	case "Id":
-		return d.Id
-	case "CreatedAt":
-		return d.CreatedAt
-	case "Name":
-		return d.Name
-	case "UpdatedAt":
-		return d.UpdatedAt
-	case "Description":
-		return d.Description
-	case "Status":
-		return d.Status
-	case "StorageType":
-		return d.StorageType
-	case "Endpoint":
-		return d.Endpoint
-	case "DriverName":
-		return d.DriverName
-	}
-	return ""
-}
-
-func (c *Client) SelectDocks(m map[string][]string, docks []*model.DockSpec) []*model.DockSpec {
-	if !c.SelectOrNot(m) {
-		return docks
-	}
-	var dcks = []*model.DockSpec{}
-
-	var flag bool
-	for _, dock := range docks {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			v := c.FindDockValue(key, dock)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			dcks = append(dcks, dock)
-		}
-	}
-	return dcks
-}
-
-func (c *Client) SortDocks(dcks []*model.DockSpec, p *Parameter) []*model.DockSpec {
-	dockSortKey = p.sortKey
-	if strings.EqualFold(p.sortDir, "asc") {
-		sort.Sort(DockSlice(dcks))
-	} else {
-		sort.Sort(sort.Reverse(DockSlice(dcks)))
-	}
-	return dcks
-}
-
 func (c *Client) ListDocksWithFilter(ctx *c.Context, m map[string][]string) ([]*model.DockSpec, error) {
 	docks, err := c.ListDocks(ctx)
 	if err != nil {
@@ -1131,10 +970,12 @@ func (c *Client) ListDocksWithFilter(ctx *c.Context, m map[string][]string) ([]*
 		return nil, err
 	}
 
-	dcks := c.SelectDocks(m, docks)
-
-	p := c.ParameterFilter(m, len(dcks), []string{"ID", "NAME", "ENDPOINT", "DRIVERNAME", "DESCRIPTION", "STATUS"})
-	return c.SortDocks(dcks, p)[p.beginIdx:p.endIdx], nil
+	tmpDocks := c.FilterAndSort(docks, m, sortableKeysMap[typeDocks])
+	var res = []*model.DockSpec{}
+	for _, data := range tmpDocks.([]interface{}) {
+		res = append(res, data.(*model.DockSpec))
+	}
+	return res, nil
 }
 
 // UpdateDock
@@ -1208,99 +1049,6 @@ func (c *Client) CreatePool(ctx *c.Context, pol *model.StoragePoolSpec) (*model.
 	return pol, nil
 }
 
-var poolSortKey string
-
-type StoragePoolSlice []*model.StoragePoolSpec
-
-func (pool StoragePoolSlice) Len() int { return len(pool) }
-
-func (pool StoragePoolSlice) Swap(i, j int) { pool[i], pool[j] = pool[j], pool[i] }
-
-func (pool StoragePoolSlice) Less(i, j int) bool {
-	switch poolSortKey {
-
-	case "ID":
-		return pool[i].Id < pool[j].Id
-	case "NAME":
-		return pool[i].Name < pool[j].Name
-	case "STATUS":
-		return pool[i].Status < pool[j].Status
-	case "AVAILABILITYZONE":
-		return pool[i].AvailabilityZone < pool[j].AvailabilityZone
-	case "DOCKID":
-		return pool[i].DockId < pool[j].DockId
-	case "DESCRIPTION":
-		return pool[i].Description < pool[j].Description
-	}
-	return false
-}
-
-func (c *Client) FindPoolValue(k string, p *model.StoragePoolSpec) string {
-	switch k {
-	case "Id":
-		return p.Id
-	case "CreatedAt":
-		return p.CreatedAt
-	case "UpdatedAt":
-		return p.UpdatedAt
-	case "Name":
-		return p.Name
-	case "Description":
-		return p.Description
-	case "Status":
-		return p.Status
-	case "DockId":
-		return p.DockId
-	case "AvailabilityZone":
-		return p.AvailabilityZone
-	case "TotalCapacity":
-		return strconv.FormatInt(p.TotalCapacity, 10)
-	case "FreeCapacity":
-		return strconv.FormatInt(p.FreeCapacity, 10)
-	case "StorageType":
-		return p.StorageType
-	}
-	return ""
-}
-
-func (c *Client) SelectPools(m map[string][]string, pools []*model.StoragePoolSpec) []*model.StoragePoolSpec {
-
-	if !c.SelectOrNot(m) {
-		return pools
-	}
-	var pols = []*model.StoragePoolSpec{}
-	var flag bool
-	for _, pool := range pools {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			v := c.FindPoolValue(key, pool)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			pols = append(pols, pool)
-		}
-	}
-	return pols
-}
-
-func (c *Client) SortPools(pools []*model.StoragePoolSpec, p *Parameter) []*model.StoragePoolSpec {
-
-	poolSortKey = p.sortKey
-
-	if strings.EqualFold(p.sortDir, "asc") {
-		sort.Sort(StoragePoolSlice(pools))
-	} else {
-		sort.Sort(sort.Reverse(StoragePoolSlice(pools)))
-	}
-	return pools
-}
-
 func (c *Client) ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.StoragePoolSpec, error) {
 	pools, err := c.ListPools(ctx)
 	if err != nil {
@@ -1308,9 +1056,12 @@ func (c *Client) ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*
 		return nil, err
 	}
 
-	pols := c.SelectPools(m, pools)
-	p := c.ParameterFilter(m, len(pols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "DOCKID", "DESCRIPTION"})
-	return c.SortPools(pols, p)[p.beginIdx:p.endIdx], nil
+	tmpPools := c.FilterAndSort(pools, m, sortableKeysMap[typePools])
+	var res = []*model.StoragePoolSpec{}
+	for _, data := range tmpPools.([]interface{}) {
+		res = append(res, data.(*model.StoragePoolSpec))
+	}
+	return res, nil
 }
 
 // GetPool
@@ -1549,83 +1300,6 @@ func (c *Client) ListProfiles(ctx *c.Context) ([]*model.ProfileSpec, error) {
 	return prfs, nil
 }
 
-var profileSortKey string
-
-type ProfileSlice []*model.ProfileSpec
-
-func (profile ProfileSlice) Len() int { return len(profile) }
-
-func (profile ProfileSlice) Swap(i, j int) { profile[i], profile[j] = profile[j], profile[i] }
-
-func (profile ProfileSlice) Less(i, j int) bool {
-	switch profileSortKey {
-
-	case "ID":
-		return profile[i].Id < profile[j].Id
-	case "NAME":
-		return profile[i].Name < profile[j].Name
-	case "DESCRIPTION":
-		return profile[i].Description < profile[j].Description
-	}
-	return false
-}
-
-func (c *Client) FindProfileValue(k string, p *model.ProfileSpec) string {
-	switch k {
-	case "Id":
-		return p.Id
-	case "CreatedAt":
-		return p.CreatedAt
-	case "UpdatedAt":
-		return p.UpdatedAt
-	case "Name":
-		return p.Name
-	case "Description":
-		return p.Description
-	case "StorageType":
-		return p.StorageType
-	}
-	return ""
-}
-
-func (c *Client) SortProfiles(profiles []*model.ProfileSpec, p *Parameter) []*model.ProfileSpec {
-	profileSortKey = p.sortKey
-
-	if strings.EqualFold(p.sortDir, "asc") {
-		sort.Sort(ProfileSlice(profiles))
-	} else {
-		sort.Sort(sort.Reverse(ProfileSlice(profiles)))
-	}
-	return profiles
-}
-
-func (c *Client) SelectProfiles(m map[string][]string, profiles []*model.ProfileSpec) []*model.ProfileSpec {
-	if !c.SelectOrNot(m) {
-		return profiles
-	}
-
-	var prfs = []*model.ProfileSpec{}
-	var flag bool
-	for _, profile := range profiles {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			v := c.FindProfileValue(key, profile)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			prfs = append(prfs, profile)
-		}
-	}
-	return prfs
-
-}
-
 func (c *Client) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.ProfileSpec, error) {
 	profiles, err := c.ListProfiles(ctx)
 	if err != nil {
@@ -1633,11 +1307,12 @@ func (c *Client) ListProfilesWithFilter(ctx *c.Context, m map[string][]string) (
 		return nil, err
 	}
 
-	prfs := c.SelectProfiles(m, profiles)
-
-	p := c.ParameterFilter(m, len(prfs), []string{"ID", "NAME", "DESCRIPTION"})
-
-	return c.SortProfiles(prfs, p)[p.beginIdx:p.endIdx], nil
+	tmpProfiles := c.FilterAndSort(profiles, m, sortableKeysMap[typeProfiles])
+	var res = []*model.ProfileSpec{}
+	for _, data := range tmpProfiles.([]interface{}) {
+		res = append(res, data.(*model.ProfileSpec))
+	}
+	return res, nil
 }
 
 // UpdateProfile
@@ -1918,35 +1593,12 @@ func (c *Client) FindVolumeValue(k string, p *model.VolumeSpec) string {
 		return p.ProfileId
 	case "GroupId":
 		return p.GroupId
+	case "DurableName":
+		return p.Identifier.DurableName
+	case "DurableNameFormat":
+		return p.Identifier.DurableNameFormat
 	}
 	return ""
-}
-
-func (c *Client) SelectVolumes(m map[string][]string, volumes []*model.VolumeSpec) []*model.VolumeSpec {
-	if !c.SelectOrNot(m) {
-		return volumes
-	}
-
-	var vols = []*model.VolumeSpec{}
-	var flag bool
-	for _, vol := range volumes {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			v := c.FindVolumeValue(key, vol)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			vols = append(vols, vol)
-		}
-	}
-	return vols
-
 }
 
 func (c *Client) SortVolumes(volumes []*model.VolumeSpec, p *Parameter) []*model.VolumeSpec {
@@ -1967,12 +1619,26 @@ func (c *Client) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([
 		log.Error("List volumes failed: ", err)
 		return nil, err
 	}
+	// If DurableName is there in filter we need to parse the sub structure 'identifier' to filter out matching volume spec
+	var vols = []*model.VolumeSpec{}
+	if val, ok := m["DurableName"]; ok {
+		for _,vol := range volumes {
+			v :=c.FindVolumeValue("DurableName",vol)
+			if v == val[0] {
+				vols =append(vols,vol)
+				return vols,nil
+			}
+		}
 
-	vols := c.SelectVolumes(m, volumes)
+		return vols,nil
+	}
 
-	p := c.ParameterFilter(m, len(vols), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "PROFILEID", "PROJECTID", "SIZE", "POOLID", "DESCRIPTION", "GROUPID"})
-
-	return c.SortVolumes(vols, p)[p.beginIdx:p.endIdx], nil
+	tmpVolumes := c.FilterAndSort(volumes, m, sortableKeysMap[typeVolumes])
+	var res = []*model.VolumeSpec{}
+	for _, data := range tmpVolumes.([]interface{}) {
+		res = append(res, data.(*model.VolumeSpec))
+	}
+	return res, nil
 }
 
 // UpdateVolume ...
@@ -2102,6 +1768,10 @@ func (c *Client) ExtendVolume(ctx *c.Context, vol *model.VolumeSpec) (*model.Vol
 
 // CreateVolumeAttachment
 func (c *Client) CreateVolumeAttachment(ctx *c.Context, attachment *model.VolumeAttachmentSpec) (*model.VolumeAttachmentSpec, error) {
+	if attachment.Id == "" {
+		attachment.Id = uuid.NewV4().String()
+	}
+	attachment.CreatedAt = time.Now().Format(constants.TimeFormat)
 	attachment.TenantId = ctx.TenantId
 
 	atcBody, err := json.Marshal(attachment)
@@ -2187,109 +1857,23 @@ func (c *Client) ListVolumeAttachments(ctx *c.Context, volumeId string) ([]*mode
 
 }
 
-var volumeAttachmentSortKey string
-
-type VolumeAttachmentSlice []*model.VolumeAttachmentSpec
-
-func (volumeAttachment VolumeAttachmentSlice) Len() int { return len(volumeAttachment) }
-
-func (volumeAttachment VolumeAttachmentSlice) Swap(i, j int) {
-
-	volumeAttachment[i], volumeAttachment[j] = volumeAttachment[j], volumeAttachment[i]
-}
-
-func (volumeAttachment VolumeAttachmentSlice) Less(i, j int) bool {
-	switch volumeAttachmentSortKey {
-	case "ID":
-		return volumeAttachment[i].Id < volumeAttachment[j].Id
-	case "VOLUMEID":
-		return volumeAttachment[i].VolumeId < volumeAttachment[j].VolumeId
-	case "STATUS":
-		return volumeAttachment[i].Status < volumeAttachment[j].Status
-	case "USERID":
-		return volumeAttachment[i].UserId < volumeAttachment[j].UserId
-	case "TENANTID":
-		return volumeAttachment[i].TenantId < volumeAttachment[j].TenantId
-	}
-	return false
-}
-
-func (c *Client) FindAttachmentValue(k string, p *model.VolumeAttachmentSpec) string {
-	switch k {
-	case "Id":
-		return p.Id
-	case "CreatedAt":
-		return p.CreatedAt
-	case "UpdatedAte":
-		return p.UpdatedAt
-	case "TenantId":
-		return p.TenantId
-	case "UserId":
-		return p.UserId
-	case "VolumeId":
-		return p.VolumeId
-	case "Mountpoint":
-		return p.Mountpoint
-	case "Status":
-		return p.Status
-	}
-	return ""
-}
-
-func (c *Client) SelectVolumeAttachments(m map[string][]string, attachments []*model.VolumeAttachmentSpec) []*model.VolumeAttachmentSpec {
-	if !c.SelectOrNot(m) {
-		return attachments
-	}
-
-	var atcs = []*model.VolumeAttachmentSpec{}
-	var flag bool
-	for _, attachment := range attachments {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			v := c.FindAttachmentValue(key, attachment)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			atcs = append(atcs, attachment)
-		}
-	}
-	return atcs
-
-}
-
-func (c *Client) SortVolumeAttachments(attachments []*model.VolumeAttachmentSpec, p *Parameter) []*model.VolumeAttachmentSpec {
-	volumeAttachmentSortKey = p.sortKey
-
-	if strings.EqualFold(p.sortDir, "asc") {
-		sort.Sort(VolumeAttachmentSlice(attachments))
-	} else {
-		sort.Sort(sort.Reverse(VolumeAttachmentSlice(attachments)))
-	}
-	return attachments
-
-}
-
 func (c *Client) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeAttachmentSpec, error) {
 	var volumeId string
 	if v, ok := m["VolumeId"]; ok {
 		volumeId = v[0]
 	}
-	volumeAttachments, err := c.ListVolumeAttachments(ctx, volumeId)
+	attachments, err := c.ListVolumeAttachments(ctx, volumeId)
 	if err != nil {
 		log.Error("List volumes failed: ", err)
 		return nil, err
 	}
 
-	atcs := c.SelectVolumeAttachments(m, volumeAttachments)
-	p := c.ParameterFilter(m, len(atcs), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
-
-	return c.SortVolumeAttachments(atcs, p)[p.beginIdx:p.endIdx], nil
+	tmpAttachments := c.FilterAndSort(attachments, m, sortableKeysMap[typeAttachments])
+	var res = []*model.VolumeAttachmentSpec{}
+	for _, data := range tmpAttachments.([]interface{}) {
+		res = append(res, data.(*model.VolumeAttachmentSpec))
+	}
+	return res, nil
 }
 
 // UpdateVolumeAttachment
@@ -2305,10 +1889,6 @@ func (c *Client) UpdateVolumeAttachment(ctx *c.Context, attachmentId string, att
 		result.Status = attachment.Status
 	}
 
-	// Update metadata
-	if attachment.Metadata != nil {
-		result.Metadata = utils.MergeStringMaps(result.Metadata, attachment.Metadata)
-	}
 	// Update DriverVolumeType
 	if len(attachment.DriverVolumeType) > 0 {
 		result.DriverVolumeType = attachment.DriverVolumeType
@@ -2463,101 +2043,6 @@ func (c *Client) ListVolumeSnapshots(ctx *c.Context) ([]*model.VolumeSnapshotSpe
 	return vss, nil
 }
 
-var volumeSnapshotSortKey string
-
-type VolumeSnapshotSlice []*model.VolumeSnapshotSpec
-
-func (volumeSnapshot VolumeSnapshotSlice) Len() int { return len(volumeSnapshot) }
-
-func (volumeSnapshot VolumeSnapshotSlice) Swap(i, j int) {
-
-	volumeSnapshot[i], volumeSnapshot[j] = volumeSnapshot[j], volumeSnapshot[i]
-}
-
-func (volumeSnapshot VolumeSnapshotSlice) Less(i, j int) bool {
-	switch volumeSnapshotSortKey {
-	case "ID":
-		return volumeSnapshot[i].Id < volumeSnapshot[j].Id
-	case "VOLUMEID":
-		return volumeSnapshot[i].VolumeId < volumeSnapshot[j].VolumeId
-	case "STATUS":
-		return volumeSnapshot[i].Status < volumeSnapshot[j].Status
-	case "USERID":
-		return volumeSnapshot[i].UserId < volumeSnapshot[j].UserId
-	case "TENANTID":
-		return volumeSnapshot[i].TenantId < volumeSnapshot[j].TenantId
-	case "SIZE":
-		return volumeSnapshot[i].Size < volumeSnapshot[j].Size
-		//TODO:case "GroupSnapshotId"
-	}
-	return false
-}
-
-func (c *Client) FindSnapshotsValue(k string, p *model.VolumeSnapshotSpec) string {
-	switch k {
-	case "Id":
-		return p.Id
-	case "CreatedAt":
-		return p.CreatedAt
-	case "UpdatedAte":
-		return p.UpdatedAt
-	case "TenantId":
-		return p.TenantId
-	case "UserId":
-		return p.UserId
-	case "Name":
-		return p.Name
-	case "Description":
-		return p.Description
-	case "Status":
-		return p.Status
-	case "Size":
-		return strconv.FormatInt(p.Size, 10)
-	case "VolumeId":
-		return p.VolumeId
-	}
-	return ""
-}
-
-func (c *Client) SelectSnapshots(m map[string][]string, snapshots []*model.VolumeSnapshotSpec) []*model.VolumeSnapshotSpec {
-	if !c.SelectOrNot(m) {
-		return snapshots
-	}
-
-	var snps = []*model.VolumeSnapshotSpec{}
-	var flag bool
-	for _, snapshot := range snapshots {
-		flag = true
-		for key := range m {
-			if utils.Contained(key, validKey) {
-				continue
-			}
-			v := c.FindSnapshotsValue(key, snapshot)
-			if !strings.EqualFold(m[key][0], v) {
-				flag = false
-				break
-			}
-		}
-		if flag {
-			snps = append(snps, snapshot)
-		}
-	}
-	return snps
-
-}
-
-func (c *Client) SortSnapshots(snapshots []*model.VolumeSnapshotSpec, p *Parameter) []*model.VolumeSnapshotSpec {
-	volumeSnapshotSortKey = p.sortKey
-
-	if strings.EqualFold(p.sortDir, "asc") {
-		sort.Sort(VolumeSnapshotSlice(snapshots))
-	} else {
-		sort.Sort(sort.Reverse(VolumeSnapshotSlice(snapshots)))
-	}
-	return snapshots
-
-}
-
 func (c *Client) ListVolumeSnapshotsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeSnapshotSpec, error) {
 	volumeSnapshots, err := c.ListVolumeSnapshots(ctx)
 	if err != nil {
@@ -2565,10 +2050,12 @@ func (c *Client) ListVolumeSnapshotsWithFilter(ctx *c.Context, m map[string][]st
 		return nil, err
 	}
 
-	snps := c.SelectSnapshots(m, volumeSnapshots)
-	p := c.ParameterFilter(m, len(snps), []string{"ID", "VOLUMEID", "STATUS", "USERID", "PROJECTID"})
-
-	return c.SortSnapshots(snps, p)[p.beginIdx:p.endIdx], nil
+	tmpVolumeSnapshots := c.FilterAndSort(volumeSnapshots, m, sortableKeysMap[typeVolumeSnapshots])
+	var res = []*model.VolumeSnapshotSpec{}
+	for _, data := range tmpVolumeSnapshots.([]interface{}) {
+		res = append(res, data.(*model.VolumeSnapshotSpec))
+	}
+	return res, nil
 }
 
 // UpdateVolumeSnapshot
@@ -3047,6 +2534,14 @@ func (c *Client) UpdateStatus(ctx *c.Context, in interface{}, status string) err
 			return errUpdate
 		}
 
+	case *model.FileShareAclSpec:
+		fileshareAcl := in.(*model.FileShareAclSpec)
+		fileshareAcl.Status = status
+		if _, errUpdate := c.UpdateFileShareAcl(ctx, fileshareAcl); errUpdate != nil {
+			log.Error("when update fileshare acl status in db:", errUpdate.Error())
+			return errUpdate
+		}
+
 	case *model.FileShareSnapshotSpec:
 		fsnap := in.(*model.FileShareSnapshotSpec)
 		fsnap.Status = status
@@ -3259,7 +2754,7 @@ func (c *Client) SelectVolumeGroup(param map[string][]string, vgs []*model.Volum
 	return vglist
 }
 
-func (c *Client) ListHosts(ctx *c.Context) ([]*model.HostSpec, error) {
+func (c *Client) ListHosts(ctx *c.Context, m map[string][]string) ([]*model.HostSpec, error) {
 	dbReq := &Request{
 		Url: urls.GenerateHostURL(urls.Etcd, ctx.TenantId),
 	}
@@ -3286,11 +2781,23 @@ func (c *Client) ListHosts(ctx *c.Context) ([]*model.HostSpec, error) {
 		}
 		hosts = append(hosts, host)
 	}
-	return hosts, nil
+
+	tmpHosts := utils.Filter(hosts, m)
+	if len(m["sortKey"]) > 0 && utils.Contains([]string{"hostName", "createdAt"}, m["sortKey"][0]) {
+		tmpHosts = utils.Sort(tmpHosts, m["sortKey"][0], c.GetSortDir(m))
+	}
+
+	tmpHosts = utils.Slice(tmpHosts, c.GetOffset(m, len(hosts)), c.GetLimit(m))
+	var res = []*model.HostSpec{}
+	for _, data := range tmpHosts.([]interface{}) {
+		res = append(res, data.(*model.HostSpec))
+	}
+
+	return res, nil
 }
 
 func (c *Client) ListHostsByName(ctx *c.Context, hostName string) ([]*model.HostSpec, error) {
-	hosts, err := c.ListHosts(ctx)
+	hosts, err := c.ListHosts(ctx, map[string][]string{"hostName": []string{hostName}})
 	if err != nil {
 		log.Error("List hosts failed: ", err)
 		return nil, err
@@ -3337,6 +2844,9 @@ func (c *Client) UpdateHost(ctx *c.Context, host *model.HostSpec) (*model.HostSp
 	}
 	if host.HostName != "" {
 		result.HostName = host.HostName
+	}
+	if host.OsType != "" {
+		result.OsType = host.OsType
 	}
 	if host.IP != "" {
 		result.IP = host.IP
@@ -3389,7 +2899,7 @@ func (c *Client) GetHost(ctx *c.Context, hostId string) (*model.HostSpec, error)
 	if !IsAdminContext(ctx) || err == nil {
 		return host, err
 	}
-	hosts, err := c.ListHosts(ctx)
+	hosts, err := c.ListHosts(ctx, map[string][]string{"id": []string{hostId}})
 	if err != nil {
 		return nil, err
 	}
