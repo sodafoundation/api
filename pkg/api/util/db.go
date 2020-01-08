@@ -351,28 +351,6 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	if in.Name == "" {
-		errMsg := "empty volume name is not allowed. Please give valid name"
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
-	if len(in.Name) > 255 {
-		errMsg := fmt.Sprintf("volume name length should not more than 255 characters. current length is : %d", len(in.Name))
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
-	reg, err := regexp.Compile("^[a-zA-Z0-9 _-]+$")
-	if err != nil {
-		errMsg := fmt.Sprintf("regex compilation for volume name validation failed")
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
-	if reg.MatchString(in.Name) == false {
-		errMsg := fmt.Sprintf("invalid volume name it only contain english char and number  : %v", in.Name)
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
-
 	if in.SnapshotId != "" {
 		snap, err := db.C.GetVolumeSnapshot(ctx, in.SnapshotId)
 		if err != nil {
