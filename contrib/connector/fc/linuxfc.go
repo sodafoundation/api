@@ -181,9 +181,9 @@ func getMultipathDevice(deviceWWN string) (string, error) {
 	cmd := fmt.Sprintf("ls -l /dev/disk/by-id/ | grep %s", deviceWWN)
 	out, err := connector.ExecCmd("/bin/bash", "-c", cmd)
 	if err != nil {
-		errMsg := fmt.Sprintf("error occurred when find DM of wwn %s: %s, %v", deviceWWN, out, err)
-		log.Println(errMsg)
-		return "", errors.New(errMsg)
+		msg := fmt.Sprintf("No DM of wwn %s exist", deviceWWN)
+		log.Println(msg)
+		return "", nil
 	}
 
 	lines := strings.Split(strings.TrimSpace(out), "\n")
