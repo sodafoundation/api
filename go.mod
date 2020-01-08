@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/LINBIT/godrbdutils v0.0.0-20180425110027-65b98a0f103a
-	github.com/astaxie/beego v1.11.1
+	github.com/astaxie/beego v1.12.0
 	github.com/beorn7/perks v1.0.0 // indirect
 	github.com/ceph/go-ceph v0.0.0-20170728144007-81e4191e131b
 	github.com/coreos/bbolt v1.3.3 // indirect
