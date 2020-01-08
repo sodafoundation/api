@@ -207,6 +207,8 @@ func TestHostBasedCreateReplication(t *testing.T) {
 	pool.ReplicationType = model.ReplicationTypeHost
 	mockClient.On("GetProfile", context.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
 	mockClient.On("GetPool", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&pool, nil)
+	mockClient.On("ListHostsByName", context.NewAdminContext(), mock.Anything).Return([]*model.HostSpec{&SampleHosts[0]}, nil)
+	mockClient.On("GetHost", context.NewAdminContext(), mock.Anything).Return(&SampleHosts[0], nil)
 	mockClient.On("GetDock", context.NewAdminContext(), mock.Anything).Return(&SampleDocks[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
 	mockClient.On("CreateVolumeAttachment", context.NewAdminContext(), &SampleAttachments[0]).Return(&SampleAttachments[0], nil)
@@ -248,15 +250,15 @@ func TestHostBasedCreateReplication(t *testing.T) {
 			"lvPath":       "/dev/opensds-volumes-default/volume-ab14d4ea-edd4-41bd-b37b-391f66115e8b",
 			"Mountpoint":   "/dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1",
 			"AttachmentId": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
-			"HostName":     "",
-			"HostIp":       "",
+			"HostName":     "sap1",
+			"HostIp":       "192.168.56.12",
 		},
 		SecondaryReplicationDriverData: map[string]string{
 			"lvPath":       "/dev/opensds-volumes-default/volume-7bce5fb6-a229-4584-bad4-15f1a6a6aadd",
 			"Mountpoint":   "/dev/disk/by-path/ip-192.168.56.100:3260-iscsi-iqn.2017-10.io.opensds:baec258b-8f79-4bbc-bf97-28addfa903d3-lun-1",
 			"AttachmentId": "f2dda3d2-bf79-11e7-8665-f750b088f63e",
-			"HostName":     "",
-			"HostIp":       "",
+			"HostName":     "sap1",
+			"HostIp":       "192.168.56.12",
 		},
 		Metadata: map[string]string{},
 	}
@@ -269,6 +271,7 @@ func TestArrayBasedDeleteReplication(t *testing.T) {
 	pool.ReplicationType = model.ReplicationTypeArray
 	mockClient := new(dbtest.Client)
 	mockClient.On("GetPool", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&pool, nil)
+	mockClient.On("GetHost", context.NewAdminContext(), mock.Anything).Return(&SampleHosts[0], nil)
 	mockClient.On("GetDock", context.NewAdminContext(), "b7602e18-771e-11e7-8f38-dbd6d291f4e0").Return(&SampleDocks[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
 	mockClient.On("DeleteReplication", context.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359").Return(nil)
@@ -299,6 +302,7 @@ func TestHostBasedDeleteReplication(t *testing.T) {
 	mockClient := new(dbtest.Client)
 	mockClient.On("GetPool", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&pool, nil)
 	mockClient.On("GetDock", context.NewAdminContext(), mock.Anything).Return(&SampleDocks[0], nil)
+	mockClient.On("GetHost", context.NewAdminContext(), mock.Anything).Return(&SampleHosts[0], nil)
 	mockClient.On("GetDockByPoolId", context.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
 	mockClient.On("DeleteReplication", context.NewAdminContext(), "c299a978-4f3e-11e8-8a5c-977218a83359").Return(nil)
 	mockClient.On("GetVolumeAttachment", context.NewAdminContext(), "f2dda3d2-bf79-11e7-8665-f750b088f63e").Return(&SampleAttachments[0], nil)

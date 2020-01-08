@@ -289,15 +289,49 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 		initiator = attacherDock.Metadata["WWPNS"]
 	}
 
+	hosts, err := db.C.ListHostsByName(ctx, attacherDock.NodeId)
+	if err != nil {
+		return nil, err
+	}
+
+	var host *HostSpec
+	if len(hosts) == 0 {
+		host = &HostSpec{
+			BaseModel: &BaseModel{
+				Id: "",
+			},
+			HostName: attacherDock.NodeId,
+			IP:       attacherDock.Metadata["HostIp"],
+			OsType:   attacherDock.Metadata["OsType"],
+			Initiators: []*Initiator{
+				&Initiator{
+					Protocol: protocol,
+					PortName: initiator,
+				},
+			},
+		}
+
+		host, err = db.C.CreateHost(ctx, host)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		host = hosts[0]
+	}
+
 	var createAttachOpt = &pb.CreateVolumeAttachmentOpts{
 		Id:       attachmentId,
 		VolumeId: vol.Id,
 		HostInfo: &pb.HostInfo{
-			Platform:  attacherDock.Metadata["Platform"],
-			OsType:    attacherDock.Metadata["OsType"],
-			Ip:        attacherDock.Metadata["HostIp"],
-			Host:      attacherDock.NodeId,
-			Initiator: initiator,
+			OsType: host.OsType,
+			Ip:     host.IP,
+			Host:   host.HostName,
+			Initiators: []*pb.Initiator{
+				&pb.Initiator{
+					Protocol: protocol,
+					PortName: initiator,
+				},
+			},
 		},
 		AccessProtocol: protocol,
 		Metadata:       vol.Metadata,
@@ -312,6 +346,7 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 	}
 
 	atm.Status = VolumeAvailable
+	atm.HostId = host.Id
 	_, err = db.C.CreateVolumeAttachment(ctx, atm)
 	if err != nil {
 		return nil, err
@@ -324,14 +359,18 @@ func (p *PairOperator) doAttach(ctx *c.Context, vol *VolumeSpec, provisionerDock
 				Id:       atm.Id,
 				VolumeId: atm.VolumeId,
 				HostInfo: &pb.HostInfo{
-					Platform:  atm.Platform,
-					OsType:    atm.OsType,
-					Ip:        atm.Ip,
-					Host:      atm.Host,
-					Initiator: atm.Initiator,
+					OsType: host.OsType,
+					Ip:     host.IP,
+					Host:   host.HostName,
+					Initiators: []*pb.Initiator{
+						&pb.Initiator{
+							Protocol: protocol,
+							PortName: initiator,
+						},
+					},
 				},
 				AccessProtocol: protocol,
-				Metadata:       utils.MergeStringMaps(atm.Metadata, vol.Metadata),
+				Metadata:       vol.Metadata,
 				DriverName:     provisionerDock.DriverName,
 				Context:        ctx.ToJson(),
 			}
@@ -384,7 +423,6 @@ func (p *PairOperator) doDetach(ctx *c.Context, attachmentId string, vol *Volume
 	detachOpt := &pb.DetachVolumeOpts{
 		AccessProtocol: atm.DriverVolumeType,
 		ConnectionData: string(connData),
-		Metadata:       atm.Metadata,
 		Context:        ctx.ToJson(),
 	}
 	p.volumeController.SetDock(attacherDock)
@@ -393,18 +431,31 @@ func (p *PairOperator) doDetach(ctx *c.Context, attachmentId string, vol *Volume
 		return err
 	}
 
+	host, err := db.C.GetHost(ctx, atm.HostId)
+	if err != nil {
+		log.Error("Get host failed, ", err)
+		return err
+	}
+	var initiators []*pb.Initiator
+	for _, e := range host.Initiators {
+		initiator := pb.Initiator{
+			PortName: e.PortName,
+			Protocol: e.Protocol,
+		}
+		initiators = append(initiators, &initiator)
+	}
+
 	opt := &pb.DeleteVolumeAttachmentOpts{
 		Id:       atm.Id,
 		VolumeId: atm.VolumeId,
 		HostInfo: &pb.HostInfo{
-			Platform:  atm.Platform,
-			OsType:    atm.OsType,
-			Ip:        atm.Ip,
-			Host:      atm.Host,
-			Initiator: atm.Initiator,
+			OsType:     host.OsType,
+			Ip:         host.IP,
+			Host:       host.HostName,
+			Initiators: initiators,
 		},
 		AccessProtocol: atm.AccessProtocol,
-		Metadata:       utils.MergeStringMaps(atm.Metadata, vol.Metadata),
+		Metadata:       vol.Metadata,
 		DriverName:     provisionerDock.DriverName,
 		Context:        ctx.ToJson(),
 	}
@@ -424,11 +475,16 @@ func (p *PairOperator) Attach(ctx *c.Context, replica *ReplicationSpec, vol *Vol
 	if err != nil {
 		return nil, err
 	}
+	host, err := db.C.GetHost(ctx, atm.HostId)
+	if err != nil {
+		log.Error("Get host failed, ", err)
+		return nil, err
+	}
 	data := map[string]string{
 		"Mountpoint":   atm.Mountpoint,
 		"AttachmentId": atm.Id,
-		"HostName":     atm.Host,
-		"HostIp":       atm.Ip,
+		"HostName":     host.HostName,
+		"HostIp":       host.IP,
 	}
 
 	if p.isPrimary {

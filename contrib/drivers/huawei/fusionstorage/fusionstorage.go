@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	log "github.com/golang/glog"
+	"github.com/opensds/opensds/contrib/drivers/utils"
 	. "github.com/opensds/opensds/contrib/drivers/utils/config"
 	. "github.com/opensds/opensds/pkg/model"
 	pb "github.com/opensds/opensds/pkg/model/proto"
@@ -126,6 +127,7 @@ func (d *Driver) ListPools() ([]*StoragePoolSpec, error) {
 			Name:             poolId,
 			TotalCapacity:    p.TotalCapacity >> UnitGiShiftBit,
 			FreeCapacity:     (p.TotalCapacity - p.UsedCapacity) >> UnitGiShiftBit,
+			ConsumedCapacity: p.UsedCapacity >> UnitGiShiftBit,
 			StorageType:      c.Pool[poolId].StorageType,
 			Extras:           c.Pool[poolId].Extras,
 			AvailabilityZone: c.Pool[poolId].AvailabilityZone,
@@ -150,7 +152,7 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*Conn
 
 	hostInfo := opt.GetHostInfo()
 
-	initiator := hostInfo.GetInitiator()
+	initiator := utils.GetInitiatorName(hostInfo.GetInitiators(), opt.GetAccessProtocol())
 	hostName := hostInfo.GetHost()
 
 	if initiator == "" || hostName == "" {
@@ -203,12 +205,11 @@ func (d *Driver) InitializeConnection(opt *pb.CreateVolumeAttachmentOpts) (*Conn
 		DriverVolumeType: opt.GetAccessProtocol(),
 		ConnectionData: map[string]interface{}{
 			"target_discovered": true,
-			"volume_id":         opt.GetVolumeId(),
+			"volumeId":          opt.GetVolumeId(),
 			"description":       "huawei",
-			"host_name":         hostName,
+			"hostName":          hostName,
 			"targetLun":         targetLunId,
 			"connect_type":      FusionstorageIscsi,
-			"host":              hostName,
 			"initiator":         initiator,
 			"targetIQN":         targetIQN,
 			"targetPortal":      targetPortal,
@@ -354,7 +355,7 @@ func (d *Driver) TerminateConnection(opt *pb.DeleteVolumeAttachmentOpts) error {
 
 	hostInfo := opt.GetHostInfo()
 
-	initiator := hostInfo.GetInitiator()
+	initiator := utils.GetInitiatorName(hostInfo.GetInitiators(), opt.GetAccessProtocol())
 	hostName := hostInfo.GetHost()
 
 	if initiator == "" || hostName == "" {

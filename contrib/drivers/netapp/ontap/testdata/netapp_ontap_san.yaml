@@ -1,0 +1,21 @@
+backendOptions:
+  version: 1
+  username: "admin"
+  password: "password"
+  storageDriverName: "ontap-san"
+  managementLIF: "127.0.0.1"
+  dataLIF: "127.0.0.1"
+  svm: "vserver"
+  igroupName: "opensds"
+pool:
+  ontap-pool:
+    storageType: block
+    availabilityZone: default
+    multiAttach: true
+    extras:
+      dataStorage:
+        provisioningPolicy: Thin
+        compression: false
+        deduplication: false
+      ioConnectivity:
+        accessProtocol: iscsi

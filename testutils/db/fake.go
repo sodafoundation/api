@@ -584,7 +584,7 @@ func (fc *FakeDbClient) VolumesToUpdate(ctx *c.Context, volumeList []*model.Volu
 	return nil, nil
 }
 
-func (c *FakeDbClient) ListHosts(ctx *c.Context) ([]*model.HostSpec, error) {
+func (c *FakeDbClient) ListHosts(ctx *c.Context, m map[string][]string) ([]*model.HostSpec, error) {
 	var hosts []*model.HostSpec
 
 	for i := range SampleHosts {

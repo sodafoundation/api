@@ -53,10 +53,11 @@ const (
 
 // Error Code
 const (
-	ErrorConnectToServer      = -403
-	ErrorUnauthorizedToServer = -401
-	ErrorObjectUnavailable    = 1077948996
-	ErrorHostGroupNotExist    = 1077937500
+	ErrorConnectToServer        = -403
+	ErrorUnauthorizedToServer   = -401
+	ErrorObjectUnavailable      = 1077948996
+	ErrorHostGroupNotExist      = 1077937500
+	ErrorObjectNameAlreadyExist = 1077948993
 )
 
 // misc

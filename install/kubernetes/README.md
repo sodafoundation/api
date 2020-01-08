@@ -90,11 +90,15 @@ pool:
     extras:
       dataStorage:
         provisioningPolicy: Thin
-        isSpaceEfficient: false
+        compression: false
+        deduplication: false
       ioConnectivity:
         accessProtocol: iscsi
         maxIOPS: 7000000
         maxBWS: 600
+        minIOPS: 1000000
+        minBWS: 100
+        latency: 100
       advanced:
         diskType: SSD
         latency: 5ms
@@ -137,7 +141,7 @@ dock          ClusterIP   10.0.0.144   <none>        50050/TCP           21m
 ### OpenSDS CLI tool
 #### Download cli tool.
 ```
-wget https://github.com/opensds/opensds/releases/download/v0.5.2/opensds-hotpot-v0.5.2-linux-amd64.tar.gz 
+wget https://github.com/opensds/opensds/releases/download/v0.5.2/opensds-hotpot-v0.5.2-linux-amd64.tar.gz
 tar zxvf opensds-hotpot-v0.5.2-linux-amd64.tar.gz
 cp opensds-hotpot-v0.5.2-linux-amd64/bin/* /usr/local/bin
 chmod 755 /usr/local/bin/osdsctl

@@ -1169,13 +1169,13 @@ func (_m *Client) ListFileSharesWithFilter(ctx *context.Context, m map[string][]
 	return r0, r1
 }
 
-// ListHosts provides a mock function with given fields: ctx
-func (_m *Client) ListHosts(ctx *context.Context) ([]*model.HostSpec, error) {
-	ret := _m.Called(ctx)
+// ListHosts provides a mock function with given fields: ctx, m
+func (_m *Client) ListHosts(ctx *context.Context, m map[string][]string) ([]*model.HostSpec, error) {
+	ret := _m.Called(ctx, m)
 
 	var r0 []*model.HostSpec
-	if rf, ok := ret.Get(0).(func(*context.Context) []*model.HostSpec); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(*context.Context, map[string][]string) []*model.HostSpec); ok {
+		r0 = rf(ctx, m)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.HostSpec)
@@ -1183,8 +1183,8 @@ func (_m *Client) ListHosts(ctx *context.Context) ([]*model.HostSpec, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(*context.Context, map[string][]string) error); ok {
+		r1 = rf(ctx, m)
 	} else {
 		r1 = ret.Error(1)
 	}

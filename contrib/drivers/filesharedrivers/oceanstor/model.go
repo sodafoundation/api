@@ -36,7 +36,7 @@ type Driver struct {
 type AuthOptions struct {
 	Username        string `yaml:"username"`
 	Password        string `yaml:"password"`
-	Uri             string `yaml:"uri"`
+	Endpoint        string `yaml:"endpoints"`
 	PwdEncrypter    string `yaml:"PwdEncrypter,omitempty"`
 	EnableEncrypted bool   `yaml:"EnableEncrypted,omitempty"`
 }

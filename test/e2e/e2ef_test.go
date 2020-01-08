@@ -19,6 +19,7 @@ package e2e
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"runtime"
@@ -184,24 +185,22 @@ func TestVolumeAttachmentOperationFlow(t *testing.T) {
 		return
 	}
 
+	host, err := prepareHostForTest(t)
+	if err != nil {
+		t.Error("failed to run host prepare function:", err)
+		return
+	}
+
 	t.Log("Begin to create volume attachment...")
-	host, _ := os.Hostname()
 	atc, err := u.CreateVolumeAttachment(&model.VolumeAttachmentSpec{
 		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{
-			Host:      host,
-			Platform:  runtime.GOARCH,
-			OsType:    runtime.GOOS,
-			Ip:        "127.0.0.1",
-			Initiator: localIqn,
-		},
-		AccessProtocol: iscsiProtocol,
+		HostId:   host.Id,
 	})
 	if err != nil {
 		t.Error("create volume attachment failed:", err)
 		return
 	}
-	defer cleanVolumeAndAttachmentForTest(t, vol.Id, atc.Id)
+	defer cleanVolumeAndAttachmentForTest(t, vol.Id, atc.Id, host.Id)
 	// Check if the status of created volume attachment is available.
 	if atc, _ = u.GetVolumeAttachment(atc.Id); atc.Status != model.VolumeAttachAvailable {
 		t.Errorf("status expected %s, got %s\n", model.VolumeAttachAvailable, atc.Status)
@@ -224,7 +223,7 @@ func TestVolumeAttachOperationFlow(t *testing.T) {
 		t.Error("prepare volume attachment failed:", err)
 		return
 	}
-	defer cleanVolumeAndAttachmentForTest(t, atc.VolumeId, atc.Id)
+	defer cleanVolumeAndAttachmentForTest(t, atc.VolumeId, atc.Id, atc.HostId)
 
 	t.Log("Begin to attach volume...")
 	t.Log("atc.ConnectionData is:", atc.ConnectionData)
@@ -235,6 +234,7 @@ func TestVolumeAttachOperationFlow(t *testing.T) {
 		return
 	}
 	accPro := atc.AccessProtocol
+	t.Log(accPro)
 	output, err := execCmd("sudo", "./volume-connector",
 		"attach", string(conn), accPro)
 	if err != nil {
@@ -286,23 +286,21 @@ func TestNvmeofAttachIssues(t *testing.T) {
 		return
 	}
 
-	host, _ := os.Hostname()
+	host, err := prepareHostForTest(t)
+	if err != nil {
+		t.Error("failed to run host prepare function:", err)
+		return
+	}
+
 	atc, err := u.CreateVolumeAttachment(&model.VolumeAttachmentSpec{
 		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{
-			Host:      host,
-			Platform:  runtime.GOARCH,
-			OsType:    runtime.GOOS,
-			Ip:        "127.0.0.1",
-			Initiator: localNqn,
-		},
-		AccessProtocol: nvmeofProtocol,
+		HostId:   host.Id,
 	})
 	if err != nil {
 		t.Error("create volume attachment failed:", err)
 		return
 	}
-	defer cleanVolumeAndAttachmentForTest(t, vol.Id, atc.Id)
+	defer cleanVolumeAndAttachmentForTest(t, vol.Id, atc.Id, host.Id)
 	// Check if the status of created volume attachment is available.
 	if atc, _ = u.GetVolumeAttachment(atc.Id); atc.Status != model.VolumeAttachAvailable {
 		t.Errorf("status expected %s, got %s\n", model.VolumeAttachAvailable, atc.Status)
@@ -332,15 +330,20 @@ func CreateNvmeofAttach(t *testing.T) error {
 		t.Error("prepare nvme volume failed:", err)
 		return err
 	}
+	host, err := prepareHostForTest(t)
+	if err != nil {
+		t.Error("failed to run host prepare function:", err)
+		return err
+	}
 	attc, err := u.CreateVolumeAttachment(&model.VolumeAttachmentSpec{
 		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{},
+		HostId:   host.Id,
 	})
 	if err != nil {
 		t.Error("create nvmeof volume attachment failed:", err)
 		return err
 	}
-	defer cleanVolumeAndAttachmentForTest(t, vol.Id, attc.Id)
+	defer cleanVolumeAndAttachmentForTest(t, vol.Id, attc.Id, host.Id)
 
 	attrs, _ := json.MarshalIndent(attc, "", "    ")
 	t.Log(string(attrs))
@@ -354,7 +357,8 @@ func ListNvmeofAttachment(t *testing.T) error {
 		t.Error("prepare nvmeof attachment failed:", err)
 		return err
 	}
-	defer cleanVolumeAndAttachmentForTest(t, attc.VolumeId, attc.Id)
+
+	defer cleanVolumeAndAttachmentForTest(t, attc.VolumeId, attc.Id, attc.HostId)
 
 	atts, err := u.ListVolumeAttachments()
 	if err != nil {
@@ -373,7 +377,7 @@ func ShowNvmeofAttachDetail(t *testing.T) error {
 		t.Error("prepare attachment failed:", err)
 		return err
 	}
-	defer cleanVolumeAndAttachmentForTest(t, attc.VolumeId, attc.Id)
+	defer cleanVolumeAndAttachmentForTest(t, attc.VolumeId, attc.Id, attc.HostId)
 
 	getatt, err := u.GetVolumeAttachment(attc.Id)
 	if err != nil || getatt.Status != "available" {
@@ -390,7 +394,7 @@ func DeleteNvmeofAttach(t *testing.T) error {
 		t.Error("prepare attachment failed:", err)
 		return err
 	}
-	defer cleanVolumeForTest(t, attc.VolumeId)
+	defer cleanVolumeAndAttachmentForTest(t, attc.VolumeId, attc.Id, attc.HostId)
 
 	err = u.DeleteVolumeAttachment(attc.Id, nil)
 	if err != nil {
@@ -415,7 +419,7 @@ func NvmeofVolumeAttachHost(t *testing.T) error {
 		t.Error("Prepare Attachment Fail:", err)
 		return err
 	}
-	defer cleanVolumeAndAttachmentForTest(t, attc.VolumeId, attc.Id)
+	defer cleanVolumeAndAttachmentForTest(t, attc.VolumeId, attc.Id, attc.HostId)
 	getatt, err := u.GetVolumeAttachment(attc.Id)
 	if err != nil || getatt.Status != "available" {
 		t.Errorf("attachment(%s) is not available: %v", attc.Id, err)
@@ -459,7 +463,7 @@ func NvmeofVolumeAttach(t *testing.T) error {
 		t.Error("prepare attachment failed:", err)
 		return err
 	}
-	defer cleanVolumeAndAttachmentForTest(t, attc.VolumeId, attc.Id)
+	defer cleanVolumeAndAttachmentForTest(t, attc.VolumeId, attc.Id, attc.Id)
 
 	getatt, err := u.GetVolumeAttachment(attc.Id)
 	if err != nil || getatt.Status != "available" {
@@ -497,7 +501,7 @@ func NvmeofVolumeAttach(t *testing.T) error {
 
 //Test Case:Delete Attachment
 func NvmeofVolumeDetach(t *testing.T, attc *model.VolumeAttachmentSpec) error {
-	defer cleanVolumeAndAttachmentForTest(t, attc.VolumeId, attc.Id)
+	defer cleanVolumeAndAttachmentForTest(t, attc.VolumeId, attc.Id, attc.HostId)
 
 	getatt, err := u.GetVolumeAttachment(attc.Id)
 	if err != nil || getatt.Status != "available" {
@@ -555,10 +559,11 @@ func prepareVolumeForTest(t *testing.T) (*model.VolumeSpec, error) {
 
 	// create volume in default pool
 	vol, err := u.CreateVolume(&model.VolumeSpec{
-		Name:        "test",
-		Description: "This is a test",
-		Size:        int64(1),
-		PoolId:      polId,
+		Name:             "test",
+		Description:      "This is a test",
+		Size:             int64(1),
+		PoolId:           polId,
+		AvailabilityZone: "default",
 	})
 	if err != nil {
 		t.Error("prepare volume failed:", err)
@@ -572,6 +577,53 @@ func prepareVolumeForTest(t *testing.T) (*model.VolumeSpec, error) {
 	return vol, nil
 }
 
+func prepareHostForTest(t *testing.T) (*model.HostSpec, error) {
+	t.Log("Start preparing host...")
+
+	hostName, _ := os.Hostname()
+	var body = &model.HostSpec{
+		HostName:          hostName,
+		IP:                getHostIp(),
+		OsType:            runtime.GOOS,
+		AccessMode:        "agentless",
+		AvailabilityZones: []string{"default", "az2"},
+		Initiators: []*model.Initiator{
+			&model.Initiator{
+				PortName: localIqn,
+				Protocol: iscsiProtocol,
+			},
+			&model.Initiator{
+				PortName: localNqn,
+				Protocol: nvmeofProtocol,
+			},
+		},
+	}
+	host, err := u.CreateHost(body)
+	if err != nil {
+		t.Error("prepare host failed:", err)
+		return nil, err
+	}
+
+	t.Log("End preparing host...")
+	return host, nil
+}
+
+// getHostIp return Host IP
+func getHostIp() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "127.0.0.1"
+	}
+
+	for _, address := range addrs {
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			return ipnet.IP.String()
+		}
+	}
+
+	return "127.0.0.1"
+}
+
 // prepare volume attachment for test
 func prepareVolumeAttachmentForTest(t *testing.T) (*model.VolumeAttachmentSpec, error) {
 	vol, err := prepareVolumeForTest(t)
@@ -580,10 +632,16 @@ func prepareVolumeAttachmentForTest(t *testing.T) (*model.VolumeAttachmentSpec, 
 		return nil, err
 	}
 
+	host, err := prepareHostForTest(t)
+	if err != nil {
+		t.Error("failed to run host prepare function:", err)
+		return nil, err
+	}
+
 	t.Log("Start preparing volume attachment...")
 	atc, err := u.CreateVolumeAttachment(&model.VolumeAttachmentSpec{
 		VolumeId:       vol.Id,
-		HostInfo:       model.HostInfo{},
+		HostId:         host.Id,
 		AccessProtocol: iscsiProtocol,
 	})
 	if err != nil {
@@ -643,9 +701,15 @@ func PrepareNvmeofAttachment(t *testing.T) (*model.VolumeAttachmentSpec, error) 
 		return nil, err
 	}
 
+	host, err := prepareHostForTest(t)
+	if err != nil {
+		t.Error("failed to run host prepare function:", err)
+		return nil, err
+	}
+
 	var body = &model.VolumeAttachmentSpec{
 		VolumeId:       vol.Id,
-		HostInfo:       model.HostInfo{},
+		HostId:         host.Id,
 		AccessProtocol: nvmeofProtocol,
 	}
 	attc, err := u.CreateVolumeAttachment(body)
@@ -665,12 +729,15 @@ func PrepareNvmeofAttachmentHost(t *testing.T) (*model.VolumeAttachmentSpec, err
 		t.Error("Prepare nvmeof  Volume Fail", err)
 		return nil, err
 	}
+	host, err := prepareHostForTest(t)
+	if err != nil {
+		t.Error("failed to run host prepare function:", err)
+		return nil, err
+	}
 
 	var body = &model.VolumeAttachmentSpec{
-		VolumeId: vol.Id,
-		HostInfo: model.HostInfo{
-			Initiator: "nqn.ini.1A2B3C4D5E6F7G8H",
-		},
+		VolumeId:       vol.Id,
+		HostId:         host.Id,
 		AccessProtocol: nvmeofProtocol,
 	}
 	attc, err := u.CreateVolumeAttachment(body)
@@ -689,7 +756,7 @@ func cleanVolumeForTest(t *testing.T, volID string) {
 	t.Log("End cleaning volume...")
 }
 
-func cleanVolumeAndAttachmentForTest(t *testing.T, volID, atcID string) {
+func cleanVolumeAndAttachmentForTest(t *testing.T, volID, atcID, hostID string) {
 	t.Log("Start cleaning volume attachment...")
 	u.DeleteVolumeAttachment(atcID, nil)
 	t.Log("End cleaning volume attachment...")
@@ -697,6 +764,10 @@ func cleanVolumeAndAttachmentForTest(t *testing.T, volID, atcID string) {
 	t.Log("Start cleaning volume...")
 	u.DeleteVolume(volID, nil)
 	t.Log("End cleaning volume...")
+
+	t.Log("Start cleaning host...")
+	u.DeleteHost(hostID)
+	t.Log("End cleaning host...")
 }
 
 func cleanVolumeAndSnapshotForTest(t *testing.T, volID, snpID string) {

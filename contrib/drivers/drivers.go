@@ -28,7 +28,9 @@ import (
 	"github.com/opensds/opensds/contrib/drivers/hpe/nimble"
 	"github.com/opensds/opensds/contrib/drivers/huawei/fusionstorage"
 	"github.com/opensds/opensds/contrib/drivers/huawei/oceanstor"
+	"github.com/opensds/opensds/contrib/drivers/ibm/spectrumscale"
 	"github.com/opensds/opensds/contrib/drivers/lvm"
+	"github.com/opensds/opensds/contrib/drivers/netapp/ontap"
 	"github.com/opensds/opensds/contrib/drivers/openstack/cinder"
 	"github.com/opensds/opensds/contrib/drivers/utils/config"
 	"github.com/opensds/opensds/pkg/model"
@@ -96,6 +98,9 @@ func Init(resourceType string) VolumeDriver {
 	case config.LVMDriverType:
 		d = &lvm.Driver{}
 		break
+	case config.IBMSpectrumScaleDriverType:
+		d = &spectrumscale.Driver{}
+		break
 	case config.HuaweiOceanStorBlockDriverType:
 		d = &oceanstor.Driver{}
 		break
@@ -106,6 +111,9 @@ func Init(resourceType string) VolumeDriver {
 		break
 	case config.FujitsuEternusDriverType:
 		d = &eternus.Driver{}
+		break
+	case config.NetappOntapSanDriverType:
+		d = &ontap.SANDriver{}
 		break
 	default:
 		d = &sample.Driver{}
@@ -125,6 +133,8 @@ func Clean(d VolumeDriver) VolumeDriver {
 		break
 	case *lvm.Driver:
 		break
+	case *spectrumscale.Driver:
+		break
 	case *oceanstor.Driver:
 		break
 	case *fusionstorage.Driver:
@@ -132,6 +142,8 @@ func Clean(d VolumeDriver) VolumeDriver {
 	case *nimble.Driver:
 		break
 	case *eternus.Driver:
+		break
+	case *ontap.SANDriver:
 		break
 	default:
 		break

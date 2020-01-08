@@ -21,6 +21,10 @@ set +o xtrace
 
 
 osds:opensds:configuration(){
+
+# Copy api spec file to configuration path
+cp $OPENSDS_DIR/openapi-spec/swagger.yaml $OPENSDS_CONFIG_DIR
+
 # Set global configuration.
 cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_GLOBAL_CONFIG_DOC
 [osdsapiserver]
