@@ -14,6 +14,12 @@
 
 package model
 
+// Storage pool status
+const (
+	PoolAvailable   = "available"
+	PoolUnAvailable = "unavailable"
+)
+
 // fileshare status
 const (
 	FileShareCreating      = "creating"
@@ -46,22 +52,11 @@ const (
 const (
 	VolumeCreating       = "creating"
 	VolumeAvailable      = "available"
-	VolumeInUse          = "inUse"
 	VolumeDeleting       = "deleting"
 	VolumeError          = "error"
 	VolumeErrorDeleting  = "errorDeleting"
 	VolumeErrorExtending = "errorExtending"
 	VolumeExtending      = "extending"
-)
-
-// volume attach status
-const (
-	VolumeAttaching      = "attaching"
-	VolumeAttached       = "attached"
-	VolumeDetached       = "detached"
-	VolumeReserved       = "reserved"
-	VolumeErrorAttaching = "errorAttaching"
-	VolumeErrorDetaching = "errorDetaching"
 )
 
 // volume snapshot status

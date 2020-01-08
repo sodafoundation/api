@@ -256,6 +256,7 @@ func TestExtendVolume(t *testing.T) {
 		mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
 		mockClient.On("ExtendVolume", c.NewAdminContext(), &expected).Return(&expected, nil)
 		mockClient.On("GetProfile", c.NewAdminContext(), SampleReplications[0].ProfileId).Return(&SampleProfiles[0], nil)
+		mockClient.On("GetPool", c.NewAdminContext(), SampleVolumes[0].PoolId).Return(&SamplePools[0], nil)
 		db.C = mockClient
 
 		r, _ := http.NewRequest("POST", "/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8/resize", bytes.NewBuffer(jsonStr))

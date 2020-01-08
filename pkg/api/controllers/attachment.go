@@ -87,21 +87,34 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 		return
 	}
 
-	if vol.Status == model.VolumeAvailable {
-		db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAttaching)
-	} else if vol.Status == model.VolumeInUse {
-		if vol.MultiAttach {
-			db.UpdateVolumeStatus(ctx, db.C, vol.Id, model.VolumeAttaching)
-		} else {
-			errMsg := "volume is already attached to one of the host. If you want to attach to multiple host, volume multiattach must be true"
-			v.ErrorHandle(model.ErrorBadRequest, errMsg)
-			return
-		}
-	} else {
-		errMsg := "status of volume is available. It can be attached to host"
+	if vol.Status != model.VolumeAvailable {
+		errMsg := fmt.Sprintf("volume:%s status:%s should be available when mapping volume.", vol.Name, vol.Status)
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
+
+	if (vol.Attached != nil && *vol.Attached) && !vol.MultiAttach {
+		errMsg := fmt.Sprintf("volume:%s is already attached to host:%s. If you want to attach to multiple host, volume multiattach must be true", vol.Name, host.HostName)
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
+	// Check volume attachment with host id and volume id
+	attachments, err := db.C.ListVolumeAttachmentsWithFilter(ctx,
+		map[string][]string{"hostId": []string{attachment.HostId},
+			"volumeId": []string{attachment.VolumeId}})
+	if err != nil {
+		errMsg := fmt.Sprintf("check volume attachment failed, host:%s, volume:%s, err:%v", host.HostName, vol.Name, err)
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+	if len(attachments) > 0 {
+		errMsg := fmt.Sprintf("cannot attach volume:%s to same host:%s twice", vol.Name, host.HostName)
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
+	// TODO: should we set volume status with VolumeAttaching??
 
 	// Set AccessProtocol
 	pol, err := db.C.GetPool(ctx, vol.PoolId)
@@ -146,14 +159,6 @@ func (v *VolumeAttachmentPortal) CreateVolumeAttachment() {
 	}
 	defer v.CtrClient.Close()
 
-	// // Note: In some protocols, there is no related initiator
-	// var initiatorPort = ""
-	// for _, e := range host.Initiators {
-	// 	if e.Protocol == protocol {
-	// 		initiatorPort = e.PortName
-	// 		break
-	// 	}
-	// }
 	var initiators []*pb.Initiator
 	for _, e := range host.Initiators {
 		initiator := pb.Initiator{
@@ -291,16 +296,10 @@ func (v *VolumeAttachmentPortal) DeleteVolumeAttachment() {
 		return
 	}
 
-	// If volume id is invalid, it would mean that volume attachment creation failed before the create method
-	// in storage driver was called, and delete its db entry directly.
 	vol, err := db.C.GetVolume(ctx, attachment.VolumeId)
 	if err != nil {
-		if err := db.C.DeleteVolumeAttachment(ctx, attachment.Id); err != nil {
-			errMsg := fmt.Sprintf("failed to delete volume attachment: %s", err.Error())
-			v.ErrorHandle(model.ErrorBadRequest, errMsg)
-			return
-		}
-		v.SuccessHandle(StatusAccepted, nil)
+		errMsg := fmt.Sprintf("get volume failed in delete volume attachment method: %v", err)
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
 		return
 	}
 
