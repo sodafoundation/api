@@ -2294,12 +2294,7 @@ components:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              name:
-                type: string
-              description:
-                type: string
+            $ref: '#/components/schemas/FileShareUpdateSpec'
     FileShareSnapshotCreateSpec:
       content:
         application/json:
@@ -2676,8 +2671,8 @@ components:
         name:
           type: string
           minLength: 1
-          maxLength: 255
-          pattern: '[A-Za-z0-9_-]'
+          maxLength: 102
+          pattern: '^[\w\- ]+$'
         description:
           type: string
         size:
@@ -2689,7 +2684,26 @@ components:
           default: default
         profileId:
           type: string
-
+    FileShareUpdateSpec:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 102
+          pattern: '^[\w\- ]+$'
+        description:
+          type: string
+          pattern: '^[\w\- ]+$'
+        size:
+          type: integer
+          format: int64
+          example: 2
+        availabilityZone:
+          type: string
+          default: default
+        profileId:
+          type: string
     FileShareRespSpec:
       description: >-
         FileShare is a file system created by nfs southbound driver, it can be

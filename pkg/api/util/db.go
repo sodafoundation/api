@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"regexp"
 	"strings"
 	"time"
 
@@ -170,28 +169,23 @@ func CreateFileShareDBEntry(ctx *c.Context, in *model.FileShareSpec) (*model.Fil
 	if in.UpdatedAt == "" {
 		in.UpdatedAt = time.Now().Format(constants.TimeFormat)
 	}
-	//validate the name
-	if in.Name == "" {
-		errMsg := fmt.Sprintf("empty fileshare name is not allowed. Please give valid name.")
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
-	if len(in.Name) > 255 {
-		errMsg := fmt.Sprintf("fileshare name length should not be more than 255 characters. input name length is : %d", len(in.Name))
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
 
-	reg, err := regexp.Compile("^[a-zA-Z0-9_-]+$")
+	shares, err := db.C.ListFileShares(ctx)
 	if err != nil {
-		errMsg := fmt.Sprintf("regex compilation for file name validation failed")
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
-	}
-	if reg.MatchString(in.Name) == false {
-		errMsg := fmt.Sprintf("invalid fileshare name it only contain english char and number  : %v", in.Name)
-		log.Error(errMsg)
-		return nil, errors.New(errMsg)
+		return nil, err
+	} else {
+		for _, fshare := range shares {
+			if fshare.Name == in.Name {
+				errMsg := fmt.Sprintf("file share name already exists")
+				log.Error(errMsg)
+				return nil, errors.New(errMsg)
+			}
+			if fshare.Id == in.Id {
+				errMsg := fmt.Sprintf("file share id already exists")
+				log.Error(errMsg)
+				return nil, errors.New(errMsg)
+			}
+		}
 	}
 
 	in.UserId = ctx.UserId

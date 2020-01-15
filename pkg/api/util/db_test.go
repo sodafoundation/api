@@ -17,10 +17,7 @@ package util
 import (
 	"fmt"
 	"reflect"
-	"strconv"
 	"testing"
-
-	"github.com/opensds/opensds/pkg/utils"
 
 	"github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db"
@@ -390,6 +387,7 @@ func TestCreateFileShareDBEntry(t *testing.T) {
 	t.Run("Everything should work well", func(t *testing.T) {
 		mockClient := new(dbtest.Client)
 		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
+		mockClient.On("ListFileShares", context.NewAdminContext()).Return(nil, nil)
 		db.C = mockClient
 
 		var expected = &SampleFileShares[0]
@@ -404,6 +402,7 @@ func TestCreateFileShareDBEntry(t *testing.T) {
 		in.Size = int64(-2)
 		mockClient := new(dbtest.Client)
 		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
+		mockClient.On("ListFileShares", context.NewAdminContext()).Return(nil, nil)
 		db.C = mockClient
 
 		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
@@ -415,6 +414,7 @@ func TestCreateFileShareDBEntry(t *testing.T) {
 		in.ProfileId = ""
 		mockClient := new(dbtest.Client)
 		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
+		mockClient.On("ListFileShares", context.NewAdminContext()).Return(nil, nil)
 		db.C = mockClient
 
 		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
@@ -422,110 +422,29 @@ func TestCreateFileShareDBEntry(t *testing.T) {
 		assertTestResult(t, err.Error(), expectedError)
 	})
 
-	t.Run("Empty file share name is allowed", func(t *testing.T) {
-		in.Size, in.Name, in.ProfileId = int64(1), "", "b3585ebe-c42c-120g-b28e-f373746a71ca"
+	t.Run("Duplicate file share name are not allowed", func(t *testing.T) {
+		var sampleshares = []*model.FileShareSpec{&SampleFileShares[0]}
+		in.Size, in.Name, in.ProfileId, in.Description = int64(1), "sample-fileshare-01", "b3585ebe-c42c-120g-b28e-f373746a71ca", "File share test"
 		mockClient := new(dbtest.Client)
 		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
+		mockClient.On("ListFileShares", context.NewAdminContext()).Return(sampleshares, nil)
 		db.C = mockClient
 
 		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
-		expectedError := "empty fileshare name is not allowed. Please give valid name."
+		expectedError := "file share name already exists"
 		assertTestResult(t, err.Error(), expectedError)
 	})
 
-	t.Run("File share name length equal to 0 character are not allowed", func(t *testing.T) {
-		in.Name = utils.RandSeqWithAlnum(0)
-		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
+	t.Run("Overwritting existing file share resource are not allowed", func(t *testing.T) {
+		var sampleshares = []*model.FileShareSpec{&SampleFileShares[0]}
+		in.Size, in.Name, in.ProfileId, in.Description, in.Id = int64(1), "sample-fileshare-05", "b3585ebe-c42c-120g-b28e-f373746a71ca", "File share test", "d2975ebe-d82c-430f-b28e-f373746a71ca"
 		mockClient := new(dbtest.Client)
 		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
+		mockClient.On("ListFileShares", context.NewAdminContext()).Return(sampleshares, nil)
 		db.C = mockClient
 
 		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
-		expectedError := "empty fileshare name is not allowed. Please give valid name."
-		assertTestResult(t, err.Error(), expectedError)
-	})
-
-	t.Run("File share name length equal to 1 character are allowed", func(t *testing.T) {
-		in.Name = utils.RandSeqWithAlnum(1)
-		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
-		mockClient := new(dbtest.Client)
-		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
-		db.C = mockClient
-
-		var expected = &SampleFileShares[0]
-		result, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
-		if err != nil {
-			t.Errorf("failed to create fileshare err is %v\n", err)
-		}
-		assertTestResult(t, result, expected)
-	})
-
-	t.Run("File share name length equal to 10 characters are allowed", func(t *testing.T) {
-		in.Name = utils.RandSeqWithAlnum(10)
-		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
-		mockClient := new(dbtest.Client)
-		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
-		db.C = mockClient
-
-		var expected = &SampleFileShares[0]
-		result, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
-		if err != nil {
-			t.Errorf("failed to create fileshare err is %v\n", err)
-		}
-		assertTestResult(t, result, expected)
-	})
-
-	t.Run("File share name length equal to 254 characters are allowed", func(t *testing.T) {
-		in.Name = utils.RandSeqWithAlnum(254)
-		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
-		mockClient := new(dbtest.Client)
-		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
-		db.C = mockClient
-
-		var expected = &SampleFileShares[0]
-		result, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
-		if err != nil {
-			t.Errorf("failed to create fileshare err is %v\n", err)
-		}
-		assertTestResult(t, result, expected)
-	})
-
-	t.Run("File share name length equal to 255 characters are allowed", func(t *testing.T) {
-		in.Name = utils.RandSeqWithAlnum(255)
-		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
-		mockClient := new(dbtest.Client)
-		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
-		db.C = mockClient
-
-		var expected = &SampleFileShares[0]
-		result, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
-		if err != nil {
-			t.Errorf("failed to create fileshare err is %v\n", err)
-		}
-		assertTestResult(t, result, expected)
-	})
-
-	t.Run("File share name length more than 255 characters are not allowed", func(t *testing.T) {
-		in.Name = utils.RandSeqWithAlnum(256)
-		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
-		mockClient := new(dbtest.Client)
-		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
-		db.C = mockClient
-
-		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
-		expectedError := "fileshare name length should not be more than 255 characters. input name length is : " + strconv.Itoa(len(in.Name))
-		assertTestResult(t, err.Error(), expectedError)
-	})
-
-	t.Run("File share name length more than 255 characters are not allowed", func(t *testing.T) {
-		in.Name = utils.RandSeqWithAlnum(257)
-		in.Size, in.ProfileId = int64(1), "b3585ebe-c42c-120g-b28e-f373746a71ca"
-		mockClient := new(dbtest.Client)
-		mockClient.On("CreateFileShare", context.NewAdminContext(), in).Return(&SampleFileShares[0], nil)
-		db.C = mockClient
-
-		_, err := CreateFileShareDBEntry(context.NewAdminContext(), in)
-		expectedError := "fileshare name length should not be more than 255 characters. input name length is : " + strconv.Itoa(len(in.Name))
+		expectedError := "file share id already exists"
 		assertTestResult(t, err.Error(), expectedError)
 	})
 }

@@ -192,6 +192,7 @@ func TestUpdateFileShare(t *testing.T) {
 		fileshare := model.FileShareSpec{BaseModel: &model.BaseModel{}}
 		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&fileshare)
 		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&expected, nil)
 		mockClient.On("UpdateFileShare", c.NewAdminContext(), &fileshare).Return(&expected, nil)
 		db.C = mockClient
 
@@ -212,6 +213,7 @@ func TestUpdateFileShare(t *testing.T) {
 		fileshare := model.FileShareSpec{BaseModel: &model.BaseModel{}}
 		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&fileshare)
 		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&expected, nil)
 		mockClient.On("UpdateFileShare", c.NewAdminContext(), &fileshare).Return(nil, errors.New("db error"))
 		db.C = mockClient
 
