@@ -937,6 +937,20 @@ func (c *Client) GetDockByPoolId(ctx *c.Context, poolId string) (*model.DockSpec
 	return nil, errors.New("Get dock failed by pool id: " + poolId)
 }
 
+func (c *Client) GetDockByDockName(ctx *c.Context, dockName string) (*model.DockSpec, error) {
+	docks, err := c.ListDocks(ctx)
+	if err != nil {
+		log.Error("List docks failed failed in db: ", err)
+		return nil, err
+	}
+	for _, dock := range docks {
+		if dockName == dock.Name {
+			return dock, nil
+		}
+	}
+	return nil, errors.New("Get dock failed by dock name: " + dockName)
+}
+
 // ListDocks
 func (c *Client) ListDocks(ctx *c.Context) ([]*model.DockSpec, error) {
 	dbReq := &Request{

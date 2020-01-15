@@ -309,18 +309,29 @@ func (dr *DockRegister) Register(in interface{}) error {
 	switch in.(type) {
 	case *model.DockSpec:
 		dck := in.(*model.DockSpec)
-		// Call db module to create dock resource.
-		if _, err := dr.c.CreateDock(ctx, dck); err != nil {
-			log.Errorf("When create dock %s in db: %v\n", dck.Id, err)
-			return err
+		if dock, _ := dr.c.GetDockByDockName(ctx, dck.Name); dock == nil {
+			// Call db module to create dock resource.
+			if _, err := dr.c.CreateDock(ctx, dck); err != nil {
+				log.Errorf("When create dock %s in db: %v\n", dck.Id, err)
+				return err
+			}
 		}
 		break
 	case *model.StoragePoolSpec:
 		pol := in.(*model.StoragePoolSpec)
 		// Call db module to create pool resource.
-		if _, err := dr.c.CreatePool(ctx, pol); err != nil {
-			log.Errorf("When create pool %s in db: %v\n", pol.Id, err)
-			return err
+		name := map[string][]string{
+			"Name": {pol.Name},
+		}
+		pools, err := dr.c.ListPoolsWithFilter(ctx, name)
+		if err != nil {
+			break
+		}
+		if len(pools) == 0 {
+			if _, err := dr.c.CreatePool(ctx, pol); err != nil {
+				log.Errorf("When create pool %s in db: %v\n", pol.Id, err)
+				return err
+			}
 		}
 		break
 	default:

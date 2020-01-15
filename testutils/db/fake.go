@@ -202,6 +202,15 @@ func (fc *FakeDbClient) GetDockByPoolId(ctx *c.Context, poolId string) (*model.D
 	return nil, errors.New("Can't find this dock resource by pool id!")
 }
 
+func (fc *FakeDbClient) GetDockByDockName(ctx *c.Context, dockName string) (*model.DockSpec, error) {
+	for _, dock := range SampleDocks {
+		if dockName == dock.Name {
+			return &dock, nil
+		}
+	}
+	return nil, errors.New("Can't find this dock resource by dock name!")
+}
+
 // ListDocks
 func (fc *FakeDbClient) ListDocksWithFilter(ctx *c.Context, m map[string][]string) ([]*model.DockSpec, error) {
 	var dcks []*model.DockSpec
