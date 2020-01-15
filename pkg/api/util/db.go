@@ -299,7 +299,7 @@ func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotS
 		return nil, errors.New(errMsg)
 	}
 	if reg.MatchString(in.Description) == false {
-		errMsg := fmt.Sprintf("invalid file share snapshot description it only contain english char and number  : %v", in.Name)
+		errMsg := fmt.Sprintf("fileshare snapshot creation failed, because description has some special chars: %v. Description only support english char and number", in.Description)
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
