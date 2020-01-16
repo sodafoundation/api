@@ -306,7 +306,6 @@ func (add *attachDockDiscoverer) Discover() error {
 			"WWPNS":     strings.Join(wwpns, ","),
 		},
 	}
-
 	return nil
 }
 
@@ -328,12 +327,11 @@ func (dr *DockRegister) Register(in interface{}) error {
 	switch in.(type) {
 	case *model.DockSpec:
 		dck := in.(*model.DockSpec)
-		// Call db module to create dock resource with latest info.
+		// Call db module to create dock resource.
 		if _, err := dr.c.CreateDock(ctx, dck); err != nil {
 			log.Errorf("When create dock %s in db: %v\n", dck.Id, err)
 			return err
 		}
-
 		break
 	case *model.StoragePoolSpec:
 		pol := in.(*model.StoragePoolSpec)
