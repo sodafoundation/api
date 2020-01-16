@@ -196,7 +196,6 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 				}
 				pools, err := pdd.c.ListPoolsWithFilter(ctx, name)
 				if err == nil && len(pools) != 0 {
-					log.Errorf("name is %s, id is %s, not found\n", pol.Name, pol.DockId)
 					pol.Id = pools[0].Id
 				}
 
