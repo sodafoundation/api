@@ -190,6 +190,16 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 			}
 			for _, pol := range pols {
 				log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
+				name := map[string][]string{
+					"Name":   {pol.Name},
+					"dockId": {pol.DockId},
+				}
+				pools, err := pdd.c.ListPoolsWithFilter(ctx, name)
+				if err == nil && len(pools) != 0 {
+					log.Errorf("name is %s, id is %s, not found\n", pol.Name, pol.DockId)
+					pol.Id = pools[0].Id
+				}
+
 				delete(dbPolsMap[dck.Id], pol.Id)
 				pol.DockId = dck.Id
 				pol.ReplicationType = replicationType
@@ -328,17 +338,6 @@ func (dr *DockRegister) Register(in interface{}) error {
 	case *model.StoragePoolSpec:
 		pol := in.(*model.StoragePoolSpec)
 		// Call db module to create pool resource.
-		name := map[string][]string{
-			"Name":   {pol.Name},
-			"dockId": {pol.DockId},
-		}
-		pools, err := dr.c.ListPoolsWithFilter(ctx, name)
-		if err != nil {
-			break
-		}
-		if len(pools) != 0 {
-			pol.Id = pools[0].Id
-		}
 		if _, err := dr.c.CreatePool(ctx, pol); err != nil {
 			log.Errorf("When create pool %s in db: %v\n", pol.Id, err)
 			return err
