@@ -192,7 +192,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 				log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
 				name := map[string][]string{
 					"Name":   {pol.Name},
-					"dockId": {pol.DockId},
+					"DockId": {dck.Id},
 				}
 				pools, err := pdd.c.ListPoolsWithFilter(ctx, name)
 				if err == nil && len(pools) != 0 {
