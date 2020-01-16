@@ -97,8 +97,8 @@ func TestDiscover(t *testing.T) {
 	}
 	mockClient := new(dbtest.Client)
 	mockClient.On("ListPools", c.NewAdminContext()).Return(fdd.pols, nil)
-	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m1).Return(SamplePools, nil)
-	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m2).Return(SamplePools, nil)
+	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m1).Return(expected, nil)
+	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m2).Return(expected, nil)
 	fdd.c = mockClient
 
 	if err := fdd.Discover(); err != nil {
