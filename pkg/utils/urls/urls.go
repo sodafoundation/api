@@ -25,7 +25,7 @@ const (
 	Client        // Client == 1
 )
 
-const etcd_prefix string = "opensds"
+const etcd_prefix string = "/opensds"
 
 func GenerateHostURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("host/hosts", urlType, tenantId, in...)
