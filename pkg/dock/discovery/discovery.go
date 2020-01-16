@@ -128,6 +128,14 @@ func (pdd *provisionDockDiscoverer) Init() error {
 			Type:        model.DockTypeProvioner,
 			Metadata:    map[string]string{"HostReplicationDriver": CONF.OsdsDock.HostBasedReplicationDriver},
 		}
+		// Update the id if the dock is already in etcd
+		name := map[string][]string{
+			"Name": {dck.Name},
+		}
+		docks, err := pdd.DockRegister.c.ListDocksWithFilter(c.NewAdminContext(), name)
+		if err == nil && len(docks) != 0 {
+			dck.Id = docks[0].Id
+		}
 		pdd.dcks = append(pdd.dcks, dck)
 	}
 
@@ -288,6 +296,7 @@ func (add *attachDockDiscoverer) Discover() error {
 			"WWPNS":     strings.Join(wwpns, ","),
 		},
 	}
+
 	return nil
 }
 
@@ -309,29 +318,30 @@ func (dr *DockRegister) Register(in interface{}) error {
 	switch in.(type) {
 	case *model.DockSpec:
 		dck := in.(*model.DockSpec)
-		if dock, _ := dr.c.GetDockByDockName(ctx, dck.Name); dock == nil {
-			// Call db module to create dock resource.
-			if _, err := dr.c.CreateDock(ctx, dck); err != nil {
-				log.Errorf("When create dock %s in db: %v\n", dck.Id, err)
-				return err
-			}
+		// Call db module to create dock resource with latest info.
+		if _, err := dr.c.CreateDock(ctx, dck); err != nil {
+			log.Errorf("When create dock %s in db: %v\n", dck.Id, err)
+			return err
 		}
+
 		break
 	case *model.StoragePoolSpec:
 		pol := in.(*model.StoragePoolSpec)
 		// Call db module to create pool resource.
 		name := map[string][]string{
-			"Name": {pol.Name},
+			"Name":   {pol.Name},
+			"dockId": {pol.DockId},
 		}
 		pools, err := dr.c.ListPoolsWithFilter(ctx, name)
 		if err != nil {
 			break
 		}
-		if len(pools) == 0 {
-			if _, err := dr.c.CreatePool(ctx, pol); err != nil {
-				log.Errorf("When create pool %s in db: %v\n", pol.Id, err)
-				return err
-			}
+		if len(pools) != 0 {
+			pol.Id = pools[0].Id
+		}
+		if _, err := dr.c.CreatePool(ctx, pol); err != nil {
+			log.Errorf("When create pool %s in db: %v\n", pol.Id, err)
+			return err
 		}
 		break
 	default:

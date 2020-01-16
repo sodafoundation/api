@@ -111,8 +111,6 @@ type Client interface {
 
 	GetDockByPoolId(ctx *c.Context, poolId string) (*model.DockSpec, error)
 
-	GetDockByDockName(ctx *c.Context, dockName string) (*model.DockSpec, error)
-
 	CreatePool(ctx *c.Context, pol *model.StoragePoolSpec) (*model.StoragePoolSpec, error)
 
 	GetPool(ctx *c.Context, polID string) (*model.StoragePoolSpec, error)
