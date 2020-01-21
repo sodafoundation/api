@@ -1488,3 +1488,11 @@ func (c *OceanStorClient) GetPerformance(resId string, dataIdList []string) (map
 
 	return perfMap, nil
 }
+
+func (c *OceanStorClient) checkErrorCode(err error, code int) bool {
+	if inErr, ok := err.(*ArrayInnerError); ok && inErr.Err.Code == code {
+		return true
+	}
+
+	return false
+}
