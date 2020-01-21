@@ -82,15 +82,13 @@ func NewClient(opt *AuthOptions) (*OceanStorClient, error) {
 		pwdCiphertext = password
 	}
 
-	c := &OceanStorClient{
+	return &OceanStorClient{
 		user:       opt.Username,
 		passwd:     pwdCiphertext,
 		vstoreName: opt.VstoreName,
 		endpoints:  endpoints,
 		insecure:   opt.Insecure,
-	}
-	err := c.login()
-	return c, err
+	}, nil
 }
 
 func (c *OceanStorClient) Destroy() error {
@@ -137,13 +135,12 @@ func (c *OceanStorClient) request(method, url string, in, out interface{}) error
 	var b []byte
 	var err error
 	for i := 0; i < 2; i++ {
-		// For debugging
-		log.V(5).Infof("URL:%s %s\n BODY:%v", method, c.urlPrefix+url, in)
+		log.Infof("URL:%s %s\n BODY:%v", method, c.urlPrefix+url, in)
 		b, _, err = c.doRequest(method, c.urlPrefix+url, in)
 		if err == nil {
 			break
 		}
-		log.Errorf("URL:%s %s\n BODY:%v", method, c.urlPrefix+url, in)
+
 		if inErr, ok := err.(*ArrayInnerError); ok {
 			errCode := inErr.Err.Code
 			if errCode == ErrorConnectToServer || errCode == ErrorUnauthorizedToServer {
@@ -155,6 +152,7 @@ func (c *OceanStorClient) request(method, url string, in, out interface{}) error
 			}
 			err = inErr
 		}
+
 		log.Errorf("Request %d times error:%v", i+1, err)
 		return err
 	}
@@ -164,6 +162,7 @@ func (c *OceanStorClient) request(method, url string, in, out interface{}) error
 		log.V(8).Infof("Response Body: %s", string(b))
 		json.Unmarshal(b, out)
 	}
+
 	return nil
 }
 
@@ -980,6 +979,10 @@ func (c *OceanStorClient) GetHostLunId(hostId, lunId string) (int, error) {
 func (c *OceanStorClient) RemoveLunFromLunGroup(lunGrpId, lunId string) error {
 	url := fmt.Sprintf("/lungroup/associate?ID=%s&ASSOCIATEOBJTYPE=11&ASSOCIATEOBJID=%s", lunGrpId, lunId)
 	if err := c.request("DELETE", url, nil, nil); err != nil {
+		if c.checkErrorCode(err, ErrorObjectUnavailable) || c.checkErrorCode(err, ErrorLunNotExist) {
+			return nil
+		}
+
 		log.Errorf("Remove lun %s from lun group %s failed, %v", lunId, lunGrpId, err)
 		return err
 	}
@@ -1224,6 +1227,21 @@ func (c *OceanStorClient) GetHostFCInitiators(hostId string) ([]string, error) {
 		}
 	}
 	return initiators, nil
+}
+
+func (c *OceanStorClient) GetFCInitiatorByWWN(wwn string) (*FCInitiator, error) {
+	resp := &FCInitiatorsResp{}
+	url := fmt.Sprintf("/fc_initiator?filter=ID::%s", wwn)
+	if err := c.request("GET", url, nil, resp); err != nil {
+		log.Errorf("Get fc initiator of WWN %s failed.", wwn)
+		return nil, err
+	}
+
+	if len(resp.Data) > 0 {
+		return &resp.Data[0], nil
+	}
+
+	return nil, nil
 }
 
 func (c *OceanStorClient) GetHostIscsiInitiators(hostId string) ([]string, error) {

@@ -85,9 +85,14 @@ type VolumeDriver interface {
 	ListPools() ([]*model.StoragePoolSpec, error)
 }
 
+var (
+	OceanStorDriver = oceanstor.Driver{}
+)
+
 // Init
-func Init(resourceType string) VolumeDriver {
+func Init(resourceType string) (VolumeDriver, error) {
 	var d VolumeDriver
+
 	switch resourceType {
 	case config.CinderDriverType:
 		d = &cinder.Driver{}
@@ -102,7 +107,7 @@ func Init(resourceType string) VolumeDriver {
 		d = &spectrumscale.Driver{}
 		break
 	case config.HuaweiOceanStorBlockDriverType:
-		d = &oceanstor.Driver{}
+		d = &OceanStorDriver
 		break
 	case config.HuaweiFusionStorageDriverType:
 		d = &fusionstorage.Driver{}
@@ -119,12 +124,17 @@ func Init(resourceType string) VolumeDriver {
 		d = &sample.Driver{}
 		break
 	}
-	d.Setup()
-	return d
+
+	err := d.Setup()
+	if err != nil {
+		return nil, err
+	}
+
+	return d, nil
 }
 
 // Clean
-func Clean(d VolumeDriver) VolumeDriver {
+func Clean(d VolumeDriver) {
 	// Execute different clean operations according to the VolumeDriver type.
 	switch d.(type) {
 	case *cinder.Driver:
@@ -136,7 +146,7 @@ func Clean(d VolumeDriver) VolumeDriver {
 	case *spectrumscale.Driver:
 		break
 	case *oceanstor.Driver:
-		break
+		return // No need to clean anything for oceanstor
 	case *fusionstorage.Driver:
 		break
 	case *nimble.Driver:
@@ -148,10 +158,9 @@ func Clean(d VolumeDriver) VolumeDriver {
 	default:
 		break
 	}
+
 	d.Unset()
 	d = nil
-
-	return d
 }
 
 func CleanMetricDriver(d MetricDriver) MetricDriver {

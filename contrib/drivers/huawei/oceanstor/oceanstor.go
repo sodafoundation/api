@@ -35,7 +35,12 @@ type Driver struct {
 	client *OceanStorClient
 }
 
-func (d *Driver) Setup() (err error) {
+func (d *Driver) Setup() error {
+	if d.client != nil {
+		// Login already, return
+		return nil
+	}
+
 	// Read huawei oceanstor config file
 	conf := &OceanStorConfig{}
 	d.conf = conf
@@ -44,17 +49,29 @@ func (d *Driver) Setup() (err error) {
 	if "" == path {
 		path = defaultConfPath
 	}
+
 	Parse(conf, path)
-	d.client, err = NewClient(&d.conf.AuthOptions)
+
+	client, err := NewClient(&d.conf.AuthOptions)
 	if err != nil {
 		log.Errorf("Get new client failed, %v", err)
 		return err
 	}
+
+	err = client.login()
+	if err != nil {
+		log.Errorf("Client login failed, %v", err)
+		return err
+	}
+
+	d.client = client
 	return nil
 }
 
 func (d *Driver) Unset() error {
-	d.client.logout()
+	if d.client != nil {
+		d.client.logout()
+	}
 	return nil
 }
 
@@ -576,69 +593,44 @@ func (d *Driver) InitializeConnectionFC(opt *pb.CreateVolumeAttachmentOpts) (*mo
 }
 
 func (d *Driver) connectFCUseNoSwitch(opt *pb.CreateVolumeAttachmentOpts, initiators []string, hostId string) ([]string, map[string][]string, error) {
-	wwns := initiators
+	var addWWNs []string
+	var hostWWNs []string
 
-	onlineWWNsInHost, err := d.client.GetHostOnlineFCInitiators(hostId)
-	if err != nil {
-		return nil, nil, err
-	}
-	onlineFreeWWNs, err := d.client.GetOnlineFreeWWNs()
-	if err != nil {
-		return nil, nil, err
-	}
-	onlineFCInitiators, err := d.client.GetOnlineFCInitiatorOnArray()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var wwnsNew []string
-	for _, w := range wwns {
-		if d.isInStringArray(w, onlineFCInitiators) {
-			wwnsNew = append(wwnsNew, w)
+	for _, wwn := range initiators {
+		initiator, err := d.client.GetFCInitiatorByWWN(wwn)
+		if err != nil {
+			log.Errorf("Get FC initiator %s error: %v", wwn, err)
+			return nil, nil, err
 		}
-	}
-	log.Infof("initialize connection, online initiators on the array:%s", wwnsNew)
+		if initiator == nil {
+			log.Warningf("FC initiator %s does not exist", wwn)
+			continue
+		}
 
-	if wwnsNew == nil {
-		return nil, nil, errors.New("no available host initiator")
-	}
+		if initiator.RunningStatus != "27" {
+			log.Warningf("FC initiator %s is not online", wwn)
+			continue
+		}
 
-	for _, wwn := range wwnsNew {
-		if !d.isInStringArray(wwn, onlineWWNsInHost) && !d.isInStringArray(wwn, onlineFreeWWNs) {
-			wwnsInHost, err := d.client.GetHostFCInitiators(hostId)
-			if err != nil {
-				return nil, nil, err
-			}
-			iqnsInHost, err := d.client.GetHostIscsiInitiators(hostId)
-			if err != nil {
-				return nil, nil, err
-			}
-			flag, err := d.client.IsHostAssociatedToHostgroup(hostId)
-			if err != nil {
-				return nil, nil, err
-			}
-
-			if wwnsInHost == nil && iqnsInHost == nil && flag == false {
-				if err = d.client.RemoveHost(hostId); err != nil {
-					return nil, nil, err
-				}
-			}
-
-			msg := fmt.Sprintf("host initiator occupied: Can not add FC initiator %s to host %s, please check if this initiator has been added to other host.", wwn, hostId)
-			log.Errorf(msg)
+		if len(initiator.ParentId) == 0 {
+			addWWNs = append(addWWNs, wwn)
+		} else if initiator.ParentId != hostId {
+			msg := fmt.Sprintf("FC initiator %s is already associated to another host %s", wwn, initiator.ParentId)
+			log.Error(msg)
 			return nil, nil, errors.New(msg)
 		}
+
+		hostWWNs = append(hostWWNs, wwn)
 	}
 
-	for _, wwn := range wwnsNew {
-		if d.isInStringArray(wwn, onlineFreeWWNs) {
-			if err = d.client.AddFCPortTohost(hostId, wwn); err != nil {
-				return nil, nil, err
-			}
+	for _, wwn := range addWWNs {
+		if err := d.client.AddFCPortTohost(hostId, wwn); err != nil {
+			log.Errorf("Add initiator %s to host %s error: %v", wwn, hostId, err)
+			return nil, nil, err
 		}
 	}
 
-	tgtPortWWNs, initTargMap, err := d.client.GetIniTargMap(wwnsNew)
+	tgtPortWWNs, initTargMap, err := d.client.GetIniTargMap(hostWWNs)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -676,6 +668,9 @@ func (d *Driver) detachVolumeFC(opt *pb.DeleteVolumeAttachmentOpts) (string, err
 	hostId, lunGrpId, hostGrpId, viewId, err := d.getMappedInfo(opt.GetHostInfo().GetHost())
 	if err != nil {
 		return "", err
+	}
+	if len(hostId) == 0 {
+		return "", nil
 	}
 
 	if lunId != "" && lunGrpId != "" {
