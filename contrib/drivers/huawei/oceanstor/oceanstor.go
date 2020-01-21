@@ -619,7 +619,7 @@ func (d *Driver) connectFCUseNoSwitch(opt *pb.CreateVolumeAttachmentOpts, initia
 			}
 
 			if wwnsInHost == nil && iqnsInHost == nil && flag == false {
-				if err = d.client.RemoveHost(hostId); err != nil {
+				if err = d.client.DeleteHost(hostId); err != nil {
 					return nil, nil, err
 				}
 			}
@@ -739,19 +739,26 @@ func (d *Driver) deleteZoneAndRemoveFCInitiators(wwns []string, hostId, hostGrpI
 func (d *Driver) getMappedInfo(hostName string) (string, string, string, string, error) {
 	hostId, err := d.client.GetHostIdByName(hostName)
 	if err != nil {
+		if IsNotFoundError(err) {
+			log.Warningf("host(%s) has been removed already, ignore it.", hostName)
+			return "", "", "", "", nil
+		}
+
 		return "", "", "", "", err
 	}
 
 	lunGrpId, err := d.client.FindLunGroup(PrefixLunGroup + hostId)
-	if err != nil {
+	if err != nil && !IsNotFoundError(err) {
 		return "", "", "", "", err
 	}
+
 	hostGrpId, err := d.client.FindHostGroup(PrefixHostGroup + hostId)
-	if err != nil {
+	if err != nil && !IsNotFoundError(err) {
 		return "", "", "", "", err
 	}
+
 	viewId, err := d.client.FindMappingView(PrefixMappingView + hostId)
-	if err != nil {
+	if err != nil && !IsNotFoundError(err) {
 		return "", "", "", "", err
 	}
 
@@ -799,7 +806,7 @@ func (d *Driver) clearHostRelatedResource(lunGrpId, viewId, hostId, hostGrpId st
 			return err
 		}
 		if !flag {
-			if err := d.client.RemoveHost(hostId); err != nil {
+			if err := d.client.DeleteHost(hostId); err != nil {
 				return err
 			}
 		}

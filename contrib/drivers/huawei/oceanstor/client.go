@@ -980,9 +980,14 @@ func (c *OceanStorClient) GetHostLunId(hostId, lunId string) (int, error) {
 func (c *OceanStorClient) RemoveLunFromLunGroup(lunGrpId, lunId string) error {
 	url := fmt.Sprintf("/lungroup/associate?ID=%s&ASSOCIATEOBJTYPE=11&ASSOCIATEOBJID=%s", lunGrpId, lunId)
 	if err := c.request("DELETE", url, nil, nil); err != nil {
+		if c.checkErrorCode(err, ErrorObjectUnavailable) {
+			return nil
+		}
+
 		log.Errorf("Remove lun %s from lun group %s failed, %v", lunId, lunGrpId, err)
 		return err
 	}
+
 	log.Infof("Remove lun %s from lun group %s success", lunId, lunGrpId)
 	return nil
 }
@@ -992,16 +997,23 @@ func (c *OceanStorClient) RemoveLunGroupFromMappingView(viewId, lunGrpId string)
 		log.Infof("Lun group %s has already been removed from mapping view %s", lunGrpId, viewId)
 		return nil
 	}
+
 	url := "/mappingview/REMOVE_ASSOCIATE"
 	data := map[string]interface{}{
 		"ASSOCIATEOBJTYPE": ObjectTypeLunGroup,
 		"ASSOCIATEOBJID":   lunGrpId,
 		"TYPE":             ObjectTypeMappingView,
 		"ID":               viewId}
+
 	if err := c.request("PUT", url, data, nil); err != nil {
+		if c.checkErrorCode(err, ErrorLunGroupNotInMappingView) {
+			return nil
+		}
+
 		log.Errorf("Remove lun group %s from mapping view %s failed", lunGrpId, viewId)
 		return err
 	}
+
 	log.Infof("Remove lun group %s from mapping view %s success", lunGrpId, viewId)
 	return nil
 }
@@ -1011,58 +1023,93 @@ func (c *OceanStorClient) RemoveHostGroupFromMappingView(viewId, hostGrpId strin
 		log.Infof("Host group %s has already been removed from mapping view %s", hostGrpId, viewId)
 		return nil
 	}
+
 	url := "/mappingview/REMOVE_ASSOCIATE"
 	data := map[string]interface{}{
 		"ASSOCIATEOBJTYPE": ObjectTypeHostGroup,
 		"ASSOCIATEOBJID":   hostGrpId,
 		"TYPE":             ObjectTypeMappingView,
 		"ID":               viewId}
+
 	if err := c.request("PUT", url, data, nil); err != nil {
+		if c.checkErrorCode(err, ErrorHostGroupNotInMappingView) {
+			return nil
+		}
+
 		log.Errorf("Remove host group %s from mapping view %s failed", hostGrpId, viewId)
 		return err
 	}
+
 	log.Infof("Remove host group %s from mapping view %s success", hostGrpId, viewId)
 	return nil
 }
 
 func (c *OceanStorClient) RemoveHostFromHostGroup(hostGrpId, hostId string) error {
-
 	url := fmt.Sprintf("/host/associate?TYPE=14&ID=%s&ASSOCIATEOBJTYPE=21&ASSOCIATEOBJID=%s",
 		hostGrpId, hostId)
 	if err := c.request("DELETE", url, nil, nil); err != nil {
+		if c.checkErrorCode(err, ErrorHostNotInHostGroup) {
+			return nil
+		}
+
 		log.Errorf("Remove host %s from host group %s failed", hostId, hostGrpId)
 		return err
 	}
+
 	log.Infof("Remove host %s from host group %s success", hostId, hostGrpId)
 	return nil
 }
 
 func (c *OceanStorClient) RemoveIscsiFromHost(initiator string) error {
-
 	url := "/iscsi_initiator/remove_iscsi_from_host"
 	data := map[string]interface{}{"TYPE": ObjectTypeIscsiInitiator, "ID": initiator}
 	if err := c.request("PUT", url, data, nil); err != nil {
+		if c.checkErrorCode(err, ErrorInitiatorNotInHost) {
+			return nil
+		}
+
 		log.Errorf("Remove initiator %s failed", initiator)
 		return err
 	}
+
 	log.Infof("Remove initiator %s success", initiator)
 	return nil
 }
 
 func (c *OceanStorClient) DeleteHostGroup(id string) error {
-	return c.request("DELETE", "/hostgroup/"+id, nil, nil)
+	err := c.request("DELETE", "/hostgroup/"+id, nil, nil)
+	if err != nil && c.checkErrorCode(err, ErrorHostGroupNotExist) {
+		return nil
+	}
+
+	return err
 }
 
 func (c *OceanStorClient) DeleteLunGroup(id string) error {
-	return c.request("DELETE", "/LUNGroup/"+id, nil, nil)
+	err := c.request("DELETE", "/LUNGroup/"+id, nil, nil)
+	if err != nil && c.checkErrorCode(err, ErrorObjectUnavailable) {
+		return nil
+	}
+
+	return err
 }
 
 func (c *OceanStorClient) DeleteHost(id string) error {
-	return c.request("DELETE", "/host/"+id, nil, nil)
+	err := c.request("DELETE", "/host/"+id, nil, nil)
+	if err != nil && c.checkErrorCode(err, ErrorHostNotExist) {
+		return nil
+	}
+
+	return err
 }
 
 func (c *OceanStorClient) DeleteMappingView(id string) error {
-	return c.request("DELETE", "/mappingview/"+id, nil, nil)
+	err := c.request("DELETE", "/mappingview/"+id, nil, nil)
+	if err != nil && c.checkErrorCode(err, ErrorMappingViewNotExist) {
+		return nil
+	}
+
+	return err
 }
 
 func (c *OceanStorClient) GetArrayInfo() (*System, error) {
@@ -1260,10 +1307,6 @@ func (c *OceanStorClient) IsHostAssociatedToHostgroup(hostId string) (bool, erro
 	}
 
 	return false, nil
-}
-
-func (c *OceanStorClient) RemoveHost(hostId string) error {
-	return c.request("DELETE", fmt.Sprintf("/host/%s", hostId), nil, nil)
 }
 
 func (c *OceanStorClient) AddFCPortTohost(hostId string, wwn string) error {
