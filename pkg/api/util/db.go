@@ -356,7 +356,7 @@ func CreateVolumeDBEntry(ctx *c.Context, in *model.VolumeSpec) (*model.VolumeSpe
 		return nil, errors.New(errMsg)
 	}
 	if reg.MatchString(in.Name) == false {
-		errMsg := fmt.Sprintf("invalid volume name it only contain english char and number  : %v", in.Name)
+		errMsg := fmt.Sprintf("invalid volume name, it should only contain english char and number  : %v", in.Name)
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
