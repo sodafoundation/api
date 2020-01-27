@@ -36,7 +36,7 @@ install:
   - make all
 
 script:
-  - python test.py
+  - python ./install/CI/test.py
   - ./install/CI/coverage
   - ./install/CI/test
 
