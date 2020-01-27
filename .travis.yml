@@ -37,7 +37,7 @@ install:
   - make all
 
 script:
-  - export PYTHONPATH=/root/gopath/src/github.com/opensds/opensds/install/CI
+  - export PYTHONPATH=/home/travis/gopath/src/github.com/opensds/opensds/install/CI/
   - robot install/CI/hotpot.robot
   - ./install/CI/coverage
   - ./install/CI/test
