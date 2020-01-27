@@ -8,11 +8,11 @@
 
 <img src="https://www.opensds.io/wp-content/uploads/sites/18/2016/11/logo_opensds.png" width="100">
 
-## Latest Release: v0.6.0 Capri
+## Latest Release: v0.10.1 Daito
 
-[OpenAPI doc](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.6.0/openapi-spec/swagger.yaml)
+[OpenAPI doc](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.10.1/openapi-spec/swagger.yaml)
 
-[Release notes](https://github.com/opensds/opensds/releases/tag/v0.6.0)
+[Release notes](https://github.com/opensds/opensds/releases/tag/v0.10.1)
 
 ## Introduction
 
@@ -38,40 +38,22 @@ you should consider joining the [OpenSDS Project](https://opensds.io/).
 If you are a developer and would like to be part of the code development
 that is happening now, please refer to the Contributing sections below.
 
-## Collaborative Testing
+## You want to contribute?
 
-* [CNCF Cluster](https://github.com/cncf/cluster/issues/30)
+* [Our Documentation](https://docs.opensds.io/) : 
+You can find the quick start guides and start using OpenSDS releases.
+See [COMMUNITY](https://docs.opensds.io/community/) for details on discussion of the OpenSDS architecture design and feature development.
 
-## Contact
+## How to start ? 
 
-* Mailing list: [opensds-tech-discuss](https://lists.opensds.io/mailman/listinfo/opensds-tech-discuss)
-* slack: #[opensds](https://opensds.slack.com)
-* Ideas/Bugs: [issues](https://github.com/opensds/opensds/issues)
-
-## OpenSDS Controller Work Group
-
-See [COMMUNITY](COMMUNITY.md) for details on discussion of the OpenSDS architecture design and feature development.
-
-## Contributing
-
-If you're interested in being a contributor and want to get involved in
-developing the OpenSDS code, please see [CONTRIBUTING](CONTRIBUTING.md) for
-details on submitting patches and the contribution workflow.
-
-## Hacking
-
-Please refer to [HACKING](HACKING.md) for any requirements when you want to perform code
-development for OpenSDS.
-
-## Installation
-
-Please refer to [INSTALL](INSTALL.md) for any requirements when you want to perform code
-development for OpenSDS.
-
-## Auto-generated SDK
-
-To generate SDK (e.g. Java, C#, Ruby, etc) to access the REST API, please consider using [OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator) given the [OpenAPI/Swagger spec](https://raw.githubusercontent.com/opensds/opensds/master/openapi-spec/swagger.yaml). If you need help with OpenAPI Generator, please reach out to the OpenAPI Generator community by opening an [issue](https://github.com/OpenAPITools/openapi-generator/issues/new).
+Please refer to [Try OpenSDS](https://docs.opensds.io/try-opensds/) to start using our releases and knowing more.
 
 ## License
 
 OpenSDS is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
+
+## Contact
+* Mailing list: [opensds-tech-discuss](https://lists.opensds.io/mailman/listinfo/opensds-tech-discuss)
+* slack: #[opensds](https://opensds.io/slack)
+* Ideas/Bugs: You can raise your ideas, requirements and issues at any of the projects under [our git organization](https://github.com/opensds/)
+* Join our community meetings. All the details, refer [our global community meeting agenda and notes](http://bit.ly/sodaglobalcommunitymeeting)
