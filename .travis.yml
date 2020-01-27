@@ -37,7 +37,7 @@ install:
   - make all
 
 script:
-  - robot ./install/CI/hotpot.robot
+  - robot install/CI/hotpot.robot
   - ./install/CI/coverage
   - ./install/CI/test
 
