@@ -37,6 +37,7 @@ install:
   - make all
   # Start lvm e2e test
   # - split_line "Start lvm e2e test"
+  - sudo ./install/devsds/uninstall.sh --purge
   - sudo ./install/devsds/install.sh
   - ps -ef|grep osds
 
