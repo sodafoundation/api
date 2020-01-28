@@ -45,6 +45,7 @@ script:
   - export PYTHONPATH=/home/travis/gopath/src/github.com/opensds/opensds/install/CI/
   - sudo cp build/out/bin/osdsctl /usr/local/bin/
   - robot install/CI/hotpot.robot
+  - sudo cat /home/travis/gopath/src/github.com/opensds/opensds/output.xml
   - ./install/CI/coverage
   - ./install/CI/test
 
