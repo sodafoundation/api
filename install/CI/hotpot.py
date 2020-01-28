@@ -85,13 +85,13 @@ class Hotpot(object):
         print "BASIC HOTPOT TESTING!"
 
     def pool_list(self):
-        self.run_command('osdsctl pool list')
+        self.run_command('build/out/bin/osdsctl pool list')
 
     def profile_list(self):
         return self.run_command('osdsctl profile list')
 
     def dock_list(self):
-        self.run_command('osdsctl dock list')
+        self.run_command('build/out/bin/osdsctl dock list')
 
     def volume_list(self):
         self.run_command('osdsctl volume list')
@@ -103,7 +103,7 @@ class Hotpot(object):
         self.run_command('osdsctl version list')
 
     def volume_create(self):
-        stdout, stderr = self.run_command('osdsctl volume create 2 --name=vol1')
+        stdout, stderr = self.run_command('build/out/bin/osdsctl volume create 1 --name=vol1')
         return self.get_id(stdout)
 
     def check_volume_status_available(self, volume_id):
