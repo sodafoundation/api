@@ -105,14 +105,18 @@ func (*RBD) Detach(conn map[string]interface{}) error {
 }
 
 // GetInitiatorInfo implementation
-func (*RBD) GetInitiatorInfo() (string, error) {
+func (*RBD) GetInitiatorInfo() ([]string, error) {
+
 	hostName, err := connector.GetHostName()
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return hostName, nil
+	initiator := make([]string, 1)
+	initiator = append(initiator, hostName)
+
+	return initiator, nil
 }
 
 func parseName(name string) (poolName, imageName, snapName string, err error) {

@@ -41,6 +41,6 @@ func (f *FC) Detach(conn map[string]interface{}) error {
 }
 
 // GetInitiatorInfo ...
-func (f *FC) GetInitiatorInfo() (string, error) {
+func (f *FC) GetInitiatorInfo() ([]string, error) {
 	return getInitiatorInfo()
 }

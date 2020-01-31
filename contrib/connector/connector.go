@@ -42,7 +42,7 @@ const (
 type Connector interface {
 	Attach(map[string]interface{}) (string, error)
 	Detach(map[string]interface{}) error
-	GetInitiatorInfo() (string, error)
+	GetInitiatorInfo() ([]string, error)
 }
 
 var cnts = map[string]Connector{}
