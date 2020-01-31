@@ -302,6 +302,10 @@ func (c *OceanStorClient) GetVolumeByName(name string) (*Lun, error) {
 }
 func (c *OceanStorClient) DeleteVolume(id string) error {
 	err := c.request("DELETE", "/lun/"+id, nil, nil)
+	// If the lun already doesn't exist, delete command should not return err
+	if c.checkErrorCode(err, ErrorLunNotExist) {
+		return nil
+	}
 	return err
 }
 
@@ -1483,4 +1487,12 @@ func (c *OceanStorClient) GetPerformance(resId string, dataIdList []string) (map
 	}
 
 	return perfMap, nil
+}
+
+func (c *OceanStorClient) checkErrorCode(err error, code int) bool {
+	if inErr, ok := err.(*ArrayInnerError); ok && inErr.Err.Code == code {
+		return true
+	}
+
+	return false
 }
