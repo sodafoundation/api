@@ -8,11 +8,11 @@
 
 <img src="https://www.opensds.io/wp-content/uploads/sites/18/2016/11/logo_opensds.png" width="100">
 
-## Latest Release: v0.6.0 Capri
+## Latest Release: v0.10.0 Daito
 
-[OpenAPI doc](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.6.0/openapi-spec/swagger.yaml)
+[OpenAPI doc](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.10.0/openapi-spec/swagger.yaml)
 
-[Release notes](https://github.com/opensds/opensds/releases/tag/v0.6.0)
+[Release notes](https://github.com/opensds/opensds/releases/tag/v0.10.0)
 
 ## Introduction
 

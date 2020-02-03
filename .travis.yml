@@ -22,6 +22,7 @@ before_install:
   - sudo apt-get install -y librados-dev librbd-dev
   - sudo apt-get install -y lvm2 tgt open-iscsi
   - sudo docker pull p1c2u/openapi-spec-validator
+  - sudo pip install robotframework
 
 
 matrix:
@@ -34,8 +35,21 @@ matrix:
 install:
   # Build OpenSDS Controller source code
   - make all
+  # Start lvm e2e test
+  # - split_line "Start lvm e2e test"
+  - sudo install/devsds/uninstall.sh --purge
+  - sudo install/devsds/install.sh
+  - export OPENSDS_AUTH_STRATEGY=noauth
+  - export OPENSDS_ENDPOINT=http://localhost:50040
+  - sudo echo $(ps -ef |grep osds)
 
 script:
+  - export PYTHONPATH=/home/travis/gopath/src/github.com/opensds/opensds/install/CI/
+  - sudo cp build/out/bin/osdsctl /usr/local/bin/
+  - sudo vgs
+  - sudo vgdisplay
+  - robot install/CI/hotpot.robot
+  - sudo cat /home/travis/gopath/src/github.com/opensds/opensds/output.xml
   - ./install/CI/coverage
   - ./install/CI/test
 
