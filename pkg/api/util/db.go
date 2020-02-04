@@ -292,6 +292,17 @@ func CreateFileShareSnapshotDBEntry(ctx *c.Context, in *model.FileShareSnapshotS
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
+	reg, err := regexp.Compile("^[a-zA-Z0-9 _-]+$")
+	if err != nil {
+		errMsg := fmt.Sprintf("regex compilation for file share snapshot validation failed")
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	if reg.MatchString(in.Description) == false {
+		errMsg := fmt.Sprintf("fileshare snapshot creation failed, because description has some special chars: %v. Description only support english char and number", in.Description)
+		log.Error(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	in.Status = model.FileShareSnapCreating
 	in.Metadata = fshare.Metadata
 	return db.C.CreateFileShareSnapshot(ctx, in)
