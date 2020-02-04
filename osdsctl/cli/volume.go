@@ -72,7 +72,6 @@ var volumeExtendCommand = &cobra.Command{
 
 var (
 	profileId string
-	//poolId    string
 	volName   string
 	volDesp   string
 	volAz     string
