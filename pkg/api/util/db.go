@@ -890,7 +890,7 @@ func DeleteVolumeGroupDBEntry(ctx *c.Context, volumeGroupId string) error {
 
 	var volumesUpdate []*model.VolumeSpec
 	for _, value := range volumes {
-		if value.AttachStatus == model.VolumeAttached {
+		if value.Status == model.VolumeInUse {
 			msg := fmt.Sprintf("volume %s in group %s is attached. Need to deach first.", value.Id, vg.Id)
 			log.Error(msg)
 			return errors.New(msg)
