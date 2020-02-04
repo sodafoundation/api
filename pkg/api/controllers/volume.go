@@ -109,7 +109,6 @@ func (v *VolumePortal) CreateVolume() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer v.CtrClient.Close()
 
 	opt := &pb.CreateVolumeOpts{
 		Id:               result.Id,
@@ -266,7 +265,6 @@ func (v *VolumePortal) ExtendVolume() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer v.CtrClient.Close()
 
 	opt := &pb.ExtendVolumeOpts{
 		Id:       id,
@@ -342,7 +340,6 @@ func (v *VolumePortal) DeleteVolume() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer v.CtrClient.Close()
 
 	opt := &pb.DeleteVolumeOpts{
 		Id:        volume.Id,
@@ -431,7 +428,6 @@ func (v *VolumeSnapshotPortal) CreateVolumeSnapshot() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer v.CtrClient.Close()
 
 	opt := &pb.CreateVolumeSnapshotOpts{
 		Id:          result.Id,
@@ -572,7 +568,6 @@ func (v *VolumeSnapshotPortal) DeleteVolumeSnapshot() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer v.CtrClient.Close()
 
 	opt := &pb.DeleteVolumeSnapshotOpts{
 		Id:       snapshot.Id,
