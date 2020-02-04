@@ -36,6 +36,7 @@ var volumeCommand = &cobra.Command{
 var volumeCreateCommand = &cobra.Command{
 	Use:   "create <size>",
 	Short: "create a volume in the cluster",
+	Example: "osdsctl volume create 1 --name vol-name",
 	Run:   volumeCreateAction,
 }
 
@@ -71,6 +72,7 @@ var volumeExtendCommand = &cobra.Command{
 
 var (
 	profileId string
+	//poolId    string
 	volName   string
 	volDesp   string
 	volAz     string
@@ -93,7 +95,7 @@ var (
 )
 
 func init() {
-	volumeListCommand.Flags().StringVarP(&volLimit, "limit", "", "50", "the number of ertries displayed per page")
+	volumeListCommand.Flags().StringVarP(&volLimit, "limit", "", "50", "the number of entries displayed per page")
 	volumeListCommand.Flags().StringVarP(&volOffset, "offset", "", "0", "all requested data offsets")
 	volumeListCommand.Flags().StringVarP(&volSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
 	volumeListCommand.Flags().StringVarP(&volSortKey, "sortKey", "", "id",
@@ -109,13 +111,14 @@ func init() {
 	volumeListCommand.Flags().StringVarP(&volProfileId, "profileId", "", "", "list volume by profile id")
 	volumeListCommand.Flags().StringVarP(&volGroupId, "groupId", "", "", "list volume by volume group id")
 
-	volumeCommand.PersistentFlags().StringVarP(&profileId, "profile", "p", "", "the id of profile configured by admin")
+	volumeCommand.PersistentFlags().StringVarP(&profileId, "profile", "", "", "the id of profile configured by admin")
 
 	volumeCommand.AddCommand(volumeCreateCommand)
 	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "", "the name of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volDesp, "description", "d", "", "the description of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volAz, "az", "a", "", "the availability zone of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volSnap, "snapshot", "s", "", "the snapshot to create volume")
+	volumeCreateCommand.Flags().StringVarP(&poolId, "pool", "p", "", "the pool to create volume")
 	volumeCreateCommand.Flags().BoolVarP(&snapshotFromCloud, "snapshotFromCloud", "c", false, "download snapshot from cloud")
 	volumeCommand.AddCommand(volumeShowCommand)
 	volumeCommand.AddCommand(volumeListCommand)
@@ -142,6 +145,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
 	size, err := strconv.Atoi(args[0])
 	if err != nil {
+		Fatalln("input size is not valid. It only support integer.")
 		log.Fatalf("error parsing size %s: %+v", args[0], err)
 	}
 
@@ -151,6 +155,7 @@ func volumeCreateAction(cmd *cobra.Command, args []string) {
 		AvailabilityZone:  volAz,
 		Size:              int64(size),
 		ProfileId:         profileId,
+		PoolId:            poolId,
 		SnapshotId:        volSnap,
 		SnapshotFromCloud: snapshotFromCloud,
 	}
