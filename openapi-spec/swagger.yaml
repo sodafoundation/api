@@ -71,6 +71,43 @@ paths:
       tags:
         - Dock
       description: Lists information for all storage docks.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word, such as name, createdAt
+          schema:
+            type: string
+        - name: storageType
+          in: query
+          schema:
+            type: string
+            enum:
+            - block
+            - file
+            - object
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum:
+            - provisioner
+            - attacher
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum:
+            - available
+            - unavailable
+        - name: name
+          in: query
+          schema:
+            minLength: 1
+            maxLength: 255
+            type: string
       responses:
         '200':
           description: OK
@@ -116,6 +153,29 @@ paths:
       tags:
         - Pool
       description: Lists information for all block storage pool.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word, such as name, createdAt
+          schema:
+            type: string
+        - name: storageType
+          in: query
+          schema:
+            type: string
+            enum:
+            - block
+            - file
+            - object
+        - name: name
+          in: query
+          schema:
+            minLength: 1
+            maxLength: 255
+            type: string
       responses:
         '200':
           description: OK
@@ -138,6 +198,29 @@ paths:
       tags:
         - Availability Zone
       description: Lists availability zones.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/sortDir'
+        - name: sortKey
+          in: query
+          description: Sorting key word, such as name, createdAt
+          schema:
+            type: string
+        - name: storageType
+          in: query
+          schema:
+            type: string
+            enum:
+            - block
+            - file
+            - object
+        - name: name
+          in: query
+          schema:
+            minLength: 1
+            maxLength: 255
+            type: string
       responses:
         '200':
           description: OK
@@ -200,6 +283,17 @@ paths:
             - block
             - file
             - object
+        - name: availabilityZone
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum:
+            - available
+            - unavailable
         - name: name
           in: query
           schema:
@@ -1768,7 +1862,7 @@ paths:
           $ref: '#/components/responses/HTTPStatus404'
         '500':
           $ref: '#/components/responses/HTTPStatus500'
-  /v1beta/{tenantId}/host/hosts:
+  '/v1beta/{tenantId}/host/hosts':
     parameters:
       - $ref: '#/components/parameters/tenantId'
     get:
@@ -1830,7 +1924,7 @@ paths:
         '500':
           $ref: '#/components/responses/HTTPStatus500'
 
-  /v1beta/{tenantId}/host/hosts/{hostId}:
+  '/v1beta/{tenantId}/host/hosts/{hostId}':
     parameters:
       - $ref: '#/components/parameters/tenantId'
       - $ref: '#/components/parameters/hostId'
