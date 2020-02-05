@@ -33,84 +33,84 @@ var profileCommand = &cobra.Command{
 }
 
 var profileCreateCommand = &cobra.Command{
-	Use:   "create <profile-info>",
+	Use: "create <profile-info>",
 	Example: "osdsctl profile create '{\"name\": \"default_block\", \"description\": \"default policy\", \"storageType\": \"block\"}'" + "\n" +
-		     "osdsctl profile create '{\"name\": \"default_file\", \"description\": \"default policy\", \"storageType\": \"file\", \"provisioningProperties\":{\"ioConnectivity\": {\"accessProtocol\": \"NFS\"},\"DataStorage\":{\"StorageAccessCapability\":[\"Read\",\"Write\",\"Execute\"]}}}'" +
-	         "\n" +
-		     "\n" +
-	         "The example of more supported \"profile-info\" parameters:\n" +
-		     "\n" +
-	         "'{" +
-				"\"name\": \"File_Profile\"," +
-		        "\"storageType\": \"block\"," +
-				"\"description\": \"string\"," +
-		        "\"provisioningProperties\": {" +
-		        	"\"dataStorage\": {" +
-					"\"recoveryTimeObjective\": 10," +
-					"\"provisioningPolicy\": \"Thick\"," +
-					"\"compression\": false," +
-				    "\"deduplication\": false," +
-					"\"characterCodeSet\": \"ASCII\"," +
-					"\"maxFileNameLengthBytes\": 255," +
-				    "\"storageAccessCapability\": [\"Read\"] " +
-		        	"}," +
-			    "\"ioConnectivity\": {" +
-					"\"accessProtocol\": \"iscsi\"," +
-					"\"maxIOPS\": 150," +
-					"\"minIOPS\": 50," +
-					"\"maxBWS\": 5," +
-					"\"minBWS\": 1," +
-					"\"latency\": 1" +
-					"}" +
-		    	"}," +
-				"\"replicationProperties\": {" +
-					"\"dataProtection\": {" +
-					"\"isIsolated\": true," +
-					"\"minLifetime\": \"P3Y6M4DT12H30M55\"," +
-					"\"RecoveryGeographicObjective\": \"datacenter\"," +
-					"\"RecoveryPointObjectiveTime\": \"P3Y6M4DT12H30M5S\"," +
-					"\"RecoveryTimeObjective\": \"offline\"," +
-					"\"ReplicaType\": \"snapshot\"" +
-			    	"}," +
-				"\"replicaInfos\": {" +
-					"\"replicaUpdateMode\": \"Active\"," +
-					"\"replcationBandwidth\": 5," +
-					"\"replicationPeriod\": \"P3Y6M4DT12H30M5S\"," +
-					"\"consistencyEnalbed\": true " +
-			    	"}" +
-				"}," +
-		        "\"snapshotProperties\": {" +
-					"\"schedule\": {" +
-					"\"datetime\": \"2019-09-07T07:02:35.389\"," +
-				    "\"occurrence\": \"Daily\"" +
-				"}," +
-				"\"retention\": {" +
-					"\"duration\": 15," +
-					"\"number\": 10" +
-				"}," +
-				"\"topology\": {" +
-					"\"bucket\": \"string\"" +
-				"	}" +
-				"}," +
-				"\"dataProtectionProperties\": {" +
-				"\"dataProtection\": {" +
-					"\"isIsolated\": true," +
-					"\"minLifetime\": \"P3Y6M4DT12H30M5S\"," +
-					"\"RecoveryGeographicObjective\": \"datacenter\"," +
-					"\"RecoveryPointObjectiveTime\": \"P3Y6M4DT12H30M5S\"," +
-					"\"RecoveryTimeObjective\": \"offline\"," +
-					"\"ReplicaType\": \"snapshot\"" +
-				"}," +
-				"\"consistencyEnalbed\": true " +
-		        "}," +
-		        "\"customProperties\": {" +
-		 		"\"key1\": \"value1\"," +
-				"\"key2\": false, " +
-				"\"key3\": { " +
-				"\"key31\": \"value31\"" +
-			    "}" +
-		        "}" +
-			 "}'",
+		"osdsctl profile create '{\"name\": \"default_file\", \"description\": \"default policy\", \"storageType\": \"file\", \"provisioningProperties\":{\"ioConnectivity\": {\"accessProtocol\": \"NFS\"},\"DataStorage\":{\"StorageAccessCapability\":[\"Read\",\"Write\",\"Execute\"]}}}'" +
+		"\n" +
+		"\n" +
+		"The example of more supported \"profile-info\" parameters:\n" +
+		"\n" +
+		"'{" +
+		"\"name\": \"File_Profile\"," +
+		"\"storageType\": \"block\"," +
+		"\"description\": \"string\"," +
+		"\"provisioningProperties\": {" +
+		"\"dataStorage\": {" +
+		"\"recoveryTimeObjective\": 10," +
+		"\"provisioningPolicy\": \"Thick\"," +
+		"\"compression\": false," +
+		"\"deduplication\": false," +
+		"\"characterCodeSet\": \"ASCII\"," +
+		"\"maxFileNameLengthBytes\": 255," +
+		"\"storageAccessCapability\": [\"Read\"] " +
+		"}," +
+		"\"ioConnectivity\": {" +
+		"\"accessProtocol\": \"iscsi\"," +
+		"\"maxIOPS\": 150," +
+		"\"minIOPS\": 50," +
+		"\"maxBWS\": 5," +
+		"\"minBWS\": 1," +
+		"\"latency\": 1" +
+		"}" +
+		"}," +
+		"\"replicationProperties\": {" +
+		"\"dataProtection\": {" +
+		"\"isIsolated\": true," +
+		"\"minLifetime\": \"P3Y6M4DT12H30M55\"," +
+		"\"RecoveryGeographicObjective\": \"datacenter\"," +
+		"\"RecoveryPointObjectiveTime\": \"P3Y6M4DT12H30M5S\"," +
+		"\"RecoveryTimeObjective\": \"offline\"," +
+		"\"ReplicaType\": \"snapshot\"" +
+		"}," +
+		"\"replicaInfos\": {" +
+		"\"replicaUpdateMode\": \"Active\"," +
+		"\"replcationBandwidth\": 5," +
+		"\"replicationPeriod\": \"P3Y6M4DT12H30M5S\"," +
+		"\"consistencyEnalbed\": true " +
+		"}" +
+		"}," +
+		"\"snapshotProperties\": {" +
+		"\"schedule\": {" +
+		"\"datetime\": \"2019-09-07T07:02:35.389\"," +
+		"\"occurrence\": \"Daily\"" +
+		"}," +
+		"\"retention\": {" +
+		"\"duration\": 15," +
+		"\"number\": 10" +
+		"}," +
+		"\"topology\": {" +
+		"\"bucket\": \"string\"" +
+		"	}" +
+		"}," +
+		"\"dataProtectionProperties\": {" +
+		"\"dataProtection\": {" +
+		"\"isIsolated\": true," +
+		"\"minLifetime\": \"P3Y6M4DT12H30M5S\"," +
+		"\"RecoveryGeographicObjective\": \"datacenter\"," +
+		"\"RecoveryPointObjectiveTime\": \"P3Y6M4DT12H30M5S\"," +
+		"\"RecoveryTimeObjective\": \"offline\"," +
+		"\"ReplicaType\": \"snapshot\"" +
+		"}," +
+		"\"consistencyEnalbed\": true " +
+		"}," +
+		"\"customProperties\": {" +
+		"\"key1\": \"value1\"," +
+		"\"key2\": false, " +
+		"\"key3\": { " +
+		"\"key31\": \"value31\"" +
+		"}" +
+		"}" +
+		"}'",
 
 	Short: "create a new profile resource",
 	Run:   profileCreateAction,
@@ -126,14 +126,14 @@ var profileListCommand = &cobra.Command{
 	Use:   "list",
 	Short: "get all profile resources",
 	Example: "osdsctl profile list --description \"test\"\n" +
-		     "osdsctl profile list --id def32d39-78e2-47f3-9e2f-8c43a8b9ee3a\n" +
-		     "osdsctl profile list --limit 2\n" +
-	         "osdsctl profile list --name test\n" +
-		     "osdsctl profile list --offset 2\n" +
-		     "osdsctl profile list --sortDir desc\n" +
-			 "osdsctl profile list --sortKey id\n" +
-		     "osdsctl profile list --storageType block\n",
-	Run:   profileListAction,
+		"osdsctl profile list --id def32d39-78e2-47f3-9e2f-8c43a8b9ee3a\n" +
+		"osdsctl profile list --limit 2\n" +
+		"osdsctl profile list --name test\n" +
+		"osdsctl profile list --offset 2\n" +
+		"osdsctl profile list --sortDir desc\n" +
+		"osdsctl profile list --sortKey id\n" +
+		"osdsctl profile list --storageType block\n",
+	Run: profileListAction,
 }
 
 var profileDeleteCommand = &cobra.Command{
@@ -163,7 +163,6 @@ func init() {
 	profileListCommand.Flags().StringVarP(&profName, "name", "", "", "list profile by name")
 	profileListCommand.Flags().StringVarP(&profDescription, "description", "", "", "list profile by description")
 	profileListCommand.Flags().StringVarP(&profStorageType, "storageType", "", "", "list profile by storage type")
-
 
 	profileCommand.AddCommand(profileCreateCommand)
 	profileCreateCommand.Flags().Lookup("profile-info")

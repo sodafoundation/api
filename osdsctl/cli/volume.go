@@ -34,10 +34,10 @@ var volumeCommand = &cobra.Command{
 }
 
 var volumeCreateCommand = &cobra.Command{
-	Use:   "create <size>",
-	Short: "create a volume in the cluster",
+	Use:     "create <size>",
+	Short:   "create a volume in the cluster",
 	Example: "osdsctl volume create 1 --name vol-name",
-	Run:   volumeCreateAction,
+	Run:     volumeCreateAction,
 }
 
 var volumeShowCommand = &cobra.Command{
