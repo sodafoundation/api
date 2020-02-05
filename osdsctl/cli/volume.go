@@ -110,14 +110,14 @@ func init() {
 	volumeListCommand.Flags().StringVarP(&volProfileId, "profileId", "", "", "list volume by profile id")
 	volumeListCommand.Flags().StringVarP(&volGroupId, "groupId", "", "", "list volume by volume group id")
 
-	volumeCommand.PersistentFlags().StringVarP(&profileId, "profile", "", "", "the id of profile configured by admin")
+	volumeCommand.PersistentFlags().StringVarP(&profileId, "profile", "p", "", "the id of profile configured by admin")
 
 	volumeCommand.AddCommand(volumeCreateCommand)
 	volumeCreateCommand.Flags().StringVarP(&volName, "name", "n", "", "the name of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volDesp, "description", "d", "", "the description of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volAz, "az", "a", "", "the availability zone of created volume")
 	volumeCreateCommand.Flags().StringVarP(&volSnap, "snapshot", "s", "", "the snapshot to create volume")
-	volumeCreateCommand.Flags().StringVarP(&poolId, "pool", "p", "", "the pool to create volume")
+	volumeCreateCommand.Flags().StringVarP(&poolId, "pool", "l", "", "the pool to create volume")
 	volumeCreateCommand.Flags().BoolVarP(&snapshotFromCloud, "snapshotFromCloud", "c", false, "download snapshot from cloud")
 	volumeCommand.AddCommand(volumeShowCommand)
 	volumeCommand.AddCommand(volumeListCommand)
