@@ -94,7 +94,6 @@ func (c *controller) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, 
 		log.Error("create volume failed in volume controller:", err)
 		return nil, err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil,
@@ -123,7 +122,6 @@ func (c *controller) DeleteVolume(opt *pb.DeleteVolumeOpts) error {
 		log.Error("delete volume failed in volume controller:", err)
 		return err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return errors.New(errorMsg.GetDescription())
@@ -143,7 +141,6 @@ func (c *controller) ExtendVolume(opt *pb.ExtendVolumeOpts) (*model.VolumeSpec, 
 		log.Error("extend volume failed in volume controller:", err)
 		return nil, err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil,
@@ -171,7 +168,6 @@ func (c *controller) CreateVolumeAttachment(opt *pb.CreateVolumeAttachmentOpts) 
 		log.Error("create volume attachment failed in volume controller:", err)
 		return nil, err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil,
@@ -201,7 +197,6 @@ func (c *controller) DeleteVolumeAttachment(opt *pb.DeleteVolumeAttachmentOpts) 
 		log.Error("delete volume attachment failed in volume controller:", err)
 		return err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return errors.New(errorMsg.GetDescription())
@@ -221,7 +216,6 @@ func (c *controller) CreateVolumeSnapshot(opt *pb.CreateVolumeSnapshotOpts) (*mo
 		log.Error("create volume snapshot failed in volume controller:", err)
 		return nil, err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil,
@@ -249,7 +243,6 @@ func (c *controller) DeleteVolumeSnapshot(opt *pb.DeleteVolumeSnapshotOpts) erro
 		log.Error("delete volume snapshot failed in volume controller:", err)
 		return err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return errors.New(errorMsg.GetDescription())
@@ -269,7 +262,6 @@ func (c *controller) CreateReplication(opt *pb.CreateReplicationOpts) (*model.Re
 		log.Error("create volume replication failed in volume controller:", err)
 		return nil, err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil,
@@ -297,7 +289,6 @@ func (c *controller) DeleteReplication(opt *pb.DeleteReplicationOpts) error {
 		log.Error("delete replication failed in volume controller:", err)
 		return err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return errors.New(errorMsg.GetDescription())
@@ -317,7 +308,6 @@ func (c *controller) EnableReplication(opt *pb.EnableReplicationOpts) error {
 		log.Error("enable replication failed in volume controller:", err)
 		return err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return errors.New(errorMsg.GetDescription())
@@ -337,7 +327,6 @@ func (c *controller) DisableReplication(opt *pb.DisableReplicationOpts) error {
 		log.Error("disable replication failed in volume controller:", err)
 		return err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return errors.New(errorMsg.GetDescription())
@@ -357,7 +346,6 @@ func (c *controller) FailoverReplication(opt *pb.FailoverReplicationOpts) error 
 		log.Error("failover replication failed in volume controller:", err)
 		return err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return errors.New(errorMsg.GetDescription())
@@ -377,7 +365,6 @@ func (c *controller) AttachVolume(opt *pb.AttachVolumeOpts) (string, error) {
 		log.Error("attach volume failed in volume controller:", err)
 		return "", err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return "",
@@ -398,7 +385,6 @@ func (c *controller) DetachVolume(opt *pb.DetachVolumeOpts) error {
 		log.Error("detach volume failed in volume controller:", err)
 		return err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return errors.New(errorMsg.GetDescription())
@@ -418,7 +404,6 @@ func (c *controller) CreateVolumeGroup(opt *pb.CreateVolumeGroupOpts) (*model.Vo
 		log.Error("create volume group failed in volume controller:", err)
 		return nil, err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil,
@@ -446,7 +431,6 @@ func (c *controller) UpdateVolumeGroup(opt *pb.UpdateVolumeGroupOpts) (*model.Vo
 		log.Error("update volume group failed in volume controller:", err)
 		return nil, err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil, fmt.Errorf("failed to update volume group in volume controller, code: %v, message: %v",
@@ -473,8 +457,6 @@ func (c *controller) DeleteVolumeGroup(opt *pb.DeleteVolumeGroupOpts) error {
 		log.Error("delete volume group failed in volume controller:", err)
 		return err
 	}
-
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return errors.New(errorMsg.GetDescription())

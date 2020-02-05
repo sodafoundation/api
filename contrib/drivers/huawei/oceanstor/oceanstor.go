@@ -76,8 +76,12 @@ func (d *Driver) createVolumeFromSnapshot(opt *pb.CreateVolumeOpts) (*model.Volu
 		return nil, err1
 	}
 
+	provPolicy := d.conf.Pool[opt.GetPoolName()].Extras.DataStorage.ProvisioningPolicy
+	if provPolicy == "" {
+		provPolicy = "Thick"
+	}
 	lun, err := d.client.CreateVolume(EncodeName(opt.GetId()), opt.GetSize(),
-		volumeDesc, poolId)
+		volumeDesc, poolId, provPolicy)
 	if err != nil {
 		log.Error("Create Volume Failed:", err)
 		return nil, err
@@ -168,7 +172,11 @@ func (d *Driver) CreateVolume(opt *pb.CreateVolumeOpts) (*model.VolumeSpec, erro
 	if err != nil {
 		return nil, err
 	}
-	lun, err := d.client.CreateVolume(name, opt.GetSize(), desc, poolId)
+	provPolicy := d.conf.Pool[opt.GetPoolName()].Extras.DataStorage.ProvisioningPolicy
+	if provPolicy == "" {
+		provPolicy = "Thick"
+	}
+	lun, err := d.client.CreateVolume(name, opt.GetSize(), desc, poolId, provPolicy)
 	if err != nil {
 		log.Error("Create Volume Failed:", err)
 		return nil, err

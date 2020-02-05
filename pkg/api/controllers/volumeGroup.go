@@ -85,7 +85,6 @@ func (v *VolumeGroupPortal) CreateVolumeGroup() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer v.CtrClient.Close()
 
 	opt := &pb.CreateVolumeGroupOpts{
 		Id:               result.Id,
@@ -167,7 +166,6 @@ func (v *VolumeGroupPortal) UpdateVolumeGroup() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer v.CtrClient.Close()
 
 	opt := &pb.UpdateVolumeGroupOpts{
 		Id:            id,
@@ -219,7 +217,6 @@ func (v *VolumeGroupPortal) DeleteVolumeGroup() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer v.CtrClient.Close()
 
 	opt := &pb.DeleteVolumeGroupOpts{
 		Id:      id,

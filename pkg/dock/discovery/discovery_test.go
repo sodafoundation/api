@@ -58,6 +58,10 @@ func TestInit(t *testing.T) {
 	for i := range SampleDocks {
 		expected = append(expected, &SampleDocks[i])
 	}
+	name := map[string][]string{"Name": {SampleDocks[0].Name}}
+	mockClient := new(dbtest.Client)
+	mockClient.On("ListDocksWithFilter", c.NewAdminContext(), name).Return(expected, nil)
+	fdd.c = mockClient
 	if err := fdd.Init(); err != nil {
 		t.Errorf("Failed to init discoverer struct: %v\n", err)
 	}
@@ -83,8 +87,24 @@ func TestDiscover(t *testing.T) {
 		fdd.pols = append(fdd.pols, &SamplePools[i])
 		expected = append(expected, &SamplePools[i])
 	}
+	m1 := map[string][]string{
+		"Name":   {SamplePools[0].Name},
+		"DockId": {""},
+	}
+	m2 := map[string][]string{
+		"Name":   {SamplePools[1].Name},
+		"DockId": {""},
+	}
+	m3 := map[string][]string{
+		"Name":   {SamplePools[2].Name},
+		"DockId": {""},
+	}
+
 	mockClient := new(dbtest.Client)
 	mockClient.On("ListPools", c.NewAdminContext()).Return(fdd.pols, nil)
+	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m1).Return(expected, nil)
+	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m2).Return(expected, nil)
+	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m3).Return(expected, nil)
 	fdd.c = mockClient
 
 	if err := fdd.Discover(); err != nil {

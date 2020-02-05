@@ -1,4 +1,4 @@
-// Copyright 2019 The OpenSDS Authors.
+// Copyright 2016 The etcd Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pwd
-
-type PwdEncrypter interface {
-	Encrypter(password string) (string, error)
-	Decrypter(code string) (string, error)
-}
-
-func NewPwdEncrypter(encrypter string) PwdEncrypter {
-	switch encrypter {
-	case "aes":
-		return NewAES()
-	default:
-		return NewAES()
-	}
-}
+// Package tlsutil provides utility functions for handling TLS.
+package tlsutil

@@ -1,4 +1,4 @@
-// Copyright 2018 The OpenSDS Authors.
+// Copyright 2016 The etcd Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,35 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package fc
+package transport
 
 import (
-	"github.com/opensds/opensds/contrib/connector"
+	"net"
+	"os"
 )
 
-// FC struct
-type FC struct{}
+type unixListener struct{ net.Listener }
 
-// init ...
-func init() {
-	connector.RegisterConnector(connector.FcDriver, &FC{})
-}
-
-// Attach ...
-func (f *FC) Attach(conn map[string]interface{}) (string, error) {
-	deviceInfo, err := connectVolume(conn)
-	if err != nil {
-		return "", err
+func NewUnixListener(addr string) (net.Listener, error) {
+	if err := os.Remove(addr); err != nil && !os.IsNotExist(err) {
+		return nil, err
 	}
-	return deviceInfo["path"], nil
+	l, err := net.Listen("unix", addr)
+	if err != nil {
+		return nil, err
+	}
+	return &unixListener{l}, nil
 }
 
-// Detach ...
-func (f *FC) Detach(conn map[string]interface{}) error {
-	return disconnectVolume(conn)
-}
-
-// GetInitiatorInfo ...
-func (f *FC) GetInitiatorInfo() ([]string, error) {
-	return getInitiatorInfo()
+func (ul *unixListener) Close() error {
+	if err := os.Remove(ul.Addr().String()); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return ul.Listener.Close()
 }

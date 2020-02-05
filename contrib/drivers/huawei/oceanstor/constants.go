@@ -62,6 +62,7 @@ const (
 	ErrorObjectIDNotUnique             = 1077948997
 	ErrorHostGroupAlreadyInMappingView = 1073804556
 	ErrorLunGroupAlreadyInMappingView  = 1073804560
+	ErrorLunNotExist                   = 1077936859
 )
 
 // misc

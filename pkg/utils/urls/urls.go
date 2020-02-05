@@ -25,6 +25,8 @@ const (
 	Client        // Client == 1
 )
 
+const etcd_prefix string = "/opensds"
+
 func GenerateHostURL(urlType int, tenantId string, in ...string) string {
 	return generateURL("host/hosts", urlType, tenantId, in...)
 }
@@ -81,7 +83,12 @@ func GenerateVolumeGroupURL(urlType int, tenantId string, in ...string) string {
 func generateURL(resource string, urlType int, tenantId string, in ...string) string {
 	// If project id is not specified, ignore it.
 	if tenantId == "" {
-		value := []string{CurrentVersion(), resource}
+		var value []string
+		if urlType == Etcd {
+			value = []string{etcd_prefix, CurrentVersion(), resource}
+		} else {
+			value = []string{CurrentVersion(), resource}
+		}
 		value = append(value, in...)
 		return strings.Join(value, "/")
 	}
@@ -89,7 +96,7 @@ func generateURL(resource string, urlType int, tenantId string, in ...string) st
 	// Set project id after resource url just for etcd query performance.
 	var value []string
 	if urlType == Etcd {
-		value = []string{CurrentVersion(), resource, tenantId}
+		value = []string{etcd_prefix, CurrentVersion(), resource, tenantId}
 	} else {
 		value = []string{CurrentVersion(), tenantId, resource}
 	}

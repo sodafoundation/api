@@ -372,19 +372,19 @@ func getTgtPortalAndTgtIQN() (string, string, error) {
 
 }
 
-func getInitiatorInfo() (string, error) {
+func getInitiatorInfo() ([]string, error) {
 	initiators, err := getInitiator()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if len(initiators) == 0 {
-		return "", errors.New("No iqn found")
+		return nil, errors.New("No iqn found")
 	}
 
 	if len(initiators) > 1 {
-		return "", errors.New("the number of iqn is wrong")
+		return nil, errors.New("the number of iqn is wrong")
 	}
 
-	return initiators[0], nil
+	return initiators, nil
 }
