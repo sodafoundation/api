@@ -76,7 +76,7 @@ var (
 )
 
 func init() {
-	volumeAttachmentListCommand.Flags().StringVarP(&volAtmLimit, "limit", "", "50", "the number of ertries displayed per page")
+	volumeAttachmentListCommand.Flags().StringVarP(&volAtmLimit, "limit", "", "100", "the number of ertries displayed per page")
 	volumeAttachmentListCommand.Flags().StringVarP(&volAtmOffset, "offset", "", "0", "all requested data offsets")
 	volumeAttachmentListCommand.Flags().StringVarP(&volAtmSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
 	volumeAttachmentListCommand.Flags().StringVarP(&volAtmSortKey, "sortKey", "", "id",

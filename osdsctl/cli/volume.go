@@ -93,7 +93,7 @@ var (
 )
 
 func init() {
-	volumeListCommand.Flags().StringVarP(&volLimit, "limit", "", "50", "the number of ertries displayed per page")
+	volumeListCommand.Flags().StringVarP(&volLimit, "limit", "", "100", "the number of ertries displayed per page")
 	volumeListCommand.Flags().StringVarP(&volOffset, "offset", "", "0", "all requested data offsets")
 	volumeListCommand.Flags().StringVarP(&volSortDir, "sortDir", "", "desc", "the sort direction of all requested data. supports asc or desc(default)")
 	volumeListCommand.Flags().StringVarP(&volSortKey, "sortKey", "", "id",
