@@ -130,6 +130,7 @@ func processListParam(args []interface{}) (string, error) {
 			if v == "" {
 				continue
 			}
+			v = strings.Replace(v, " ", "%20", -1)
 			urlParam = append(urlParam, k+"="+v)
 		}
 	}
