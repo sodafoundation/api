@@ -245,7 +245,7 @@ func TestGetReplication(t *testing.T) {
 
 func TestListDocks(t *testing.T) {
 	m := map[string][]string{
-		"offset":     {"2"},
+		"offset":     {"0"},
 		"limit":      {"732"},
 		"sortDir":    {"desc"},
 		"sortKey":    {"id"},

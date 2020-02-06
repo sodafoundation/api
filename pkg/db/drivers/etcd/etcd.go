@@ -145,8 +145,13 @@ func (c *Client) GetOffset(m map[string][]string, size int) int {
 	if ok {
 		offset, err = strconv.Atoi(v[0])
 
-		if err != nil || offset < 0 || offset > size {
-			log.Warning("Invalid input offset or input offset is out of bounds:", offset, ",use default value instead:0")
+		if err != nil || offset > size {
+			log.Warning("Invalid input offset or input offset is out of bounds:", offset, ", use largest offset: size")
+
+			return size
+		}
+		if offset < 0 {
+			log.Warning("input offset is less than zero:", offset, ",use offset value instead:0")
 
 			return constants.DefaultOffset
 		}
