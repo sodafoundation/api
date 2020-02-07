@@ -2737,7 +2737,7 @@ components:
               description: The name of the profile
               minLength: 1
               maxLength: 255
-              pattern: '^(([a-zA-Z0-9_-]|[a-zA-Z0-9_-][a-zA-Z0-9_-]*[a-zA-Z0-9_-]))*([A-Za-z0-9_-]|[A-Za-z0-9_-][A-Za-z0-9_-]*[A-Za-z0-9_-])$'
+              pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-\_]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-\_]*[A-Za-z0-9])$'
               type: string
               example: File_Profile
             storageType:
@@ -2771,7 +2771,7 @@ components:
           type: string
           minLength: 1
           maxLength: 255
-          pattern: '^(([a-zA-Z0-9_-]|[a-zA-Z0-9_-][a-zA-Z0-9_-]*[a-zA-Z0-9_-]))*([A-Za-z0-9_-]|[A-Za-z0-9_-][A-Za-z0-9_-]*[A-Za-z0-9_-])$'
+          pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-\_]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-\_]*[A-Za-z0-9])$'
         description:
           type: string
         size:
@@ -3513,8 +3513,8 @@ components:
           type: string
           minLength: 1
           maxLength: 64
-          pattern: "^(([a-zA-Z0-9_-]|[a-zA-Z0-9_-][a-zA-Z0-9_-]*[a-zA-Z0-9_-]))*([A-Za-z0-9_-]|[A-Za-z0-9_-][A-Za-z0-9_-]*[A-Za-z0-9_-])$"
-          description: Only numbers, letters, '-', '_' in ASCII characters are allowed.
+          pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
+          description: Only numbers, letters, '-', '.' in ASCII characters are allowed.
           example: opensds-node1
         ip:
           type: string
@@ -3586,8 +3586,8 @@ components:
           type: string
           minLength: 1
           maxLength: 64
-          pattern: "^(([a-zA-Z0-9_-]|[a-zA-Z0-9_-][a-zA-Z0-9_-]*[a-zA-Z0-9_-]))*([A-Za-z0-9_-]|[A-Za-z0-9_-][A-Za-z0-9_-]*[A-Za-z0-9_-])$"
-          description: Only numbers, letters, '-', '_' in ASCII characters are allowed.
+          pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
+          description: Only numbers, letters, '-', '.' in ASCII characters are allowed.
           example: opensds-node1
         ip:
           type: string
