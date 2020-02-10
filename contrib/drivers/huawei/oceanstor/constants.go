@@ -53,11 +53,16 @@ const (
 
 // Error Code
 const (
-	ErrorConnectToServer        = -403
-	ErrorUnauthorizedToServer   = -401
-	ErrorObjectUnavailable      = 1077948996
-	ErrorHostGroupNotExist      = 1077937500
-	ErrorObjectNameAlreadyExist = 1077948993
+	ErrorConnectToServer               = -403
+	ErrorUnauthorizedToServer          = -401
+	ErrorObjectUnavailable             = 1077948996
+	ErrorHostGroupNotExist             = 1077937500
+	ErrorObjectNameAlreadyExist        = 1077948993
+	ErrorHostAlreadyInHostGroup        = 1077937501
+	ErrorObjectIDNotUnique             = 1077948997
+	ErrorHostGroupAlreadyInMappingView = 1073804556
+	ErrorLunGroupAlreadyInMappingView  = 1073804560
+	ErrorLunNotExist                   = 1077936859
 )
 
 // misc

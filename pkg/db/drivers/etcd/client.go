@@ -16,8 +16,13 @@ package etcd
 
 import (
 	"context"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/coreos/etcd/pkg/transport"
+	"github.com/opensds/opensds/pkg/utils/config"
+	"github.com/opensds/opensds/pkg/utils/pwd"
 
 	"github.com/coreos/etcd/clientv3"
 	log "github.com/golang/glog"
@@ -25,8 +30,9 @@ import (
 )
 
 var (
-	timeOut  = 3 * time.Second
-	retryNum = 3
+	timeOut      = 3 * time.Second
+	retryNum     = 3
+	pwdEncrypter = "aes"
 )
 
 // Request
@@ -56,14 +62,44 @@ type clientInterface interface {
 }
 
 // Init
-func Init(edps []string) *client {
+func Init(etcd *config.Database) *client {
 	var cliv3 *clientv3.Client
+
+	clientV3Config := clientv3.Config{
+		Endpoints:   strings.Split(etcd.Endpoint, ","),
+		DialTimeout: timeOut,
+	}
+
+	if etcd.EnableTLS {
+		tlsInfo := transport.TLSInfo{
+			CertFile:       etcd.CertFile,
+			KeyFile:        etcd.KeyFile,
+			TrustedCAFile:  etcd.TrustedCAFile,
+			ClientCertAuth: etcd.AllowClientAuth,
+		}
+
+		tlsConfig, err := tlsInfo.ClientConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		clientV3Config.TLS = tlsConfig
+	}
+
+	if etcd.Username != "" && etcd.Password != "" {
+		clientV3Config.Username = etcd.Username
+
+		pwdTool := pwd.NewPwdEncrypter(pwdEncrypter)
+		password, err := pwdTool.Decrypter(etcd.Password)
+		if err != nil {
+			panic(err)
+		}
+		clientV3Config.Password = password
+	}
+
 	err := utils.Retry(retryNum, "Get etcd client", false, func(retryIdx int, lastErr error) error {
 		var err error
-		cliv3, err = clientv3.New(clientv3.Config{
-			Endpoints:   edps,
-			DialTimeout: timeOut,
-		})
+		cliv3, err = clientv3.New(clientV3Config)
 		return err
 	})
 	if err != nil {

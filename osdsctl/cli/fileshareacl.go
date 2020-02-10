@@ -20,8 +20,6 @@ This module implements a entry into the OpenSDS service.
 package cli
 
 import (
-	"encoding/json"
-	"log"
 	"os"
 
 	"github.com/opensds/opensds/pkg/model"
@@ -37,6 +35,7 @@ var fileShareAclCommand = &cobra.Command{
 var fileShareAclCreateCommand = &cobra.Command{
 	Use:   "create <fileshare id>",
 	Short: "create a acl of specified fileshare in the cluster",
+	Example: "osdsctl fileshare acl create -a 10.0.0.10 -c \"Write\" -t ip 87be9ce5-6ecc-4ac3-8d6c-f5a58c9110e4",
 	Run:   fileShareAclCreateAction,
 }
 
@@ -60,7 +59,7 @@ var fileShareAclListCommand = &cobra.Command{
 
 var (
 	shareAclType             string
-	shareAclAccessCapability string
+	shareAclAccessCapability []string
 	shareAclAccessTo         string
 	shareAclDesp             string
 
@@ -73,9 +72,9 @@ func init() {
 	fileShareAclCommand.AddCommand(fileShareAclShowCommand)
 	fileShareAclCommand.AddCommand(fileShareAclListCommand)
 
-	fileShareAclCreateCommand.Flags().StringVarP(&shareAclType, "type", "t", "", "the type of access")
-	fileShareAclCreateCommand.Flags().StringVarP(&shareAclAccessCapability, "capability", "c", "", "the accessCapability for fileshare")
-	fileShareAclCreateCommand.Flags().StringVarP(&shareAclAccessTo, "accessTo", "a", "", "accessTo of the fileshare")
+	fileShareAclCreateCommand.Flags().StringVarP(&shareAclType, "type", "t", "", "the type of access. The Only current supported type is: ip")
+	fileShareAclCreateCommand.Flags().StringSliceVarP(&shareAclAccessCapability, "capability", "c", shareAclAccessCapability, "the accessCapability \"Read\" or \"Write\" for fileshare")
+	fileShareAclCreateCommand.Flags().StringVarP(&shareAclAccessTo, "accessTo", "a", "", "accessTo of the fileshare. A valid IPv4 format is supported")
 	fileShareAclCreateCommand.Flags().StringVarP(&shareAclDesp, "description", "d", "", "the description of of the fileshare acl")
 }
 
@@ -86,19 +85,10 @@ func fileShareAclAction(cmd *cobra.Command, args []string) {
 
 func fileShareAclCreateAction(cmd *cobra.Command, args []string) {
 	ArgsNumCheck(cmd, args, 1)
-
-	var accessCapability []string
-	if "" != shareAclAccessCapability {
-		err := json.Unmarshal([]byte(shareAclAccessCapability), &accessCapability)
-		if err != nil {
-			log.Fatalf("error parsing accessCapability %s: %+v", shareAclAccessCapability, err)
-		}
-	}
-
 	acl := &model.FileShareAclSpec{
 		FileShareId:      args[0],
 		Type:             shareAclType,
-		AccessCapability: accessCapability,
+		AccessCapability: shareAclAccessCapability,
 		AccessTo:         shareAclAccessTo,
 		Description:      shareAclDesp,
 	}

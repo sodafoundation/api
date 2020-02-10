@@ -104,7 +104,6 @@ func (f *FileSharePortal) CreateFileShareAcl() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer f.CtrClient.Close()
 
 	opt := &pb.CreateFileShareAclOpts{
 		Id:               result.Id,
@@ -249,7 +248,6 @@ func (f *FileSharePortal) CreateFileShare() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer f.CtrClient.Close()
 
 	opt := &pb.CreateFileShareOpts{
 		Id:               result.Id,
@@ -429,7 +427,6 @@ func (f *FileSharePortal) DeleteFileShareAcl() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer f.CtrClient.Close()
 
 	opt := &pb.DeleteFileShareAclOpts{
 		Id:               acl.Id,
@@ -507,7 +504,6 @@ func (f *FileSharePortal) DeleteFileShare() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer f.CtrClient.Close()
 
 	opt := &pb.DeleteFileShareOpts{
 		Id:              fileshare.Id,
@@ -603,7 +599,6 @@ func (f *FileShareSnapshotPortal) CreateFileShareSnapshot() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer f.CtrClient.Close()
 
 	opt := &pb.CreateFileShareSnapshotOpts{
 		Id:          result.Id,
@@ -742,7 +737,6 @@ func (f *FileShareSnapshotPortal) DeleteFileShareSnapshot() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer f.CtrClient.Close()
 
 	opt := &pb.DeleteFileShareSnapshotOpts{
 		Id:          snapshot.Id,

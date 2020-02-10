@@ -27,15 +27,15 @@ func TestCurrentVersion(t *testing.T) {
 }
 
 func TestGenerateURL(t *testing.T) {
-	var expected = "v1beta/docks/d3c7e0c7-6e92-406c-9767-3ab73b39b64f"
+	var expected = "/opensds/v1beta/docks/d3c7e0c7-6e92-406c-9767-3ab73b39b64f"
 	if url := generateURL("docks", Etcd, "d3c7e0c7-6e92-406c-9767-3ab73b39b64f"); url != expected {
 		t.Errorf("Expected %v, got %v\n", expected, url)
 	}
-	expected = "v1beta/docks"
+	expected = "/opensds/v1beta/docks"
 	if url := generateURL("docks", Etcd, ""); url != expected {
 		t.Errorf("Expected %v, got %v\n", expected, url)
 	}
-	expected = "v1beta/pools/d3c7e0c7-6e92-406c-9767-3ab73b39b64f/8e5e92ca-d673-11e7-bca8-2ba95b86eb06"
+	expected = "/opensds/v1beta/pools/d3c7e0c7-6e92-406c-9767-3ab73b39b64f/8e5e92ca-d673-11e7-bca8-2ba95b86eb06"
 	if url := generateURL("pools", Etcd, "d3c7e0c7-6e92-406c-9767-3ab73b39b64f", "8e5e92ca-d673-11e7-bca8-2ba95b86eb06"); url != expected {
 		t.Errorf("Expected %v, got %v\n", expected, url)
 	}

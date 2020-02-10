@@ -73,9 +73,16 @@ type OsdsDock struct {
 }
 
 type Database struct {
-	Credential string `conf:"credential,username:password@tcp(ip:port)/dbname"`
-	Driver     string `conf:"driver,etcd"`
-	Endpoint   string `conf:"endpoint,localhost:2379,localhost:2380"`
+	Credential      string `conf:"credential,username:password@tcp(ip:port)/dbname"`
+	Driver          string `conf:"driver,etcd"`
+	Endpoint        string `conf:"endpoint,localhost:2379,localhost:2380"`
+	Username        string `conf:"username"`
+	Password        string `conf:"password"`
+	EnableTLS       bool   `conf:"enableTLS,false"`
+	CertFile        string `conf:"cert_file,/etc/etcd/server.crt"`
+	KeyFile         string `conf:"key_file,/etc/etcd/server.key"`
+	TrustedCAFile   string `conf:"ca_file,/etc/etcd/ca.crt"`
+	AllowClientAuth bool   `conf:"allowClientAuth,false"`
 }
 
 type BackendProperties struct {

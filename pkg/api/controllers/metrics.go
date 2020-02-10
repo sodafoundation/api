@@ -104,7 +104,6 @@ func (m *MetricsPortal) GetMetrics() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer m.CtrClient.Close()
 
 	opt := &pb.GetMetricsOpts{
 		InstanceId: getMetricSpec.InstanceId,
@@ -264,7 +263,6 @@ func (m *MetricsPortal) CollectMetrics() {
 		log.Errorf("error when connecting controller client: %s", err.Error())
 		return
 	}
-	defer m.CtrClient.Close()
 
 	opt := &pb.CollectMetricsOpts{
 		DriverName: collMetricSpec.DriverType,
@@ -293,7 +291,6 @@ func (m *MetricsPortal) GetUrls() {
 		log.Error("when connecting controller client:", err)
 		return
 	}
-	defer m.CtrClient.Close()
 
 	opt := &pb.NoParams{}
 	res, err := m.CtrClient.GetUrls(context.Background(), opt)

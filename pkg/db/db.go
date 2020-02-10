@@ -22,7 +22,6 @@ package db
 
 import (
 	"fmt"
-	"strings"
 
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/db/drivers/etcd"
@@ -42,7 +41,7 @@ func Init(db *Database) {
 		fmt.Printf("mysql is not implemented right now!")
 		return
 	case "etcd":
-		C = etcd.NewClient(strings.Split(db.Endpoint, ","))
+		C = etcd.NewClient(db)
 		return
 	case "fake":
 		C = fakedb.NewFakeDbClient()

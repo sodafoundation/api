@@ -245,7 +245,7 @@ func TestGetReplication(t *testing.T) {
 
 func TestListDocks(t *testing.T) {
 	m := map[string][]string{
-		"offset":     {"2"},
+		"offset":     {"0"},
 		"limit":      {"732"},
 		"sortDir":    {"desc"},
 		"sortKey":    {"id"},
@@ -1216,7 +1216,7 @@ func TestListVolumesWithFilter(t *testing.T) {
 				&SampleVolumeWithDurableName[0],
 			},
 			param: map[string][]string{
-				"DurableName":  {"6216b2326e974b5fb0b3d2af5cd6b25b"},
+				"DurableName": {"6216b2326e974b5fb0b3d2af5cd6b25b"},
 			},
 			expected: []*model.VolumeSpec{
 				&SampleVolumeWithDurableName[0],

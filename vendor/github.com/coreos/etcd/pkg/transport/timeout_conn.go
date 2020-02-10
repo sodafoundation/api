@@ -1,4 +1,4 @@
-// Copyright 2019 The OpenSDS Authors.
+// Copyright 2015 The etcd Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package nfs
+package transport
 
 import (
-	"github.com/opensds/opensds/contrib/connector"
+	"net"
+	"time"
 )
 
-type NFS struct{}
-
-func init() {
-	connector.RegisterConnector(connector.NFSDriver, &NFS{})
+type timeoutConn struct {
+	net.Conn
+	wtimeoutd  time.Duration
+	rdtimeoutd time.Duration
 }
 
-func (n *NFS) Attach(conn map[string]interface{}) (string, error) {
-	return connect(conn)
+func (c timeoutConn) Write(b []byte) (n int, err error) {
+	if c.wtimeoutd > 0 {
+		if err := c.SetWriteDeadline(time.Now().Add(c.wtimeoutd)); err != nil {
+			return 0, err
+		}
+	}
+	return c.Conn.Write(b)
 }
 
-func (n *NFS) Detach(conn map[string]interface{}) error {
-	return disconnect(conn)
-}
-
-// GetInitiatorInfo implementation
-func (n *NFS) GetInitiatorInfo() ([]string, error) {
-	return getInitiatorInfo()
+func (c timeoutConn) Read(b []byte) (n int, err error) {
+	if c.rdtimeoutd > 0 {
+		if err := c.SetReadDeadline(time.Now().Add(c.rdtimeoutd)); err != nil {
+			return 0, err
+		}
+	}
+	return c.Conn.Read(b)
 }

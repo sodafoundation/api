@@ -30,6 +30,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/opensds/opensds/pkg/utils/config"
+
 	log "github.com/golang/glog"
 	c "github.com/opensds/opensds/pkg/context"
 	"github.com/opensds/opensds/pkg/model"
@@ -80,9 +82,9 @@ func AuthorizeProjectContext(ctx *c.Context, tenantId string) bool {
 }
 
 // NewClient
-func NewClient(edps []string) *Client {
+func NewClient(etcd *config.Database) *Client {
 	return &Client{
-		clientInterface: Init(edps),
+		clientInterface: Init(etcd),
 	}
 }
 
@@ -143,8 +145,13 @@ func (c *Client) GetOffset(m map[string][]string, size int) int {
 	if ok {
 		offset, err = strconv.Atoi(v[0])
 
-		if err != nil || offset < 0 || offset > size {
-			log.Warning("Invalid input offset or input offset is out of bounds:", offset, ",use default value instead:0")
+		if err != nil || offset > size {
+			log.Warning("Invalid input offset or input offset is out of bounds:", offset, ", use largest offset: size")
+
+			return size
+		}
+		if offset < 0 {
+			log.Warning("input offset is less than zero:", offset, ",use offset value instead:0")
 
 			return constants.DefaultOffset
 		}
@@ -297,7 +304,7 @@ func (c *Client) CreateFileShareAcl(ctx *c.Context, fshare *model.FileShareAclSp
 
 	for _, acl := range acls {
 		if acl.AccessTo == fshare.AccessTo {
-			errstr :=  "for fileshareID: "+acl.FileShareId+", acl is already set with ip: "+acl.AccessTo+". If you want to set new acl, first delete the existing one"
+			errstr := "for fileshareID: " + acl.FileShareId + ", acl is already set with ip: " + acl.AccessTo + ". If you want to set new acl, first delete the existing one"
 			log.Error(errstr)
 			return nil, fmt.Errorf(errstr)
 		}
@@ -1622,15 +1629,15 @@ func (c *Client) ListVolumesWithFilter(ctx *c.Context, m map[string][]string) ([
 	// If DurableName is there in filter we need to parse the sub structure 'identifier' to filter out matching volume spec
 	var vols = []*model.VolumeSpec{}
 	if val, ok := m["DurableName"]; ok {
-		for _,vol := range volumes {
-			v :=c.FindVolumeValue("DurableName",vol)
+		for _, vol := range volumes {
+			v := c.FindVolumeValue("DurableName", vol)
 			if v == val[0] {
-				vols =append(vols,vol)
-				return vols,nil
+				vols = append(vols, vol)
+				return vols, nil
 			}
 		}
 
-		return vols,nil
+		return vols, nil
 	}
 
 	tmpVolumes := c.FilterAndSort(volumes, m, sortableKeysMap[typeVolumes])

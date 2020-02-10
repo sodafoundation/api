@@ -63,28 +63,32 @@ func GetInitiator() ([]string, error) {
 	return nqns, errors.New("can not find any nqn initiator")
 }
 
-func getInitiatorInfo() (string, error) {
+func getInitiatorInfo() ([]string, error) {
 
 	initiators, err := GetInitiator()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if len(initiators) == 0 {
-		return "", errors.New("no nqn found")
+		return nil, errors.New("no nqn found")
 	}
 
 	if len(initiators) > 1 {
-		return "", errors.New("the number of nqn is wrong")
+		return nil, errors.New("the number of nqn is wrong")
 	}
 
 	hostName, err := connector.GetHostName()
 	if err != nil {
-		return "", errors.New("can not get hostname")
+		return nil, errors.New("can not get hostname")
 	}
 
-	info := initiators[0] + "." + hostName
-	return info, nil
+	hostName = initiators[0] + "." + hostName
+
+	initiator := make([]string, 1)
+	initiator = append(initiator, hostName)
+
+	return initiator, nil
 }
 
 // GetNvmeDevice get all the nvme devices

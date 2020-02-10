@@ -290,7 +290,6 @@ func (c *controller) CollectMetrics(opt *pb.CollectMetricsOpts) ([]*model.Metric
 		log.Errorf("collect metrics failed in metrics controller: %s", err.Error())
 		return nil, err
 	}
-	defer c.Client.Close()
 
 	if errorMsg := response.GetError(); errorMsg != nil {
 		return nil,

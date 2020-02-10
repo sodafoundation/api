@@ -103,6 +103,6 @@ func disconnect(conn map[string]interface{}) error {
 	return errors.New("disconnect method of nfs is not implemented")
 }
 
-func getInitiatorInfo() (string, error) {
-	return "", errors.New("get initiator information method of nfs is not implemented")
+func getInitiatorInfo() ([]string, error) {
+	return nil, errors.New("get initiator information method of nfs is not implemented")
 }

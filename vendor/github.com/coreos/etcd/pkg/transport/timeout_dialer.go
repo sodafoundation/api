@@ -1,4 +1,4 @@
-// Copyright 2019 The OpenSDS Authors.
+// Copyright 2015 The etcd Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pwd
+package transport
 
-type PwdEncrypter interface {
-	Encrypter(password string) (string, error)
-	Decrypter(code string) (string, error)
+import (
+	"net"
+	"time"
+)
+
+type rwTimeoutDialer struct {
+	wtimeoutd  time.Duration
+	rdtimeoutd time.Duration
+	net.Dialer
 }
 
-func NewPwdEncrypter(encrypter string) PwdEncrypter {
-	switch encrypter {
-	case "aes":
-		return NewAES()
-	default:
-		return NewAES()
+func (d *rwTimeoutDialer) Dial(network, address string) (net.Conn, error) {
+	conn, err := d.Dialer.Dial(network, address)
+	tconn := &timeoutConn{
+		rdtimeoutd: d.rdtimeoutd,
+		wtimeoutd:  d.wtimeoutd,
+		Conn:       conn,
 	}
+	return tconn, err
 }

@@ -128,6 +128,14 @@ func (pdd *provisionDockDiscoverer) Init() error {
 			Type:        model.DockTypeProvioner,
 			Metadata:    map[string]string{"HostReplicationDriver": CONF.OsdsDock.HostBasedReplicationDriver},
 		}
+		// Update the id if the dock is already in etcd
+		name := map[string][]string{
+			"Name": {dck.Name},
+		}
+		docks, err := pdd.DockRegister.c.ListDocksWithFilter(c.NewAdminContext(), name)
+		if err == nil && len(docks) != 0 {
+			dck.Id = docks[0].Id
+		}
 		pdd.dcks = append(pdd.dcks, dck)
 	}
 
@@ -182,6 +190,15 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 			}
 			for _, pol := range pols {
 				log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
+				name := map[string][]string{
+					"Name":   {pol.Name},
+					"DockId": {dck.Id},
+				}
+				pools, err := pdd.c.ListPoolsWithFilter(ctx, name)
+				if err == nil && len(pools) != 0 {
+					pol.Id = pools[0].Id
+				}
+
 				delete(dbPolsMap[dck.Id], pol.Id)
 				pol.DockId = dck.Id
 				pol.ReplicationType = replicationType
@@ -265,7 +282,7 @@ func (add *attachDockDiscoverer) Discover() error {
 	}
 
 	var wwpns []string
-	for _, v := range strings.Split(fcInitiator, ",") {
+	for _, v := range fcInitiator {
 		if strings.Contains(v, "node_name") {
 			wwpns = append(wwpns, strings.Split(v, ":")[1])
 		}
@@ -284,7 +301,7 @@ func (add *attachDockDiscoverer) Discover() error {
 			"Platform":  runtime.GOARCH,
 			"OsType":    runtime.GOOS,
 			"HostIp":    bindIp,
-			"Initiator": localIqn,
+			"Initiator": localIqn[0],
 			"WWPNS":     strings.Join(wwpns, ","),
 		},
 	}
