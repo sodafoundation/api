@@ -20,12 +20,14 @@ _osdsctl() {
     local pre=${COMP_WORDS[COMP_CWORD-1]};
     case "$COMP_CWORD $pre" in
     "1 osdsctl")
-          COMPREPLY=($(compgen -W 'dock pool profile version volume fileshare host' -- $cur)) ;;
+          COMPREPLY=($(compgen -W 'dock pool profile version volume fileshare host zone' -- $cur)) ;;
     "2 dock")
           COMPREPLY=($(compgen -W 'list show' -- $cur)) ;;
     "2 pool")
           COMPREPLY=($(compgen -W 'list show' -- $cur)) ;;
     "2 profile")
+          COMPREPLY=($(compgen -W 'create delete list show' -- $cur)) ;;
+    "2 zone")
           COMPREPLY=($(compgen -W 'create delete list show' -- $cur)) ;;
     "2 version")
           COMPREPLY=($(compgen -W 'list show' -- $cur)) ;;

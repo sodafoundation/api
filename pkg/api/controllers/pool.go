@@ -33,28 +33,6 @@ type PoolPortal struct {
 	BasePortal
 }
 
-func (p *PoolPortal) ListAvailabilityZones() {
-	if !policy.Authorize(p.Ctx, "availability_zone:list") {
-		return
-	}
-	azs, err := db.C.ListAvailabilityZones(c.GetContext(p.Ctx))
-	if err != nil {
-		errMsg := fmt.Sprintf("get AvailabilityZones for pools failed: %s", err.Error())
-		p.ErrorHandle(model.ErrorInternalServer, errMsg)
-		return
-	}
-
-	body, err := json.Marshal(azs)
-	if err != nil {
-		errMsg := fmt.Sprintf("marshal AvailabilityZones failed: %s", err.Error())
-		p.ErrorHandle(model.ErrorInternalServer, errMsg)
-		return
-	}
-
-	p.SuccessHandle(StatusOK, body)
-	return
-}
-
 func (p *PoolPortal) ListPools() {
 	if !policy.Authorize(p.Ctx, "pool:list") {
 		return

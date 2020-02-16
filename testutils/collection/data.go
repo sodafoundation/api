@@ -254,7 +254,22 @@ var (
 		},
 	}
 
-	SampleAvailabilityZones = []string{"default"}
+	SampleAvailabilityZones = []model.AvailabilityZoneSpec{
+		{
+			BaseModel: &model.BaseModel{
+				Id: "1106b972-66ef-11e7-b172-db03f3689c9c",
+			},
+			Name:             "default",
+			Description:      "default zone",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "2f9c0a04-66ef-11e7-ade2-43158893e017",
+			},
+			Name:        "test",
+			Description: "test zone",
+		},
+	}
 
 	SampleFileShares = []model.FileShareSpec{
 		{
@@ -1118,6 +1133,26 @@ var (
                 ]
             }
     	]`
+
+	ByteAvailabilityZone = `{
+		"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
+		"name": "default",
+		"description": "default zone"
+	}`
+
+	ByteAvailabilityZones = `[
+		{
+			"id": "1106b972-66ef-11e7-b172-db03f3689c9c",
+			"name": "default",
+			"description": "default zone"
+		},
+		{
+			"id": "2f9c0a04-66ef-11e7-ade2-43158893e017",
+			"name": "test",
+			"description": "test zone"
+		}
+	]`
+
 )
 
 // The StringSlice*** variable here is designed for unit test in etcd package.

@@ -1090,30 +1090,146 @@ func (c *Client) GetPool(ctx *c.Context, polID string) (*model.StoragePoolSpec, 
 	return pol, nil
 }
 
-//ListAvailabilityZones
-func (c *Client) ListAvailabilityZones(ctx *c.Context) ([]string, error) {
+// GetAvailabilityZone
+func (c *Client) GetAvailabilityZone(ctx *c.Context, zoneID string) (*model.AvailabilityZoneSpec, error) {
 	dbReq := &Request{
-		Url: urls.GeneratePoolURL(urls.Etcd, ""),
+		Url: urls.GenerateZoneURL(urls.Etcd, "", zoneID),
+	}
+	dbRes := c.Get(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When get zone in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	var z = &model.AvailabilityZoneSpec{}
+	if err := json.Unmarshal([]byte(dbRes.Message[0]), z); err != nil {
+		log.Error("When parsing zone in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return z, nil
+}
+
+// CreateAvailabilityZone
+func (c *Client) CreateAvailabilityZone(ctx *c.Context, zone *model.AvailabilityZoneSpec) (*model.AvailabilityZoneSpec, error) {
+	if zone.Id == "" {
+		zone.Id = uuid.NewV4().String()
+	}
+	if zone.CreatedAt == "" {
+		zone.CreatedAt = time.Now().Format(constants.TimeFormat)
+	}
+
+	// zone name and id must be unique.
+	azs, err := c.ListAvailabilityZones(ctx)
+	for _, az := range azs {
+		if az.Name == zone.Name {
+			return nil, fmt.Errorf("the zone name '%s' already exists", zone.Name)
+		}
+		if az.Id == zone.Id {
+			return nil, fmt.Errorf("the zone ID '%s' already exists", zone.Id)
+		}
+	}
+
+	zoneBody, err := json.Marshal(zone)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:     urls.GenerateZoneURL(urls.Etcd, "", zone.Id),
+		Content: string(zoneBody),
+	}
+	dbRes := c.Create(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When create zone in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+
+	return zone, nil
+}
+
+// UpdateAvailabilityZone
+func (c *Client) UpdateAvailabilityZone(ctx *c.Context, zoneID string, input *model.AvailabilityZoneSpec) (*model.AvailabilityZoneSpec, error) {
+	z, err := c.GetAvailabilityZone(ctx, zoneID)
+	if err != nil {
+		return nil, err
+	}
+	if name := input.Name; name != "" {
+		// Update of name is not supported yet
+		// z.Name = name
+	}
+	if desc := input.Description; desc != "" {
+		z.Description = desc
+	}
+	z.UpdatedAt = time.Now().Format(constants.TimeFormat)
+
+	zBody, err := json.Marshal(z)
+	if err != nil {
+		return nil, err
+	}
+
+	dbReq := &Request{
+		Url:        urls.GenerateZoneURL(urls.Etcd, "", zoneID),
+		NewContent: string(zBody),
+	}
+	dbRes := c.Update(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When update zone in db:", dbRes.Error)
+		return nil, errors.New(dbRes.Error)
+	}
+	return z, nil
+}
+
+// DeleteAvailabilityZone
+func (c *Client) DeleteAvailabilityZone(ctx *c.Context, zoneID string) error {
+	dbReq := &Request{
+		Url: urls.GenerateZoneURL(urls.Etcd, "", zoneID),
+	}
+	dbRes := c.Delete(dbReq)
+	if dbRes.Status != "Success" {
+		log.Error("When delete profile in db:", dbRes.Error)
+		return errors.New(dbRes.Error)
+	}
+	return nil
+}
+
+//ListZonesWithFilter
+func (c *Client) ListZonesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.AvailabilityZoneSpec, error) {
+	zones, err := c.ListAvailabilityZones(ctx)
+	if err != nil {
+		log.Error("List zones failed: ", err.Error())
+		return nil, err
+	}
+
+	// z := c.SelectZones(m, zones)
+	// p := c.ParameterFilter(m, len(z), []string{"ID", "NAME", "STATUS", "AVAILABILITYZONE", "DOCKID", "DESCRIPTION"})
+	// return c.SortZones(z, p)[p.beginIdx:p.endIdx], nil
+
+	return zones, nil
+}
+
+//ListAvailabilityZones
+func (c *Client) ListAvailabilityZones(ctx *c.Context) ([]*model.AvailabilityZoneSpec, error) {
+	dbReq := &Request{
+		Url: urls.GenerateZoneURL(urls.Etcd, ""),
 	}
 	dbRes := c.List(dbReq)
 	if dbRes.Status != "Success" {
-		log.Error("Failed to get AZ for pools in db:", dbRes.Error)
+		log.Error("Failed to get zone in db:", dbRes.Error)
 		return nil, errors.New(dbRes.Error)
 	}
-	var azs = []string{}
+	var azs = []*model.AvailabilityZoneSpec{}
 	if len(dbRes.Message) == 0 {
 		return azs, nil
 	}
 	for _, msg := range dbRes.Message {
-		var pol = &model.StoragePoolSpec{}
-		if err := json.Unmarshal([]byte(msg), pol); err != nil {
-			log.Error("When parsing pool in db:", dbRes.Error)
+		var az = &model.AvailabilityZoneSpec{}
+		if err := json.Unmarshal([]byte(msg), az); err != nil {
+			log.Error("When parsing zone in db:", dbRes.Error)
 			return nil, errors.New(dbRes.Error)
 		}
-		azs = append(azs, pol.AvailabilityZone)
+		azs = append(azs, az)
 	}
-	//remove redundant AZ
-	azs = utils.RvRepElement(azs)
+
 	return azs, nil
 }
 

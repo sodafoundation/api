@@ -50,6 +50,7 @@ func init() {
 	rootCommand.AddCommand(profileCommand)
 	rootCommand.AddCommand(fileShareCommand)
 	rootCommand.AddCommand(hostCommand)
+	rootCommand.AddCommand(zoneCommand)
 	flags := rootCommand.PersistentFlags()
 	flags.BoolVar(&Debug, "debug", false, "shows debugging output.")
 }

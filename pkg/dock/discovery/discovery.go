@@ -339,6 +339,31 @@ func (dr *DockRegister) Register(in interface{}) error {
 			log.Errorf("When create pool %s in db: %v\n", pol.Id, err)
 			return err
 		}
+		// Check if AZ name for pool, exists else create it
+		azExists := false
+		azs, err := dr.c.ListAvailabilityZones(ctx)
+		if err != nil {
+			log.Errorf("When list zone %s in db: %v\n", pol.AvailabilityZone, err)
+		}
+		for _, az := range azs {
+			if az.Name == pol.AvailabilityZone {
+				azExists = true
+			}
+		}
+		if azExists == false {
+			var z = &model.AvailabilityZoneSpec {
+				BaseModel: &model.BaseModel {
+					Id: "",
+				},
+				Name: pol.AvailabilityZone,
+			}
+
+			_, err := dr.c.CreateAvailabilityZone(ctx, z)
+			if err != nil {
+				log.Errorf("When create zone %s in db: %v\n", pol.AvailabilityZone, err)
+				return err
+			}
+		}
 		break
 	default:
 		return fmt.Errorf("Resource type is not supported!")

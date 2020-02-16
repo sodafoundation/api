@@ -114,8 +114,6 @@ type Client interface {
 
 	GetPool(ctx *c.Context, polID string) (*model.StoragePoolSpec, error)
 
-	ListAvailabilityZones(ctx *c.Context) ([]string, error)
-
 	ListPools(ctx *c.Context) ([]*model.StoragePoolSpec, error)
 
 	ListPoolsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.StoragePoolSpec, error)
@@ -123,6 +121,18 @@ type Client interface {
 	UpdatePool(ctx *c.Context, polID, name, desp string, usedCapacity int64, used bool) (*model.StoragePoolSpec, error)
 
 	DeletePool(ctx *c.Context, polID string) error
+
+	GetAvailabilityZone(ctx *c.Context, zoneID string) (*model.AvailabilityZoneSpec, error)
+
+	CreateAvailabilityZone(ctx *c.Context, zone *model.AvailabilityZoneSpec) (*model.AvailabilityZoneSpec, error)
+
+	ListAvailabilityZones(ctx *c.Context) ([]*model.AvailabilityZoneSpec, error)
+
+	ListZonesWithFilter(ctx *c.Context, m map[string][]string) ([]*model.AvailabilityZoneSpec, error)
+
+	UpdateAvailabilityZone(ctx *c.Context, zoneID string, zone *model.AvailabilityZoneSpec) (*model.AvailabilityZoneSpec, error)
+
+	DeleteAvailabilityZone(ctx *c.Context, zoneID string) error
 
 	CreateProfile(ctx *c.Context, prf *model.ProfileSpec) (*model.ProfileSpec, error)
 
