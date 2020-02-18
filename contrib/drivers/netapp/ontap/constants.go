@@ -23,10 +23,11 @@ const (
 	KLvPath           = "lunPath"
 	KLvIdFormat       = "NAA"
 	StorageDriverName = "ontap-san"
-	driverContext      = "csi"
+	driverContext     = "csi"
 	VolumeVersion     = "1"
 	SnapshotVersion   = "1"
 	accessMode        = ""
 	volumeMode        = "Block"
-	bytesGiB           = 1073741824
+	bytesGiB          = 1073741824
+	bytesKiB          = 1048576
 )

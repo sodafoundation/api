@@ -8,7 +8,7 @@ backendOptions:
   svm: "vserver"
   igroupName: "opensds"
 pool:
-  ontap-pool:
+  pool-0:
     storageType: block
     availabilityZone: default
     multiAttach: true
