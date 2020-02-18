@@ -271,54 +271,6 @@ func TestDeleteVolume(t *testing.T) {
 	}
 }
 
-func TestExtendVolume(t *testing.T) {
-	var req = &pb.ExtendVolumeOpts{
-		Id:        "bd5b12a8-a101-11e7-941e-d77981b584d8",
-		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
-		ProfileId: "1106b972-66ef-11e7-b172-db03f3689c9c",
-		Size:      int64(1),
-		Context:   c.NewAdminContext().ToJson(),
-	}
-	var vol2 = &SampleVolumes[0]
-	mockClient := new(dbtest.Client)
-	mockClient.On("GetVolume", c.NewAdminContext(), req.Id).Return(vol2, nil)
-	mockClient.On("GetPool", c.NewAdminContext(), req.PoolId).Return(&SamplePools[0], nil)
-	mockClient.On("GetDefaultProfile", c.NewAdminContext()).Return(&SampleProfiles[0], nil)
-	mockClient.On("GetProfile", c.NewAdminContext(), req.ProfileId).Return(&SampleProfiles[0], nil)
-	mockClient.On("GetDockByPoolId", c.NewAdminContext(), req.PoolId).Return(&SampleDocks[0], nil)
-	mockClient.On("UpdateStatus", c.NewAdminContext(), vol2, vol2.Status).Return(nil)
-	db.C = mockClient
-
-	var ctrl = &Controller{
-		selector: &fakeSelector{
-			res: &model.StoragePoolSpec{
-				BaseModel: &model.BaseModel{
-					Id: "084bf71e-a102-11e7-88a8-e31fe6d52248",
-				},
-				DockId: "b7602e18-771e-11e7-8f38-dbd6d291f4e0",
-			},
-			err: nil,
-		},
-		volumeController: NewFakeVolumeController(),
-	}
-
-	req.Size = int64(92)
-	_, err := ctrl.ExtendVolume(context.Background(), req)
-	expectedError := "pool free capacity(90) < new size(92) - old size(1)"
-	if err == nil {
-		t.Errorf("Expected Non-%v, got %v\n", nil, err)
-	} else {
-		if expectedError != err.Error() {
-			t.Errorf("Expected Non-%v, got %v\n", expectedError, err.Error())
-		}
-	}
-
-	req.Size = int64(2)
-	if _, err = ctrl.ExtendVolume(context.Background(), req); err != nil {
-		t.Errorf("Failed to extend volume: %v\n", err)
-	}
-}
-
 func TestCreateVolumeAttachment(t *testing.T) {
 	var req = &pb.CreateVolumeAttachmentOpts{
 		Id:       "f2dda3d2-bf79-11e7-8665-f750b088f63e",
@@ -333,7 +285,8 @@ func TestCreateVolumeAttachment(t *testing.T) {
 	mockClient.On("GetPool", c.NewAdminContext(), vol.PoolId).Return(&SamplePools[0], nil)
 	mockClient.On("GetDockByPoolId", c.NewAdminContext(), "084bf71e-a102-11e7-88a8-e31fe6d52248").Return(&SampleDocks[0], nil)
 	mockClient.On("UpdateStatus", c.NewAdminContext(), volatm, volatm.Status).Return(nil)
-	mockClient.On("UpdateStatus", c.NewAdminContext(), vol, model.VolumeInUse).Return(nil)
+	mockClient.On("UpdateVolumeAttachment", c.NewAdminContext(), volatm.Id, volatm).Return(volatm, nil)
+	mockClient.On("UpdateVolume", c.NewAdminContext(), vol).Return(vol, nil)
 
 	db.C = mockClient
 
@@ -357,6 +310,7 @@ func TestDeleteVolumeAttachment(t *testing.T) {
 	var vol = &SampleVolumes[0]
 	mockClient := new(dbtest.Client)
 	mockClient.On("GetVolume", c.NewAdminContext(), req.VolumeId).Return(vol, nil)
+	mockClient.On("ListVolumeAttachmentsWithFilter", c.NewAdminContext(), map[string][]string{"volumeId": []string{req.VolumeId}}).Return([]*model.VolumeAttachmentSpec{&model.VolumeAttachmentSpec{}}, nil)
 	mockClient.On("GetDockByPoolId", c.NewAdminContext(), vol.PoolId).Return(&SampleDocks[0], nil)
 	mockClient.On("DeleteVolumeAttachment", c.NewAdminContext(), req.Id).Return(nil)
 	mockClient.On("UpdateStatus", c.NewAdminContext(), vol, model.VolumeAvailable).Return(nil)

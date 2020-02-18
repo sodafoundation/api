@@ -431,7 +431,19 @@ func (fc *FakeDbClient) GetVolumeAttachment(ctx *c.Context, attachmentId string)
 func (fc *FakeDbClient) ListVolumeAttachmentsWithFilter(ctx *c.Context, m map[string][]string) ([]*model.VolumeAttachmentSpec, error) {
 	var atcs []*model.VolumeAttachmentSpec
 
+	hostIds := m["hostId"]
+	volumeIds := m["volumeId"]
 	for i := range SampleAttachments {
+		if len(hostIds) > 0 {
+			if hostIds[0] != SampleAttachments[i].HostId {
+				break
+			}
+		}
+		if len(volumeIds) > 0 {
+			if volumeIds[0] != SampleAttachments[i].VolumeId {
+				break
+			}
+		}
 		atcs = append(atcs, &SampleAttachments[i])
 	}
 	return atcs, nil

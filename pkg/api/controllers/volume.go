@@ -238,6 +238,36 @@ func (v *VolumePortal) ExtendVolume() {
 		return
 	}
 
+	if volume.Status != model.VolumeAvailable && volume.Status != model.VolumeErrorExtending {
+		errMsg := "the status of the volume to be extended must be available or error extending!"
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
+	if extendRequestBody.NewSize <= volume.Size {
+		errMsg := fmt.Sprintf("new size for extend must be greater than current size."+
+			"(current: %d GB, extended: %d GB).", volume.Size, extendRequestBody.NewSize)
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
+	pool, err := db.C.GetPool(ctx, volume.PoolId)
+	if err != nil {
+		errMsg := fmt.Sprintf("pool %s not found: %s", id, err.Error())
+		v.ErrorHandle(model.ErrorNotFound, errMsg)
+		return
+	}
+	if pool.FreeCapacity < extendRequestBody.NewSize-volume.Size {
+		errMsg := fmt.Sprintf("pool:%s capacity:%v is not enough", pool.Name, pool.FreeCapacity)
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+	if pool.Status != model.PoolAvailable {
+		errMsg := fmt.Sprintf("pool:%s with status:%s can not support extending volume", pool.Name, pool.Status)
+		v.ErrorHandle(model.ErrorBadRequest, errMsg)
+		return
+	}
+
 	prf, err := db.C.GetProfile(ctx, volume.ProfileId)
 	if err != nil {
 		errMsg := fmt.Sprintf("extend volume failed: %v", err.Error())
@@ -247,7 +277,8 @@ func (v *VolumePortal) ExtendVolume() {
 
 	// NOTE:It will update the the status of the volume waiting for expansion in
 	// the database to "extending" and return the result immediately.
-	result, err := util.ExtendVolumeDBEntry(ctx, id, &extendRequestBody)
+	volume.Status = model.VolumeExtending
+	result, err := db.C.ExtendVolume(ctx, volume)
 	if err != nil {
 		errMsg := fmt.Sprintf("extend volume failed: %s", err.Error())
 		v.ErrorHandle(model.ErrorBadRequest, errMsg)
@@ -269,6 +300,8 @@ func (v *VolumePortal) ExtendVolume() {
 	opt := &pb.ExtendVolumeOpts{
 		Id:       id,
 		Size:     extendRequestBody.NewSize,
+		PoolId:   pool.Id,
+		PoolName: pool.Name,
 		Metadata: result.Metadata,
 		Context:  ctx.ToJson(),
 		Profile:  prf.ToJson(),
