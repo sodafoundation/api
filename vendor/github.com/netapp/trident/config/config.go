@@ -1,4 +1,4 @@
-// Copyright 2019 NetApp, Inc. All Rights Reserved.
+// Copyright 2020 NetApp, Inc. All Rights Reserved.
 
 package config
 
@@ -33,11 +33,13 @@ const (
 	/* Misc. orchestrator constants */
 	OrchestratorName                 = "trident"
 	OrchestratorClientName           = OrchestratorName + "ctl"
-	orchestratorVersion              = "19.10.0"
+	orchestratorVersion              = "20.01.0"
 	OrchestratorAPIVersion           = "1"
 	PersistentStoreBootstrapAttempts = 30
 	PersistentStoreBootstrapTimeout  = PersistentStoreBootstrapAttempts * time.Second
 	PersistentStoreTimeout           = 10 * time.Second
+	DockerCreateTimeout              = 115 * time.Second
+	DockerDefaultTimeout             = 55 * time.Second
 
 	/* REST/HTTP constants */
 	HTTPTimeout = 90 * time.Second
@@ -112,7 +114,7 @@ const (
 
 	// Minimum and maximum supported Kubernetes versions
 	KubernetesVersionMin = "v1.11.0"
-	KubernetesVersionMax = "v1.16.0"
+	KubernetesVersionMax = "v1.17.0"
 
 	// Minimum Kubernetes version for CSI Trident (non-CSI is the default)
 	KubernetesCSIVersionMinOptional = "v1.13.0"
@@ -146,7 +148,7 @@ var (
 	BuildImage = "netapp/trident:" + orchestratorVersion + "-custom.0"
 
 	// BuildEtcdVersion is the etcd version that Trident should be deployed with
-	BuildEtcdVersion = "v3.3.13"
+	BuildEtcdVersion = "v3.3.18"
 
 	// BuildEtcdImage is the etcd image that Trident should be deployed with
 	BuildEtcdImage = "quay.io/coreos/etcd:" + BuildEtcdVersion

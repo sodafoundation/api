@@ -87,6 +87,14 @@ type OntapStorageDriverConfig struct {
 	EmptyFlexvolDeferredDeletePeriod string `json:"emptyFlexvolDeferredDeletePeriod"` // in seconds, default to 28800
 	NfsMountOptions                  string `json:"nfsMountOptions"`
 	LimitAggregateUsage              string `json:"limitAggregateUsage"`
+	OntapStorageDriverPool
+	Storage []OntapStorageDriverPool `json:"storage"`
+}
+
+type OntapStorageDriverPool struct {
+	Labels                           map[string]string `json:"labels"`
+	Region                           string            `json:"region"`
+	Zone                             string            `json:"zone"`
 	OntapStorageDriverConfigDefaults `json:"defaults"`
 }
 
@@ -102,6 +110,7 @@ type OntapStorageDriverConfigDefaults struct {
 	SplitOnClone    string `json:"splitOnClone"`
 	FileSystemType  string `json:"fileSystemType"`
 	Encryption      string `json:"encryption"`
+	TieringPolicy	string `json:"tieringPolicy"`
 	CommonStorageDriverConfigDefaults
 }
 
@@ -136,12 +145,13 @@ type SolidfireStorageDriverConfigDefaults struct {
 
 type AWSNFSStorageDriverConfig struct {
 	*CommonStorageDriverConfig
-	APIURL          string `json:"apiURL"`
-	APIKey          string `json:"apiKey"`
-	APIRegion       string `json:"apiRegion"`
-	SecretKey       string `json:"secretKey"`
-	ProxyURL        string `json:"proxyURL"`
-	NfsMountOptions string `json:"nfsMountOptions"`
+	APIURL              string `json:"apiURL"`
+	APIKey              string `json:"apiKey"`
+	APIRegion           string `json:"apiRegion"`
+	SecretKey           string `json:"secretKey"`
+	ProxyURL            string `json:"proxyURL"`
+	NfsMountOptions     string `json:"nfsMountOptions"`
+	VolumeCreateTimeout string `json:"volumeCreateTimeout"`
 	AWSNFSStorageDriverPool
 	Storage []AWSNFSStorageDriverPool `json:"storage"`
 }
@@ -255,11 +265,13 @@ type FakeStorageDriverConfigDefaults struct {
 
 type BackendIneligibleError struct {
 	message string
+	ineligiblePhysicalPools []string
 }
 
 func (e *BackendIneligibleError) Error() string { return e.message }
+func (e *BackendIneligibleError) getIneligiblePhysicalPools() []string { return e.ineligiblePhysicalPools }
 
-func NewBackendIneligibleError(volumeName string, errors []error) error {
+func NewBackendIneligibleError(volumeName string, errors []error, ineligiblePhysicalPoolNames []string) error {
 	messages := make([]string, 0)
 	for _, err := range errors {
 		messages = append(messages, err.Error())
@@ -268,6 +280,7 @@ func NewBackendIneligibleError(volumeName string, errors []error) error {
 	return &BackendIneligibleError{
 		message: fmt.Sprintf("backend cannot satisfy create request for volume %s: (%s)",
 			volumeName, strings.Join(messages, "; ")),
+		ineligiblePhysicalPools: ineligiblePhysicalPoolNames,
 	}
 }
 
@@ -277,6 +290,13 @@ func IsBackendIneligibleError(err error) bool {
 	}
 	_, ok := err.(*BackendIneligibleError)
 	return ok
+}
+
+func GetIneligiblePhysicalPoolNames(err error) (error, []string) {
+	if IsBackendIneligibleError(err) {
+		return nil, err.(*BackendIneligibleError).getIneligiblePhysicalPools()
+	}
+	return fmt.Errorf("this method is applicable to BackendIneligibleError type only"), nil
 }
 
 type VolumeExistsError struct {
