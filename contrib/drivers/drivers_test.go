@@ -29,7 +29,7 @@ func TestInit(t *testing.T) {
 	var expectedVd = []VolumeDriver{&sample.Driver{}}
 
 	for i, rs := range rsList {
-		if vp := Init(rs); !reflect.DeepEqual(vp, expectedVd[i]) {
+		if vp, _ := Init(rs); !reflect.DeepEqual(vp, expectedVd[i]) {
 			t.Errorf("Expected %v, got %v\n", expectedVd, vp)
 		}
 	}
@@ -44,8 +44,6 @@ func TestClean(t *testing.T) {
 	}
 
 	for _, driver := range driverList {
-		if d := Clean(driver); !reflect.DeepEqual(d, nil) {
-			t.Errorf("Expected %v, got %v\n", nil, d)
-		}
+		Clean(driver)
 	}
 }

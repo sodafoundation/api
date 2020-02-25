@@ -178,7 +178,12 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 				pol.Status = availableStatus
 			}
 		} else {
-			d := drivers.Init(dck.DriverName)
+			d, err := drivers.Init(dck.DriverName)
+			if err != nil {
+				log.Errorf("Init driver %s failed: %v", dck.DriverName, err)
+				continue
+			}
+
 			defer drivers.Clean(d)
 			pols, err = d.ListPools()
 
