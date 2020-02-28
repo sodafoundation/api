@@ -155,15 +155,9 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 	if err != nil {
 		return fmt.Errorf("can not read pools in db")
 	}
-	dbPolsMap := make(map[string]map[string]*model.StoragePoolSpec)
-	for _, dck := range pdd.dcks {
-		dbPolsMap[dck.Id] = make(map[string]*model.StoragePoolSpec)
-	}
+	dbPolsMap := make(map[string]*model.StoragePoolSpec)
 	for _, polInDb := range polsInDb {
-		if dbPolsMap[polInDb.DockId] != nil {
-			polInDb.Status = unavailableStatus
-			dbPolsMap[polInDb.DockId][polInDb.Id] = polInDb
-		}
+		dbPolsMap[polInDb.Id] = polInDb
 	}
 	for _, dck := range pdd.dcks {
 		// Call function of StorageDrivers configured by storage drivers.
@@ -173,7 +167,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 			pols, err = d.ListPools()
 			for _, pol := range pols {
 				log.Infof("Backend %s discovered pool %s", dck.DriverName, pol.Name)
-				delete(dbPolsMap[dck.Id], pol.Id)
+				delete(dbPolsMap, pol.Id)
 				pol.DockId = dck.Id
 				pol.Status = availableStatus
 			}
@@ -199,7 +193,7 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 					pol.Id = pools[0].Id
 				}
 
-				delete(dbPolsMap[dck.Id], pol.Id)
+				delete(dbPolsMap, pol.Id)
 				pol.DockId = dck.Id
 				pol.ReplicationType = replicationType
 				pol.ReplicationDriverName = replicationDriverName
@@ -216,10 +210,12 @@ func (pdd *provisionDockDiscoverer) Discover() error {
 		}
 
 		pdd.pols = append(pdd.pols, pols...)
-		for _, pol := range dbPolsMap[dck.Id] {
-			pdd.pols = append(pdd.pols, pol)
-		}
 
+	}
+	// The rest of pools in db should be unavailable pools
+	for _, pol := range dbPolsMap {
+		pol.Status = unavailableStatus
+		pdd.pols = append(pdd.pols, pol)
 	}
 	if len(pdd.pols) == 0 {
 		return fmt.Errorf("there is no pool can be found")
