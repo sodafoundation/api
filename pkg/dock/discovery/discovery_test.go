@@ -79,13 +79,19 @@ func TestInit(t *testing.T) {
 func TestDiscover(t *testing.T) {
 	var fdd = NewFakeDockDiscoverer()
 	var expected []*model.StoragePoolSpec
+	var dbPols []*model.StoragePoolSpec
 
 	for i := range SampleDocks {
 		fdd.dcks = append(fdd.dcks, &SampleDocks[i])
 	}
 	for i := range SamplePools {
-		fdd.pols = append(fdd.pols, &SamplePools[i])
+		dbPols = append(dbPols, &SamplePools[i])
 		expected = append(expected, &SamplePools[i])
+	}
+	// Add unavailable pool
+	for i := range UnavailablePools {
+		dbPols = append(dbPols, &UnavailablePools[i])
+		expected = append(expected, &UnavailablePools[i])
 	}
 	m1 := map[string][]string{
 		"Name":   {SamplePools[0].Name},
@@ -101,10 +107,10 @@ func TestDiscover(t *testing.T) {
 	}
 
 	mockClient := new(dbtest.Client)
-	mockClient.On("ListPools", c.NewAdminContext()).Return(fdd.pols, nil)
-	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m1).Return(expected, nil)
-	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m2).Return(expected, nil)
-	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m3).Return(expected, nil)
+	mockClient.On("ListPools", c.NewAdminContext()).Return(dbPols, nil)
+	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m1).Return([]*model.StoragePoolSpec{&SamplePools[0]}, nil)
+	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m2).Return([]*model.StoragePoolSpec{&SamplePools[1]}, nil)
+	mockClient.On("ListPoolsWithFilter", c.NewAdminContext(), m3).Return([]*model.StoragePoolSpec{&SamplePools[2]}, nil)
 	fdd.c = mockClient
 
 	if err := fdd.Discover(); err != nil {
@@ -115,6 +121,16 @@ func TestDiscover(t *testing.T) {
 	}
 	if !reflect.DeepEqual(fdd.pols, expected) {
 		t.Errorf("Expected %+v, got %+v\n", expected, fdd.pols)
+	}
+	for i := 0; i < len(SamplePools); i++ {
+		if fdd.pols[i].Status != "available" {
+			t.Errorf("Expected available, got %s, pool name is %s\n", fdd.pols[i].Status, fdd.pols[i].Name)
+		}
+	}
+	for i := len(SamplePools); i < len(SamplePools)+len(UnavailablePools); i++ {
+		if fdd.pols[i].Status != "unavailable" {
+			t.Errorf("Expected unavailable, got %s, pool name is %s\n", fdd.pols[i].Status, fdd.pols[i].Name)
+		}
 	}
 }
 
