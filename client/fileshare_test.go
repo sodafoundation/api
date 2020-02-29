@@ -299,7 +299,7 @@ func TestCreateFileShareAcl(t *testing.T) {
 		t.Error(err)
 		return
 	}
-
+	fileShareAcl.Status = "available"
 	if !reflect.DeepEqual(fileShareAcl, &SampleFileSharesAcl[0]) {
 		t.Errorf("expected %+v, got %+v", &SampleFileSharesAcl[0], fileShareAcl)
 		return

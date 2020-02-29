@@ -547,3 +547,258 @@ func TestClientFailoverReplication(t *testing.T) {
 	t.Log("Disable volume replication not ready!")
 }
 */
+
+/*
+	File share integration test cases
+*/
+
+func TestClientCreateFileProfile(t *testing.T) {
+	var body = &model.ProfileSpec{
+		Name:        "gold",
+		Description: "gold policy",
+		StorageType: "file",
+	}
+
+	prf, err := c.CreateProfile(body)
+	if err != nil {
+		t.Error("create profile in client failed:", err)
+		return
+	}
+	// If customized properties are not defined, create an empty one.
+	if prf.CustomProperties == nil {
+		prf.CustomProperties = model.CustomPropertiesSpec{}
+	}
+
+	var expected = &SampleFileShareProfiles[0]
+	if !reflect.DeepEqual(prf, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, prf)
+	}
+}
+
+func TestClientGetFileProfile(t *testing.T) {
+	var prfID = "3f9c0a04-66ef-11e7-ade2-43158893e017"
+
+	prf, err := c.GetProfile(prfID)
+	if err != nil {
+		t.Error("get profile in client failed:", err)
+		return
+	}
+
+	var expected = &SampleFileShareProfiles[1]
+	if !reflect.DeepEqual(prf, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, prf)
+	}
+}
+
+func TestClientCreateFileShare(t *testing.T) {
+	var body = &model.FileShareSpec{
+		Name:        "test",
+		Description: "This is a test",
+		Size:        int64(1),
+		ProfileId:   "2106b972-66ef-11e7-b172-db03f3689c9c",
+	}
+
+	if _, err := c.CreateFileShare(body); err != nil {
+		t.Error("create file share in client failed:", err)
+		return
+	}
+
+	t.Log("Create file share success!")
+}
+
+func TestClientGetFileShare(t *testing.T) {
+	var fileshareID = "d2975ebe-d82c-430f-b28e-f373746a71ca"
+
+	fileshare, err := c.GetFileShare(fileshareID)
+	if err != nil {
+		t.Error("get file share in client failed:", err)
+		return
+	}
+
+	var expected = &SampleFileShares[0]
+	if !reflect.DeepEqual(fileshare, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, fileshare)
+	}
+}
+
+func TestClientListFileShares(t *testing.T) {
+	fileshares, err := c.ListFileShares()
+	if err != nil {
+		t.Error("list fileshares in client failed:", err)
+		return
+	}
+
+	var expected []*model.FileShareSpec
+	for i := range SampleFileShares {
+		expected = append(expected, &SampleFileShares[i])
+	}
+	if !reflect.DeepEqual(fileshares, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, fileshares)
+	}
+}
+
+func TestClientUpdateFileShare(t *testing.T) {
+	var fileshareID = "d2975ebe-d82c-430f-b28e-f373746a71ca"
+	body := &model.FileShareSpec{
+		Name:        "sample-fileshare-01",
+		Description: "This is first sample fileshare for testing",
+	}
+
+	fileshare, err := c.UpdateFileShare(fileshareID, body)
+	if err != nil {
+		t.Error("update fileshare in client failed:", err)
+		return
+	}
+
+	var expected = &SampleFileShares[0]
+	if !reflect.DeepEqual(fileshare, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, fileshare)
+	}
+}
+
+func TestClientCreateFileShareAcl(t *testing.T) {
+	var body = &model.FileShareAclSpec{
+		Description:      "This is a sample Acl for testing",
+		ProfileId:        "3f9c0a04-66ef-11e7-ade2-43158893e017",
+		Type:             "ip",
+		AccessCapability: []string{"Read", "Write"},
+		AccessTo:         "10.32.109.15",
+		FileShareId:      "d2975ebe-d82c-430f-b28e-f373746a71ca",
+	}
+
+	if _, err := c.CreateFileShareAcl(body); err != nil {
+		t.Error("create file share acl in client failed:", err)
+		return
+	}
+
+	t.Log("Create file share acl success!")
+}
+
+func TestClientGetFileShareAcl(t *testing.T) {
+	var aclID = "d2975ebe-d82c-430f-b28e-f373746a71ca"
+
+	acl, err := c.GetFileShareAcl(aclID)
+	if err != nil {
+		t.Error("get file share acl in client failed:", err)
+		return
+	}
+
+	var expected = &SampleFileSharesAcl[0]
+	if !reflect.DeepEqual(acl, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, acl)
+	}
+}
+
+func TestClientListFileShareAcl(t *testing.T) {
+	acls, err := c.ListFileSharesAcl()
+	if err != nil {
+		t.Error("list fileshare acls in client failed:", err)
+		return
+	}
+
+	var expected []*model.FileShareAclSpec
+	for i := range SampleFileSharesAcl {
+		expected = append(expected, &SampleFileSharesAcl[i])
+	}
+	if !reflect.DeepEqual(acls, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, acls)
+	}
+}
+
+func TestClientCreateFileShareSnapshot(t *testing.T) {
+	var body = &model.FileShareSnapshotSpec{
+		Name:        "test",
+		Description: "This is a test",
+		FileShareId: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+	}
+
+	if _, err := c.CreateFileShareSnapshot(body); err != nil {
+		t.Error("create file share snapshot in client failed:", err)
+		return
+	}
+
+	t.Log("Create file share snapshot success!")
+}
+
+func TestClientGetFileShareSnapshot(t *testing.T) {
+	var snpID = "3769855c-a102-11e7-b772-17b880d2f537"
+
+	snp, err := c.GetFileShareSnapshot(snpID)
+	if err != nil {
+		t.Error("get file share snapshot in client failed:", err)
+		return
+	}
+
+	var expected = &SampleFileShareSnapshots[0]
+	if !reflect.DeepEqual(snp, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, snp)
+	}
+}
+
+func TestClientListFileShareSnapshots(t *testing.T) {
+	snps, err := c.ListFileShareSnapshots()
+	if err != nil {
+		t.Error("list file share snapshots in client failed:", err)
+		return
+	}
+
+	var expected []*model.FileShareSnapshotSpec
+	for i := range SampleFileShareSnapshots {
+		expected = append(expected, &SampleFileShareSnapshots[i])
+	}
+	if !reflect.DeepEqual(snps, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, snps)
+	}
+}
+
+func TestClientUpdateFileShareSnapshot(t *testing.T) {
+	var snpID = "3769855c-a102-11e7-b772-17b880d2f537"
+	body := &model.FileShareSnapshotSpec{
+		Name:        "sample-snapshot-01",
+		Description: "This is the first sample snapshot for testing",
+	}
+
+	snp, err := c.UpdateFileShareSnapshot(snpID, body)
+	if err != nil {
+		t.Error("update file share snapshot in client failed:", err)
+		return
+	}
+
+	var expected = &SampleFileShareSnapshots[0]
+	if !reflect.DeepEqual(snp, expected) {
+		t.Errorf("expected %+v, got %+v\n", expected, snp)
+	}
+}
+
+func TestClientDeleteFileShareAcl(t *testing.T) {
+	var fileshareaclID = "d2975ebe-d82c-430f-b28e-f373746a71ca"
+
+	if err := c.DeleteFileShareAcl(fileshareaclID); err != nil {
+		t.Error("delete file share acl in client failed:", err)
+		return
+	}
+
+	t.Log("Delete file share acl success!")
+}
+
+func TestClientDeleteFileShareSnapshot(t *testing.T) {
+	var snapID = "3769855c-a102-11e7-b772-17b880d2f537"
+
+	if err := c.DeleteFileShareSnapshot(snapID); err != nil {
+		t.Error("delete file share snapshot in client failed:", err)
+		return
+	}
+
+	t.Log("Delete file share snapshot success!")
+}
+
+func TestClientDeleteFileProfile(t *testing.T) {
+	var prfID = "2f9c0a04-66ef-11e7-ade2-43158893e017"
+
+	if err := c.DeleteProfile(prfID); err != nil {
+		t.Error("delete profile in client failed:", err)
+		return
+	}
+
+	t.Log("Delete profile success!")
+}
