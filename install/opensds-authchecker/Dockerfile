@@ -14,7 +14,7 @@ COPY keystone.sh /keystone.sh
 COPY entrypoint.sh /entrypoint.sh
 
 # Install some packages before running command.
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get --no-install-recommends install -y \
     sudo nano git telnet net-tools iptables gnutls-bin ca-certificates && \
     mkdir -p /opt/stack/
 

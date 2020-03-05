@@ -9,7 +9,7 @@ MAINTAINER Leon Wang <wanghui71leon@gmail.com>
 COPY osdsdock /usr/bin
 
 # Install some packages before running command.
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get --no-install-recommends install -y \
  librados-dev librbd-dev ceph-common lvm2 udev tgt \
  && rm -rf /var/lib/apt
 RUN sed -i -e 's/udev_sync = 1/udev_sync = 0/g' /etc/lvm/lvm.conf \

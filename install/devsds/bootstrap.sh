@@ -84,7 +84,7 @@ fi
 # make sure 'make' has been installed.
 if [[ -z "$(which make)" ]]; then
     log "Installing make ..."
-    sudo apt-get install make -y
+    sudo apt-get --no-install-recommends install make -y
 fi
 
 cd ${OPENSDS_DIR}
