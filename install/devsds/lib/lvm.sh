@@ -48,11 +48,11 @@ NVME_DIR=/opt/opensdsNvme
 LVM_DEVICE=/dev/nvme0n1
 
 osds::lvm::pkg_install(){
-    sudo apt-get install -y lvm2 tgt open-iscsi ibverbs-utils
+    sudo apt-get --no-install-recommends install -y lvm2 tgt open-iscsi ibverbs-utils
 }
 
 osds::nfs::pkg_install(){
-    sudo apt-get install -y nfs-kernel-server
+    sudo apt-get --no-install-recommends install -y nfs-kernel-server
 }
 
 osds::lvm::pkg_uninstall(){
