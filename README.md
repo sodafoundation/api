@@ -1,18 +1,15 @@
 # OpenSDS
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/opensds/opensds?branch=master)](https://goreportcard.com/report/github.com/opensds/opensds)
-[![Build Status](https://travis-ci.org/opensds/opensds.svg?branch=master)](https://travis-ci.org/opensds/opensds)
-[![codecov.io](https://codecov.io/github/opensds/opensds/coverage.svg?branch=master)](https://codecov.io/github/opensds/opensds?branch=master)
-[![Releases](https://img.shields.io/github/release/opensds/opensds/all.svg?style=flat-square)](https://github.com/opensds/opensds/releases)
-[![LICENSE](https://img.shields.io/github/license/opensds/opensds.svg?style=flat-square)](https://github.com/opensds/opensds/blob/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/sodafoundation/api?branch=master)](https://goreportcard.com/report/github.com/sodafoundation/api)
+[![Build Status](https://travis-ci.org/sodafoundation/api.svg?branch=master)](https://travis-ci.org/sodafoundation/api)
+[![codecov.io](https://codecov.io/github/sodafoundation/api/coverage.svg?branch=master)](https://codecov.io/github/sodafoundation/api?branch=master)
+[![Releases](https://img.shields.io/github/release/sodafoundation/api/all.svg?style=flat-square)](https://github.com/sodafoundation/api/releases)
+[![LICENSE](https://img.shields.io/github/license/sodafoundation/api.svg?style=flat-square)](https://github.com/sodafoundation/api/blob/master/LICENSE)
 
 <img src="https://www.opensds.io/wp-content/uploads/sites/18/2016/11/logo_opensds.png" width="100">
 
-## Latest Release: v0.10.1 Daito
-
-[OpenAPI doc](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.10.1/openapi-spec/swagger.yaml)
-
-[Release notes](https://github.com/opensds/opensds/releases/tag/v0.10.1)
+## ATTN:
+Some of the below information is under reivew and update due to the migration from OpenSDS to SODA Foundation. If you have any questions, please post in SODA Slack. If you are not a member, please join [SODA Slack] (https://sodafoundation.io/slack/)
 
 ## Introduction
 
