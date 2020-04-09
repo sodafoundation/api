@@ -2,7 +2,7 @@ dist: xenial
 sudo: required
 
 language: go
-go_import_path: github.com/opensds/opensds
+go_import_path: github.com/sodafoundation/api
 
 go:
   - 1.12.x
