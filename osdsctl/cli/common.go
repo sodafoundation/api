@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"os"
 
-	c "github.com/opensds/opensds/client"
+	c "github.com/sodafoundation/api/client"
 	"github.com/spf13/cobra"
 )
 

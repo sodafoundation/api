@@ -63,7 +63,7 @@ Additionally, community organizers are available to help community members engag
 
 If you feel you have been falsely or unfairly accused of violating this Code of Conduct, you should notify OpenSDS with a concise description of your grievance. Your grievance will be handled in accordance with our existing governing policies.
 
-[Policy](https://github.com/opensds/opensds/blob/master/LICENSE)
+[Policy](https://github.com/sodafoundation/api/blob/master/LICENSE)
 
 ## 8. Scope
 

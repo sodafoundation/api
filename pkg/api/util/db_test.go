@@ -20,13 +20,13 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/opensds/opensds/pkg/utils"
+	"github.com/sodafoundation/api/pkg/utils"
 
-	"github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/db"
-	"github.com/opensds/opensds/pkg/model"
-	. "github.com/opensds/opensds/testutils/collection"
-	dbtest "github.com/opensds/opensds/testutils/db/testing"
+	"github.com/sodafoundation/api/pkg/context"
+	"github.com/sodafoundation/api/pkg/db"
+	"github.com/sodafoundation/api/pkg/model"
+	. "github.com/sodafoundation/api/testutils/collection"
+	dbtest "github.com/sodafoundation/api/testutils/db/testing"
 )
 
 var assertTestResult = func(t *testing.T, got, expected interface{}) {

@@ -19,7 +19,7 @@ TOP_DIR=$(cd $(dirname "$0") && pwd)
 
 # OpenSDS Root directory
 OPENSDS_DIR=$(cd $TOP_DIR/../.. && pwd)
-OPENSDS_CONF=/etc/opensds/opensds.conf
+OPENSDS_CONF=/etc/sodafoundation/api.conf
 
 # Config backend info.
 mkdir -p /etc/opensds

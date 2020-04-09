@@ -17,8 +17,8 @@
 set -e
 echo "" > coverage.txt
 
-MODEL_PACKAGE=github.com/opensds/opensds/pkg/model
-PROTOBUF_PACKAGE=github.com/opensds/opensds/pkg/model/proto
+MODEL_PACKAGE=github.com/sodafoundation/api/pkg/model
+PROTOBUF_PACKAGE=github.com/sodafoundation/api/pkg/model/proto
 
 for testpkg in $(go list ./osdsctl/... ./client/... ./pkg/... ./contrib/...); do
   test $testpkg == "$MODEL_PACKAGE" && continue

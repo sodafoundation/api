@@ -26,7 +26,7 @@ ubuntu-dev-setup:
 	sudo apt-get update && sudo apt-get install -y \
 	  build-essential gcc librados-dev librbd-dev
 
-build: prebuild osdsdock osdslet osdsapiserver osdsctl metricexporter
+build: prebuild osdsapiserver osdsctl osdslet osdsdock
 
 prebuild:
 	mkdir -p $(BUILD_DIR)
@@ -34,19 +34,19 @@ prebuild:
 .PHONY: osdsdock osdslet osdsapiserver osdsctl docker test protoc goimports
 
 osdsdock:
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsdock github.com/sodafoundation/dock/cmd/osdsdock
 
 osdslet:
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdslet github.com/sodafoundation/controller/cmd/osdslet
 
 osdsapiserver:
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsapiserver github.com/sodafoundation/api/cmd/osdsapiserver
 
 osdsctl:
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsctl github.com/sodafoundation/api/osdsctl
 
 metricexporter:
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/lvm_exporter github.com/opensds/opensds/contrib/exporters/lvm_exporter
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/lvm_exporter github.com/sodafoundation/api/contrib/exporters/lvm_exporter
 
 docker: build
 	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock

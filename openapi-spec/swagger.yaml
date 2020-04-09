@@ -2119,7 +2119,7 @@ security:
   - basicAuth: []
 externalDocs:
   description: The offical OpenSDS Controller API specification
-  url: 'https://github.com/opensds/opensds'
+  url: 'https://github.com/sodafoundation/api'
 servers:
   - url: 'https://localhost:50040/'
   - url: 'http://localhost:50040/'

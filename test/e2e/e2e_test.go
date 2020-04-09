@@ -23,9 +23,9 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils/constants"
+	"github.com/sodafoundation/api/client"
+	"github.com/sodafoundation/api/pkg/model"
+	"github.com/sodafoundation/api/pkg/utils/constants"
 )
 
 var (

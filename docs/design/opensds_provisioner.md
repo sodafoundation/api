@@ -174,4 +174,4 @@ References
 
 https://github.com/kubernetes-incubator/external-storage
 
-https://github.com/opensds/opensds-api-specs/blob/master/northbound-api/v1/openapi-spec/swagger.yaml
+https://github.com/sodafoundation/api-api-specs/blob/master/northbound-api/v1/openapi-spec/swagger.yaml

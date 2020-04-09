@@ -25,13 +25,13 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
-	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/db"
-	"github.com/opensds/opensds/pkg/model"
-	pb "github.com/opensds/opensds/pkg/model/proto"
-	. "github.com/opensds/opensds/testutils/collection"
-	ctrtest "github.com/opensds/opensds/testutils/controller/testing"
-	dbtest "github.com/opensds/opensds/testutils/db/testing"
+	c "github.com/sodafoundation/api/pkg/context"
+	"github.com/sodafoundation/api/pkg/db"
+	"github.com/sodafoundation/api/pkg/model"
+	pb "github.com/sodafoundation/api/pkg/model/proto"
+	. "github.com/sodafoundation/api/testutils/collection"
+	ctrtest "github.com/sodafoundation/api/testutils/controller/testing"
+	dbtest "github.com/sodafoundation/api/testutils/db/testing"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

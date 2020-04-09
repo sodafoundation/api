@@ -17,7 +17,7 @@ package client
 import (
 	"strings"
 
-	"github.com/opensds/opensds/pkg/model"
+	"github.com/sodafoundation/api/pkg/model"
 )
 
 // VersionBuilder contains request body of handling a version request.

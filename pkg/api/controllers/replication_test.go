@@ -24,11 +24,11 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
-	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/db"
-	"github.com/opensds/opensds/pkg/model"
-	. "github.com/opensds/opensds/testutils/collection"
-	dbtest "github.com/opensds/opensds/testutils/db/testing"
+	c "github.com/sodafoundation/api/pkg/context"
+	"github.com/sodafoundation/api/pkg/db"
+	"github.com/sodafoundation/api/pkg/model"
+	. "github.com/sodafoundation/api/testutils/collection"
+	dbtest "github.com/sodafoundation/api/testutils/db/testing"
 )
 
 func init() {

@@ -17,7 +17,7 @@ package context
 import (
 	"github.com/astaxie/beego"
 	bctx "github.com/astaxie/beego/context"
-	c "github.com/opensds/opensds/pkg/context"
+	c "github.com/sodafoundation/api/pkg/context"
 )
 
 func Factory() beego.FilterFunc {

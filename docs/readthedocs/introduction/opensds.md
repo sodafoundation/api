@@ -28,12 +28,12 @@ now, please refer to the Contributing sections below.
 
 * Mailing list: [opensds-tech-discuss](https://lists.opensds.io/mailman/listinfo/opensds-tech-discuss)
 * slack: #[opensds](https://opensds.slack.com)
-* Ideas/Bugs: [issues](https://github.com/opensds/opensds/issues)
+* Ideas/Bugs: [issues](https://github.com/sodafoundation/api/issues)
 
 ## REST API
 
 ### OpenAPI
 
-* [Bali](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.4.0/openapi-spec/swagger.yaml)
-* [Aruba](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.2.0/openapi-spec/swagger.yaml)
-* [Zealand](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/opensds/opensds/v0.1.0/openapi-spec/swagger.yaml)
+* [Bali](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/sodafoundation/api/v0.4.0/openapi-spec/swagger.yaml)
+* [Aruba](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/sodafoundation/api/v0.2.0/openapi-spec/swagger.yaml)
+* [Zealand](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/sodafoundation/api/v0.1.0/openapi-spec/swagger.yaml)

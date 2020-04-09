@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/opensds/opensds/contrib/connector"
-	_ "github.com/opensds/opensds/contrib/connector/iscsi"
-	_ "github.com/opensds/opensds/contrib/connector/nvmeof"
+	"github.com/sodafoundation/api/contrib/connector"
+	_ "github.com/sodafoundation/api/contrib/connector/iscsi"
+	_ "github.com/sodafoundation/api/contrib/connector/nvmeof"
 )
 
 const (

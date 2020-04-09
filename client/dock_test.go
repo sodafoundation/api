@@ -18,7 +18,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/opensds/opensds/pkg/model"
+	"github.com/sodafoundation/api/pkg/model"
 )
 
 var fd = &DockMgr{

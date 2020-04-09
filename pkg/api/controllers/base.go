@@ -21,7 +21,7 @@ import (
 
 	"github.com/astaxie/beego"
 	log "github.com/golang/glog"
-	"github.com/opensds/opensds/pkg/model"
+	"github.com/sodafoundation/api/pkg/model"
 )
 
 const (

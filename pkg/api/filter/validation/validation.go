@@ -25,7 +25,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/golang/glog"
-	myctx "github.com/opensds/opensds/pkg/context"
+	myctx "github.com/sodafoundation/api/pkg/context"
 )
 
 // Factory returns a fiter function of api request

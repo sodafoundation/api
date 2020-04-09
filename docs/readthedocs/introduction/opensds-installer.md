@@ -1,6 +1,6 @@
 # OpenSDS Installer
 For detailed information about this project, please refer to the
-[repo](https://github.com/opensds/opensds-installer).
+[repo](https://github.com/sodafoundation/api-installer).
 
 ## Introduction
 This project is designed for locating the code for installing all required
@@ -23,4 +23,4 @@ charts folder for installing and configuring OpenSDS cluster through helm tool.
 
 * Mailing list: [opensds-tech-discuss](https://lists.opensds.io/mailman/listinfo/opensds-tech-discuss)
 * slack: #[opensds](https://opensds.slack.com)
-* Ideas/Bugs: [issues](https://github.com/opensds/opensds-installer/issues)
+* Ideas/Bugs: [issues](https://github.com/sodafoundation/api-installer/issues)
