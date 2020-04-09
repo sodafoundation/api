@@ -42,7 +42,6 @@ split_line "Start unit test"
 go test -v github.com/sodafoundation/api/osdsctl/... -cover
 go test -v github.com/sodafoundation/api/client/... -cover
 go test -v github.com/sodafoundation/api/pkg/... -cover
-go test -v github.com/sodafoundation/api/contrib/... -cover
 
 ## Start integration test.
 #split_line "Start integration test"
