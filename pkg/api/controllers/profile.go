@@ -25,11 +25,11 @@ import (
 	"strings"
 
 	log "github.com/golang/glog"
-	"github.com/opensds/opensds/pkg/api/policy"
-	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/db"
-	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils/constants"
+	"github.com/sodafoundation/api/pkg/api/policy"
+	c "github.com/sodafoundation/api/pkg/context"
+	"github.com/sodafoundation/api/pkg/db"
+	"github.com/sodafoundation/api/pkg/model"
+	"github.com/sodafoundation/api/pkg/utils/constants"
 )
 
 type ProfilePortal struct {

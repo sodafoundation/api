@@ -24,8 +24,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
+	"github.com/sodafoundation/api/pkg/model"
+	"github.com/sodafoundation/api/pkg/utils"
 	"github.com/spf13/cobra"
 )
 

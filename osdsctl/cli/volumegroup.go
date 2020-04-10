@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/opensds/opensds/pkg/model"
+	"github.com/sodafoundation/api/pkg/model"
 	"github.com/spf13/cobra"
 )
 

@@ -72,13 +72,13 @@ fi
 
 GOPATH=${GOPATH:-$HOME/go}
 OPENSDS_ROOT=${GOPATH}/src/github.com/opensds
-OPENSDS_DIR=${GOPATH}/src/github.com/opensds/opensds
+OPENSDS_DIR=${GOPATH}/src/github.com/sodafoundation/api
 mkdir -p ${OPENSDS_ROOT}
 
 cd ${OPENSDS_ROOT}
 if [ ! -d ${OPENSDS_DIR} ]; then
     log "Downloading the OpenSDS source code..."
-    git clone https://github.com/opensds/opensds.git -b master
+    git clone https://github.com/sodafoundation/api.git -b master
 fi
 
 # make sure 'make' has been installed.

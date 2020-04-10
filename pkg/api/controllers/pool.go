@@ -23,10 +23,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/opensds/opensds/pkg/api/policy"
-	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/db"
-	"github.com/opensds/opensds/pkg/model"
+	"github.com/sodafoundation/api/pkg/api/policy"
+	c "github.com/sodafoundation/api/pkg/context"
+	"github.com/sodafoundation/api/pkg/db"
+	"github.com/sodafoundation/api/pkg/model"
 )
 
 type PoolPortal struct {

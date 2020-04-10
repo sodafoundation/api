@@ -17,8 +17,8 @@ package routers
 import (
 	"github.com/astaxie/beego"
 
-	"github.com/opensds/opensds/pkg/api/controllers"
-	"github.com/opensds/opensds/pkg/utils/constants"
+	"github.com/sodafoundation/api/pkg/api/controllers"
+	"github.com/sodafoundation/api/pkg/utils/constants"
 )
 
 func init() {

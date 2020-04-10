@@ -17,8 +17,8 @@ package client
 import (
 	"strings"
 
-	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils/urls"
+	"github.com/sodafoundation/api/pkg/model"
+	"github.com/sodafoundation/api/pkg/utils/urls"
 )
 
 // VolumeBuilder contains request body of handling a volume request.

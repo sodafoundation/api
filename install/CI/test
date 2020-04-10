@@ -39,26 +39,25 @@ fi
 
 # Start unit test.
 split_line "Start unit test"
-go test -v github.com/opensds/opensds/osdsctl/... -cover
-go test -v github.com/opensds/opensds/client/... -cover
-go test -v github.com/opensds/opensds/pkg/... -cover
-go test -v github.com/opensds/opensds/contrib/... -cover
+go test -v github.com/sodafoundation/api/osdsctl/... -cover
+go test -v github.com/sodafoundation/api/client/... -cover
+go test -v github.com/sodafoundation/api/pkg/... -cover
 
-# Start integration test.
-split_line "Start integration test"
-sudo $OPENSDS_DIR/test/integration/prepare.sh
-go test -v github.com/opensds/opensds/test/integration/... -tags integration
-sudo killall -9 osdsapiserver osdslet osdsdock
-sudo rm /etc/opensds/opensds.conf -rf
-
-# Start lvm e2e test
-split_line "Start lvm e2e test"
-sudo $OPENSDS_DIR/install/devsds/install.sh
-ps -ef|grep osds
-go test -v github.com/opensds/opensds/test/e2e/... -tags e2e
-
-# Start lvm e2e flow test
-split_line "Start lvm e2e flow test"
-go build -o ./test/e2e/volume-connector github.com/opensds/opensds/test/e2e/connector/
-go test -v github.com/opensds/opensds/test/e2e/... -tags e2ef
-sudo $OPENSDS_DIR/install/devsds/uninstall.sh
+## Start integration test.
+#split_line "Start integration test"
+#sudo $OPENSDS_DIR/test/integration/prepare.sh
+#go test -v github.com/sodafoundation/api/test/integration/... -tags integration
+#sudo killall -9 osdsapiserver osdslet osdsdock
+#sudo rm /etc/sodafoundation/api.conf -rf
+#
+## Start lvm e2e test
+#split_line "Start lvm e2e test"
+#sudo $OPENSDS_DIR/install/devsds/install.sh
+#ps -ef|grep osds
+#go test -v github.com/sodafoundation/api/test/e2e/... -tags e2e
+#
+## Start lvm e2e flow test
+#split_line "Start lvm e2e flow test"
+#go build -o ./test/e2e/volume-connector github.com/sodafoundation/api/test/e2e/connector/
+#go test -v github.com/sodafoundation/api/test/e2e/... -tags e2ef
+#sudo $OPENSDS_DIR/install/devsds/uninstall.sh

@@ -20,14 +20,14 @@ import (
 	"fmt"
 
 	log "github.com/golang/glog"
-	"github.com/opensds/opensds/pkg/api/policy"
-	"github.com/opensds/opensds/pkg/api/util"
-	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/controller/client"
-	"github.com/opensds/opensds/pkg/db"
-	"github.com/opensds/opensds/pkg/model"
-	pb "github.com/opensds/opensds/pkg/model/proto"
-	. "github.com/opensds/opensds/pkg/utils/config"
+	"github.com/sodafoundation/api/pkg/api/policy"
+	"github.com/sodafoundation/api/pkg/api/util"
+	c "github.com/sodafoundation/api/pkg/context"
+	"github.com/sodafoundation/api/pkg/api/controllerclient"
+	"github.com/sodafoundation/api/pkg/db"
+	"github.com/sodafoundation/api/pkg/model"
+	pb "github.com/sodafoundation/api/pkg/model/proto"
+	. "github.com/sodafoundation/api/pkg/utils/config"
 )
 
 func NewVolumeGroupPortal() *VolumeGroupPortal {

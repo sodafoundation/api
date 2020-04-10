@@ -30,14 +30,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/opensds/opensds/pkg/utils/config"
+	"github.com/sodafoundation/api/pkg/utils/config"
 
 	log "github.com/golang/glog"
-	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/model"
-	"github.com/opensds/opensds/pkg/utils"
-	"github.com/opensds/opensds/pkg/utils/constants"
-	"github.com/opensds/opensds/pkg/utils/urls"
+	c "github.com/sodafoundation/api/pkg/context"
+	"github.com/sodafoundation/api/pkg/model"
+	"github.com/sodafoundation/api/pkg/utils"
+	"github.com/sodafoundation/api/pkg/utils/constants"
+	"github.com/sodafoundation/api/pkg/utils/urls"
 	uuid "github.com/satori/go.uuid"
 )
 

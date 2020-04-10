@@ -18,9 +18,9 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	log "github.com/golang/glog"
-	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/utils/config"
-	"github.com/opensds/opensds/pkg/utils/constants"
+	c "github.com/sodafoundation/api/pkg/context"
+	"github.com/sodafoundation/api/pkg/utils/config"
+	"github.com/sodafoundation/api/pkg/utils/constants"
 )
 
 type AuthBase interface {

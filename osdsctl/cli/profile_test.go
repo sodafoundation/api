@@ -19,8 +19,8 @@ import (
 	"os/exec"
 	"testing"
 
-	c "github.com/opensds/opensds/client"
-	. "github.com/opensds/opensds/testutils/collection"
+	c "github.com/sodafoundation/api/client"
+	. "github.com/sodafoundation/api/testutils/collection"
 )
 
 func init() {

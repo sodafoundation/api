@@ -17,13 +17,13 @@ Firstly, you need to configure some global files with command below:
 ```shell
 export BackendType="sample" # 'sample' is the default option, currently also support 'lvm'
 
-mkdir -p /etc/opensds && sudo cat > /etc/opensds/opensds.conf <<OPENSDS_GLOABL_CONFIG_DOC
+mkdir -p /etc/opensds && sudo cat > /etc/sodafoundation/api.conf <<OPENSDS_GLOABL_CONFIG_DOC
 [osdsapiserver]
 api_endpoint = 0.0.0.0:50040
 auth_strategy = keystone
 # If https is enabled, the default value of cert file
-# is /opt/opensds-security/opensds/opensds-cert.pem,
-# and key file is /opt/opensds-security/opensds/opensds-key.pem
+# is /opt/opensds-security/sodafoundation/api-cert.pem,
+# and key file is /opt/opensds-security/sodafoundation/api-key.pem
 https_enabled = False
 beego_https_cert_file =
 beego_https_key_file =
@@ -141,7 +141,7 @@ dock          ClusterIP   10.0.0.144   <none>        50050/TCP           21m
 ### OpenSDS CLI tool
 #### Download cli tool.
 ```
-wget https://github.com/opensds/opensds/releases/download/v0.5.2/opensds-hotpot-v0.5.2-linux-amd64.tar.gz
+wget https://github.com/sodafoundation/api/releases/download/v0.5.2/opensds-hotpot-v0.5.2-linux-amd64.tar.gz
 tar zxvf opensds-hotpot-v0.5.2-linux-amd64.tar.gz
 cp opensds-hotpot-v0.5.2-linux-amd64/bin/* /usr/local/bin
 chmod 755 /usr/local/bin/osdsctl

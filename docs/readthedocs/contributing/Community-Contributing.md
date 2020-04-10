@@ -1,9 +1,9 @@
 # Community-Contributing
 ## OpenSDS
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/opensds/opensds?branch=master)](https://goreportcard.com/report/github.com/opensds/opensds)
-[![Build Status](https://travis-ci.org/opensds/opensds.svg?branch=master)](https://travis-ci.org/opensds/opensds)
-[![Coverage Status](https://coveralls.io/repos/github/opensds/opensds/badge.svg?branch=master)](https://coveralls.io/github/opensds/opensds?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/sodafoundation/api?branch=master)](https://goreportcard.com/report/github.com/sodafoundation/api)
+[![Build Status](https://travis-ci.org/sodafoundation/api.svg?branch=master)](https://travis-ci.org/sodafoundation/api)
+[![Coverage Status](https://coveralls.io/repos/github/sodafoundation/api/badge.svg?branch=master)](https://coveralls.io/github/sodafoundation/api?branch=master)
 
 <img src="https://www.opensds.io/wp-content/uploads/sites/18/2016/11/logo_opensds.png" width="100">
 
@@ -50,10 +50,10 @@ When reporting issues, refer to this format:
 
 ### Propose PRs
 
-- Raise your idea as an [issue](https://github.com/opensds/opensds/issues)
+- Raise your idea as an [issue](https://github.com/sodafoundation/api/issues)
 - If it is a new feature that needs lots of design details, a design proposal should also be submitted [here](https://github.com/opensds/design-specs/pulls).
 - After reaching consensus in the issue discussions and design proposal reviews, complete the development on the forked repo and submit a PR. 
-  Here are the [PRs](https://github.com/opensds/opensds/pulls?q=is%3Apr+is%3Aclosed) that are already closed.
+  Here are the [PRs](https://github.com/sodafoundation/api/pulls?q=is%3Apr+is%3Aclosed) that are already closed.
 - If a PR is submitted by one of the core members, it has to be merged by a different core member.
 - After PR is sufficiently discussed, it will get merged, abondoned or rejected depending on the outcome of the discussion.
 

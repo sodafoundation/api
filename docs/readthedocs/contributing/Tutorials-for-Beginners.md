@@ -20,7 +20,7 @@ git clone https://your_repo_url/opensds.git
 
 To reduce the conflicts between your remote repo and opensds repo, we SUGGEST you configure opensds as the upstream repo:
 ```
-git remote add upstream https://github.com/opensds/opensds.git
+git remote add upstream https://github.com/sodafoundation/api.git
 git fetch upstream
 ```
 

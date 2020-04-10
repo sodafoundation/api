@@ -23,7 +23,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/opensds/opensds/osdsctl/cli"
+	"github.com/sodafoundation/api/osdsctl/cli"
 )
 
 func main() {

@@ -15,7 +15,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/opensds/opensds/pkg/model"
+	"github.com/sodafoundation/api/pkg/model"
 )
 
 type bd struct {

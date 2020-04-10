@@ -22,9 +22,9 @@ import (
 	"log"
 	"os"
 
-	c "github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/pkg/utils"
-	"github.com/opensds/opensds/pkg/utils/constants"
+	c "github.com/sodafoundation/api/client"
+	"github.com/sodafoundation/api/pkg/utils"
+	"github.com/sodafoundation/api/pkg/utils/constants"
 	"github.com/spf13/cobra"
 )
 

@@ -14,7 +14,7 @@ package main
 import (
 	"fmt"
 	
-	"github.com/opensds/opensds/client"
+	"github.com/sodafoundation/api/client"
 )
 
 func main() {
@@ -39,8 +39,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/opensds/opensds/client"
-	"github.com/opensds/opensds/pkg/model"
+	"github.com/sodafoundation/api/client"
+	"github.com/sodafoundation/api/pkg/model"
 )
 
 func main() {
