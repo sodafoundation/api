@@ -26,7 +26,7 @@ ubuntu-dev-setup:
 	sudo apt-get update && sudo apt-get install -y \
 	  build-essential gcc librados-dev librbd-dev
 
-build: prebuild osdsapiserver osdsctl osdslet osdsdock
+build: prebuild osdsapiserver osdsctl
 
 prebuild:
 	mkdir -p $(BUILD_DIR)
@@ -49,11 +49,7 @@ metricexporter:
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/lvm_exporter github.com/sodafoundation/api/contrib/exporters/lvm_exporter
 
 docker: build
-	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock
-	cp $(BUILD_DIR)/bin/osdslet ./cmd/osdslet
 	cp $(BUILD_DIR)/bin/osdsapiserver ./cmd/osdsapiserver
-	docker build cmd/osdsdock -t opensdsio/opensds-dock:latest
-	docker build cmd/osdslet -t opensdsio/opensds-controller:latest
 	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:latest
 
 test: build
