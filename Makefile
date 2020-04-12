@@ -18,7 +18,7 @@ DIST_DIR := $(BASE_DIR)/build/dist
 VERSION ?= $(shell git describe --exact-match 2> /dev/null || \
                  git describe --match=$(git rev-parse --short=8 HEAD) \
 		 --always --dirty --abbrev=8)
-BUILD_TGT := opensds-hotpot-$(VERSION)-linux-amd64
+BUILD_TGT := soda-api-$(VERSION)-linux-amd64
 
 all: build
 
@@ -75,6 +75,7 @@ dist: build
 	    mkdir $(BUILD_TGT) && \
 	    cp -r $(BUILD_DIR)/bin $(BUILD_TGT)/ && \
 	    cp $(BASE_DIR)/LICENSE $(BUILD_TGT)/ && \
+	    cp $(BASE_DIR)/openapi-spec/swagger.yaml $(BUILD_TGT)/ && \
 	    zip -r $(DIST_DIR)/$(BUILD_TGT).zip $(BUILD_TGT) && \
 	    tar zcvf $(DIST_DIR)/$(BUILD_TGT).tar.gz $(BUILD_TGT) && \
 	    tree \
