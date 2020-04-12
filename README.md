@@ -1,4 +1,4 @@
-# OpenSDS
+# SODA API
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/sodafoundation/api?branch=master)](https://goreportcard.com/report/github.com/sodafoundation/api)
 [![Build Status](https://travis-ci.org/sodafoundation/api.svg?branch=master)](https://travis-ci.org/sodafoundation/api)
@@ -6,51 +6,68 @@
 [![Releases](https://img.shields.io/github/release/sodafoundation/api/all.svg?style=flat-square)](https://github.com/sodafoundation/api/releases)
 [![LICENSE](https://img.shields.io/github/license/sodafoundation/api.svg?style=flat-square)](https://github.com/sodafoundation/api/blob/master/LICENSE)
 
-<img src="https://www.opensds.io/wp-content/uploads/sites/18/2016/11/logo_opensds.png" width="100">
-
-## ATTN:
-Some of the below information is under reivew and update due to the migration from OpenSDS to SODA Foundation. If you have any questions, please post in SODA Slack. If you are not a member, please join [SODA Slack] (https://sodafoundation.io/slack/)
+<img src="https://sodafoundation.io/wp-content/uploads/2020/01/SODA_logo_outline_color_800x800.png" width="200" height="200">
 
 ## Introduction
 
-The [OpenSDS Project](https://opensds.io/) is a collaborative project under Linux
-Foundation supported by storage users and vendors, including
-Dell EMC, Intel, Huawei, Fujitsu, Western Digital, Vodafone, NTT and Oregon State University. The project
-will also seek to collaborate with other upstream open source communities
-such as Cloud Native Computing Foundation, Docker, OpenStack, and Open
-Container Initiative.
+SODA API is an open source implementation of SODA API Standards for Data and Storage Management. The effort is to provide a common unified data and storage interface to store, run any data anywhere.
 
-It is a software defined storage controller that provides
-unified block, file, object storage services and focuses on:
+This project implements the API Server, Different API services, utilities and more. The implementation will be based on the API standards from The SODA Foundation.
 
-* *Simple*: well-defined API that follows the [OpenAPI](https://github.com/OAI/OpenAPI-Specification) specification.
-* *Lightweight*: no external dependencies, deployed once in binary file or container.
-* *Extensible*: pluggable framework available for different storage systems, identity services, capability filters, etc.
+It connects the application or client to the storage backends to do data/storage management seamlessly providing a platform and storage agnostic framework.
 
-## Community
+Any application or client platform can implement the interface using the API specification to connect to API or implement northbound plugins to bridge their specifications to SODA API.
 
-The OpenSDS community welcomes anyone who is interested in software defined
-storage and shaping the future of cloud-era storage. If you are a company,
-you should consider joining the [OpenSDS Project](https://opensds.io/).
-If you are a developer and would like to be part of the code development
-that is happening now, please refer to the Contributing sections below.
+Currently we support block and file APIs for key features of data management (provisioning, migration, fileshare, etc). for on-prem implementation
 
-## You want to contribute?
+This is one of the SODA Core Projects and is maintained by SODA Foundation directly.
 
-* [Our Documentation](https://docs.opensds.io/) : 
-You can find the quick start guides and start using OpenSDS releases.
-See [COMMUNITY](https://docs.opensds.io/community/) for details on discussion of the OpenSDS architecture design and feature development.
+Earlier part of github.com/sodafoundation/opensds Or github.com/opensds/opensds
 
-## How to start ? 
+## Documentation
 
-Please refer to [Try OpenSDS](https://docs.opensds.io/try-opensds/) to start using our releases and knowing more.
+[https://docs.sodafoundation.io](https://docs.sodafoundation.io/)
 
-## License
+## Quick Start - To Use/Experience
 
-OpenSDS is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
+[https://docs.sodafoundation.io](https://docs.sodafoundation.io/)
 
-## Contact
-* Mailing list: [opensds-tech-discuss](https://lists.opensds.io/mailman/listinfo/opensds-tech-discuss)
-* slack: #[opensds](https://opensds.io/slack)
-* Ideas/Bugs: You can raise your ideas, requirements and issues at any of the projects under [our git organization](https://github.com/opensds/)
-* Join our community meetings. All the details, refer [our global community meeting agenda and notes](http://bit.ly/sodaglobalcommunitymeeting)
+## Quick Start - To Develop
+
+[https://docs.sodafoundation.io](https://docs.sodafoundation.io/)
+
+## Latest Releases
+
+[https://github.com/sodafoundation/api/releases](https://github.com/sodafoundation/api/releases)
+
+## Support and Issues
+
+[https://github.com/sodafoundation/api/issues](https://github.com/sodafoundation/api/issues)
+
+## Project Community
+
+[https://sodafoundation.io/slack/](https://sodafoundation.io/slack/)
+
+## How to contribute to this project?
+
+Join [https://sodafoundation.io/slack/](https://sodafoundation.io/slack/) and share your interest in the ‘general’ channel
+
+Checkout [https://github.com/sodafoundation/api/issues](https://github.com/sodafoundation/api/issues) labelled with ‘good first issue’ or ‘help needed’ or ‘help wanted’ or ‘StartMyContribution’ or ‘SMC’
+
+## Project Roadmap
+
+SODA API Standards working with standard bodies and industry partners. Build a scalable microservice based API layer to support data store with file, block and object operations across edge, core/on-prem and cloud.
+
+  
+
+[https://docs.sodafoundation.io](https://docs.sodafoundation.io/)
+
+## Join SODA Foundation
+
+Website : [https://sodafoundation.io](https://sodafoundation.io/)
+
+Slack  : [https://sodafoundation.io/slack/](https://sodafoundation.io/slack/)
+
+Twitter  : @sodafoundation
+
+Mailinglist  : [https://lists.opensds.io](https://lists.opensds.io/groups)
