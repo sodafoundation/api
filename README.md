@@ -68,6 +68,6 @@ Website : [https://sodafoundation.io](https://sodafoundation.io/)
 
 Slack  : [https://sodafoundation.io/slack/](https://sodafoundation.io/slack/)
 
-Twitter  : @sodafoundation
+Twitter  : [@sodafoundation](https://twitter.com/sodafoundation)
 
-Mailinglist  : [https://lists.opensds.io](https://lists.opensds.io/groups)
+Mailinglist  : [https://lists.sodafoundation.io](https://lists.sodafoundation.io/)
