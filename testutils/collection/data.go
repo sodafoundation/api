@@ -987,6 +987,17 @@ var (
 			"description": "This is the first sample group for testing",
 			"status": "creating"
 		}
+		{
+			"id": "015184f3-8e73-47fd-8f57-26ea912e2a6b",
+			"name": "volumeGroup-demo",
+			"status": "creating",
+			"description": "volumeGroup test",
+			"profiles": [
+			  "993c87dc-1928-498b-9767-9da8f901d6ce",
+			  "90d667f0-e9a9-427c-8a7f-cc714217c7bd"
+			],
+			"availabilityZone": "default"
+		}
 	]`
 
 	ByteSnapshots = `[
