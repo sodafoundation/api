@@ -31,11 +31,11 @@ The Bali release adds the following functionality:
 The OpenSDS controller (Hotpot), the north bound plugins (Sushi), the multiple cloud(Gelato), 
 the opensds dashboard and the installer can be downloaded from here:
 
-`Hotpot <https://github.com/opensds/opensds/releases/tag/v0.4.0>`__
+`Hotpot <https://github.com/sodafoundation/api/releases/tag/v0.4.0>`__
 `Sushi <https://github.com/opensds/nbp/releases/tag/v0.4.0>`__
 `Gelato <https://github.com/opensds/multi-cloud/releases/tag/v0.4.0>`__
-`Dashboard <https://github.com/opensds/opensds-dashboard/releases/tag/v0.4.0>`__
-`Installer <https://github.com/opensds/opensds-installer/releases/tag/v0.4.0>`__
+`Dashboard <https://github.com/sodafoundation/api-dashboard/releases/tag/v0.4.0>`__
+`Installer <https://github.com/sodafoundation/api-installer/releases/tag/v0.4.0>`__
 
 
 Aruba
@@ -66,6 +66,6 @@ The Aruba release adds the following functionality:
 The OpenSDS controller (Hotpot), the north bound plugins (Sushi), and the
 installer can be downloaded from here:
 
-`Hotpot <https://github.com/opensds/opensds/releases/tag/v0.2.0>`__
+`Hotpot <https://github.com/sodafoundation/api/releases/tag/v0.2.0>`__
 `Sushi <https://github.com/opensds/nbp/releases/tag/v0.2.0>`__
-`Installer <https://github.com/opensds/opensds-installer/releases/tag/v0.2.0>`__
+`Installer <https://github.com/sodafoundation/api-installer/releases/tag/v0.2.0>`__

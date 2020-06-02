@@ -23,8 +23,8 @@ echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile
 echo 'export GOPATH=$HOME/gopath' >> /etc/profile
 source /etc/profile
 cd $HOME
-mkdir -p gopath/src/github.com/opensds/opensds
-cd gopath/src/github.com/opensds/opensds
+mkdir -p gopath/src/github.com/sodafoundation/api
+cd gopath/src/github.com/sodafoundation/api
 cp -r ${BASE_DIR}/* .
 make ubuntu-dev-setup && make docker
 cp cmd/osdsapiserver/osdsapiserver ${BASE_DIR}/cmd/osdsapiserver

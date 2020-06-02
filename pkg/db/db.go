@@ -23,11 +23,11 @@ package db
 import (
 	"fmt"
 
-	c "github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/db/drivers/etcd"
-	"github.com/opensds/opensds/pkg/model"
-	. "github.com/opensds/opensds/pkg/utils/config"
-	fakedb "github.com/opensds/opensds/testutils/db"
+	c "github.com/sodafoundation/api/pkg/context"
+	"github.com/sodafoundation/api/pkg/db/drivers/etcd"
+	"github.com/sodafoundation/api/pkg/model"
+	. "github.com/sodafoundation/api/pkg/utils/config"
+	fakedb "github.com/sodafoundation/api/testutils/db"
 )
 
 // C is a global variable that controls database module.

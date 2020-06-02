@@ -31,8 +31,8 @@ cat >> $OPENSDS_CONFIG_DIR/opensds.conf << OPENSDS_GLOBAL_CONFIG_DOC
 api_endpoint = 0.0.0.0:50040
 auth_strategy = $OPENSDS_AUTH_STRATEGY
 # If https is enabled, the default value of cert file
-# is /opt/opensds-security/opensds/opensds-cert.pem,
-# and key file is /opt/opensds-security/opensds/opensds-key.pem
+# is /opt/opensds-security/sodafoundation/api-cert.pem,
+# and key file is /opt/opensds-security/sodafoundation/api-key.pem
 https_enabled = False
 beego_https_cert_file =
 beego_https_key_file =
@@ -58,8 +58,9 @@ osds::opensds::install(){
 (
     cd ${OPENSDS_DIR}
     sudo build/out/bin/osdsapiserver --daemon
-    sudo build/out/bin/osdslet --daemon
-    sudo build/out/bin/osdsdock --daemon
+    cd ..
+    sudo controller/build/out/bin/osdslet --daemon
+    sudo dock/build/out/bin/osdsdock --daemon
 
     osds::echo_summary "Waiting for osdsapiserver to come up."
     osds::util::wait_for_url localhost:50040 "osdsapiserver" 0.5 80

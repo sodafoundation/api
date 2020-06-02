@@ -64,4 +64,14 @@ const (
 	DefaultSortDir = "desc"
 	DefaultLimit   = 50
 	DefaultOffset  = 0
+
+// These constants below represent the access protocol type of all storage
+// drivers which can be supported by now. Please NOTICE that currently these
+// constants can NOT be used by all methods except InitializeConnection().
+
+	ISCSIProtocol  = "iscsi"
+	RBDProtocol    = "rbd"
+	FCProtocol     = "fibre_channel"
+	NVMEOFProtocol = "nvmeof"
+	NFSProtocol    = "nfs"
 )

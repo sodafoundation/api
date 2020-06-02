@@ -18,7 +18,7 @@ DIST_DIR := $(BASE_DIR)/build/dist
 VERSION ?= $(shell git describe --exact-match 2> /dev/null || \
                  git describe --match=$(git rev-parse --short=8 HEAD) \
 		 --always --dirty --abbrev=8)
-BUILD_TGT := opensds-hotpot-$(VERSION)-linux-amd64
+BUILD_TGT := soda-api-$(VERSION)-linux-amd64
 
 all: build
 
@@ -26,7 +26,7 @@ ubuntu-dev-setup:
 	sudo apt-get update && sudo apt-get install -y \
 	  build-essential gcc librados-dev librbd-dev
 
-build: prebuild osdsdock osdslet osdsapiserver osdsctl metricexporter
+build: prebuild osdsapiserver osdsctl
 
 prebuild:
 	mkdir -p $(BUILD_DIR)
@@ -34,26 +34,22 @@ prebuild:
 .PHONY: osdsdock osdslet osdsapiserver osdsctl docker test protoc goimports
 
 osdsdock:
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsdock github.com/opensds/opensds/cmd/osdsdock
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsdock github.com/sodafoundation/dock/cmd/osdsdock
 
 osdslet:
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdslet github.com/opensds/opensds/cmd/osdslet
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdslet github.com/sodafoundation/controller/cmd/osdslet
 
 osdsapiserver:
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsapiserver github.com/opensds/opensds/cmd/osdsapiserver
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsapiserver github.com/sodafoundation/api/cmd/osdsapiserver
 
 osdsctl:
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsctl github.com/opensds/opensds/osdsctl
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsctl github.com/sodafoundation/api/osdsctl
 
 metricexporter:
-	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/lvm_exporter github.com/opensds/opensds/contrib/exporters/lvm_exporter
+	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/lvm_exporter github.com/sodafoundation/api/contrib/exporters/lvm_exporter
 
 docker: build
-	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock
-	cp $(BUILD_DIR)/bin/osdslet ./cmd/osdslet
 	cp $(BUILD_DIR)/bin/osdsapiserver ./cmd/osdsapiserver
-	docker build cmd/osdsdock -t opensdsio/opensds-dock:latest
-	docker build cmd/osdslet -t opensdsio/opensds-controller:latest
 	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:latest
 
 test: build
@@ -79,6 +75,7 @@ dist: build
 	    mkdir $(BUILD_TGT) && \
 	    cp -r $(BUILD_DIR)/bin $(BUILD_TGT)/ && \
 	    cp $(BASE_DIR)/LICENSE $(BUILD_TGT)/ && \
+	    cp $(BASE_DIR)/openapi-spec/swagger.yaml $(BUILD_TGT)/ && \
 	    zip -r $(DIST_DIR)/$(BUILD_TGT).zip $(BUILD_TGT) && \
 	    tar zcvf $(DIST_DIR)/$(BUILD_TGT).tar.gz $(BUILD_TGT) && \
 	    tree \

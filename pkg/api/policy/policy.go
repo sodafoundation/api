@@ -24,9 +24,9 @@ import (
 
 	bctx "github.com/astaxie/beego/context"
 	log "github.com/golang/glog"
-	"github.com/opensds/opensds/pkg/context"
-	"github.com/opensds/opensds/pkg/utils"
-	"github.com/opensds/opensds/pkg/utils/config"
+	"github.com/sodafoundation/api/pkg/context"
+	"github.com/sodafoundation/api/pkg/utils"
+	"github.com/sodafoundation/api/pkg/utils/config"
 )
 
 var enforcer *Enforcer

@@ -6,12 +6,11 @@ package proto
 import (
 	context "context"
 	fmt "fmt"
-	math "math"
-
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -3868,7 +3867,9 @@ func init() {
 	proto.RegisterType((*NoParams)(nil), "proto.NoParams")
 }
 
-func init() { proto.RegisterFile("model.proto", fileDescriptor_4c16552f9fdb66d8) }
+func init() {
+	proto.RegisterFile("model.proto", fileDescriptor_4c16552f9fdb66d8)
+}
 
 var fileDescriptor_4c16552f9fdb66d8 = []byte{
 	// 2458 bytes of a gzipped FileDescriptorProto
@@ -4030,11 +4031,11 @@ var fileDescriptor_4c16552f9fdb66d8 = []byte{
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion6
 
 // ControllerClient is the client API for Controller service.
 //
@@ -4079,10 +4080,10 @@ type ControllerClient interface {
 }
 
 type controllerClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewControllerClient(cc *grpc.ClientConn) ControllerClient {
+func NewControllerClient(cc grpc.ClientConnInterface) ControllerClient {
 	return &controllerClient{cc}
 }
 
@@ -4799,10 +4800,10 @@ type ProvisionDockClient interface {
 }
 
 type provisionDockClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewProvisionDockClient(cc *grpc.ClientConn) ProvisionDockClient {
+func NewProvisionDockClient(cc grpc.ClientConnInterface) ProvisionDockClient {
 	return &provisionDockClient{cc}
 }
 
@@ -5495,10 +5496,10 @@ type FileShareControllerClient interface {
 }
 
 type fileShareControllerClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewFileShareControllerClient(cc *grpc.ClientConn) FileShareControllerClient {
+func NewFileShareControllerClient(cc grpc.ClientConnInterface) FileShareControllerClient {
 	return &fileShareControllerClient{cc}
 }
 
@@ -5759,10 +5760,10 @@ type FileShareDockClient interface {
 }
 
 type fileShareDockClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewFileShareDockClient(cc *grpc.ClientConn) FileShareDockClient {
+func NewFileShareDockClient(cc grpc.ClientConnInterface) FileShareDockClient {
 	return &fileShareDockClient{cc}
 }
 
@@ -6015,10 +6016,10 @@ type AttachDockClient interface {
 }
 
 type attachDockClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewAttachDockClient(cc *grpc.ClientConn) AttachDockClient {
+func NewAttachDockClient(cc grpc.ClientConnInterface) AttachDockClient {
 	return &attachDockClient{cc}
 }
 

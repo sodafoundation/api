@@ -19,7 +19,7 @@ import (
 	"os/exec"
 	"testing"
 
-	c "github.com/opensds/opensds/client"
+	c "github.com/sodafoundation/api/client"
 )
 
 func init() {

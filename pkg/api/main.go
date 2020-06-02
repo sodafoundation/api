@@ -25,15 +25,15 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego"
-	"github.com/opensds/opensds/pkg/api/filter/accesslog"
-	"github.com/opensds/opensds/pkg/api/filter/auth"
-	"github.com/opensds/opensds/pkg/api/filter/context"
-	"github.com/opensds/opensds/pkg/api/filter/validation"
-	cfg "github.com/opensds/opensds/pkg/utils/config"
-	"github.com/opensds/opensds/pkg/utils/constants"
+	"github.com/sodafoundation/api/pkg/api/filter/accesslog"
+	"github.com/sodafoundation/api/pkg/api/filter/auth"
+	"github.com/sodafoundation/api/pkg/api/filter/context"
+	"github.com/sodafoundation/api/pkg/api/filter/validation"
+	cfg "github.com/sodafoundation/api/pkg/utils/config"
+	"github.com/sodafoundation/api/pkg/utils/constants"
 
 	// Load the API routers
-	_ "github.com/opensds/opensds/pkg/api/routers"
+	_ "github.com/sodafoundation/api/pkg/api/routers"
 )
 
 const (

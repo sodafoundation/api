@@ -26,8 +26,8 @@ type OsdsApiServer struct {
 	PolicyPath         string        `conf:"policy_path,/etc/opensds/policy.json"`
 	LogFlushFrequency  time.Duration `conf:"log_flush_frequency,5s"` // Default value is 5s
 	HTTPSEnabled       bool          `conf:"https_enabled,false"`
-	BeegoHTTPSCertFile string        `conf:"beego_https_cert_file,/opt/opensds-security/opensds/opensds-cert.pem"`
-	BeegoHTTPSKeyFile  string        `conf:"beego_https_key_file,/opt/opensds-security/opensds/opensds-key.pem"`
+	BeegoHTTPSCertFile string        `conf:"beego_https_cert_file,/opt/opensds-security/sodafoundation/api-cert.pem"`
+	BeegoHTTPSKeyFile  string        `conf:"beego_https_key_file,/opt/opensds-security/sodafoundation/api-key.pem"`
 	BeegoServerTimeOut int64         `conf:"beego_server_time_out,120"`
 
 	// prometheus related

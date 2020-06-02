@@ -22,7 +22,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
-	c "github.com/opensds/opensds/pkg/context"
+	c "github.com/sodafoundation/api/pkg/context"
 )
 
 func init() {

@@ -2,7 +2,7 @@ dist: xenial
 sudo: required
 
 language: go
-go_import_path: github.com/opensds/opensds
+go_import_path: github.com/sodafoundation/api
 
 go:
   - 1.12.x
@@ -35,7 +35,8 @@ install:
   # TODO: Remove once source code is fixed for sodafoundation
   - ln -s $GOPATH/src/sodafoundation $GOPATH/src/opensds
   # Build OpenSDS Controller source code
-  - make all
+  - make osdsapiserver
+  - make osdsctl
 
 script:
   - ./install/CI/coverage
