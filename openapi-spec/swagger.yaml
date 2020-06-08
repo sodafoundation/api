@@ -1,13 +1,13 @@
 openapi: 3.0.0
 info:
   version: "v1beta"
-  title: OpenSDS Controller API
-  description: OpenSDS Controller API to manage mutliple backend storages.
+  title: SODA API
+  description: Unified SODA API for data management across multiple, heterogeneous storage backends. Currently supporting file/block for on prem
   termsOfService: 'https://www.linuxfoundation.org/terms'
   contact:
-    name: OpenSDS Support
+    name: SODA Support
     url: 'https://opensds.slack.com'
-    email: support@opensds.io
+    email: support@sodafoundation.io
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
@@ -16,7 +16,7 @@ paths:
     get:
       tags:
         - API versions
-      description: Lists information for all SDSController API versions.
+      description: Lists information for all API versions.
       responses:
         '200':
           description: OK
@@ -2118,7 +2118,7 @@ paths:
 security:
   - basicAuth: []
 externalDocs:
-  description: The offical OpenSDS Controller API specification
+  description:  Unified SODA API for data management across multiple, heterogeneous storage backends.
   url: 'https://github.com/sodafoundation/api'
 servers:
   - url: 'https://localhost:50040/'
@@ -2689,7 +2689,7 @@ components:
             key3:
               key31: value31
     ProfileCreateSpec:
-      description: An OpenSDS profile is identified by a unique name and ID. With
+      description: A configuration profile is identified by a unique name and ID. With
         adding extra properties, each profile can contain a set of tags of storage
         capabilities which are desirable features for a class of applications.
       required:
@@ -2726,7 +2726,7 @@ components:
         customProperties:
           $ref: '#/components/schemas/CustomPropertiesSpec'
     ProfileRespSpec:
-      description: An OpenSDS profile is identified by a unique name and ID. With
+      description: A configuration profile is identified by a unique name and ID. With
         adding extra properties, each profile can contain a set of tags of storage
         capabilities which are desirable features for a class of applications.
       allOf:
