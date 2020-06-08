@@ -71,7 +71,7 @@ if [[ "${MINIMUM_GO_VERSION}" != $(echo -e "${MINIMUM_GO_VERSION}\n${go_version[
 fi
 
 GOPATH=${GOPATH:-$HOME/go}
-OPENSDS_ROOT=${GOPATH}/src/github.com/opensds
+OPENSDS_ROOT=${GOPATH}/src/github.com/sodafoundation
 OPENSDS_DIR=${GOPATH}/src/github.com/sodafoundation/api
 mkdir -p ${OPENSDS_ROOT}
 
