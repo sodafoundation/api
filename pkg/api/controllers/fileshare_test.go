@@ -19,9 +19,11 @@ import (
 	ctx "context"
 	"encoding/json"
 	"errors"
+	"github.com/sodafoundation/api/pkg/utils/constants"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
@@ -87,6 +89,72 @@ var (
 	}
 	fakeFileShares = []*model.FileShareSpec{fakeFileShare}
 )
+
+func TestCreateFileShare(t *testing.T) {
+	var jsonStr = []byte(`{
+		"id": "d2975ebe-d82c-430f-b28e-f373746a71ca",
+		"name": "File_share",
+		"description": "fake File share",
+		"size": 1,
+		"profileId": "b3585ebe-c42c-120g-b28e-f373746a71ca",
+		"snapshotId": "b7602e18-771e-11e7-8f38-dbd6d291f4eg"
+	}`)
+
+	t.Run("Should return 202 if everything works well", func(t *testing.T) {
+		fileshare := model.FileShareSpec{BaseModel: &model.BaseModel{
+			Id:        "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			CreatedAt: time.Now().Format(constants.TimeFormat),
+			UpdatedAt: time.Now().Format(constants.TimeFormat),
+		},
+			Name: "File_share",
+			Description: "fake File share",
+			Status: "creating",
+			Size: int64(1),
+			AvailabilityZone: "default",
+			ProfileId: "b3585ebe-c42c-120g-b28e-f373746a71ca",
+			SnapshotId: "b7602e18-771e-11e7-8f38-dbd6d291f4eg",
+		}
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetDefaultProfileFileShare", c.NewAdminContext()).Return(&SampleProfiles[0], nil)
+		mockClient.On("GetFileShareSnapshot", c.NewAdminContext(), fileshare.SnapshotId).Return(&SampleFileShareSnapshots[0], nil)
+		mockClient.On("GetFileShare", c.NewAdminContext(), SampleFileShareSnapshots[0].FileShareId).Return(&SampleFileShares[0], nil)
+		mockClient.On("GetProfile", c.NewAdminContext(), fileshare.ProfileId).Return(&SampleFileShareProfiles[0], nil)
+		mockClient.On("CreateFileShare", c.NewAdminContext(), &fileshare).Return(&SampleFileShares[0], nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/file/shares", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output model.FileShareSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 202)
+		assertTestResult(t, &output, &SampleFileShares[0])
+	})
+
+	t.Run("Should return 500 if create file share with bad request", func(t *testing.T) {
+		fileshare := model.FileShareSpec{BaseModel: &model.BaseModel{}}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&fileshare)
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShareSnapshot", c.NewAdminContext(), fileshare.SnapshotId).Return(&SampleFileShareSnapshots[0], nil)
+		mockClient.On("GetFileShare", c.NewAdminContext(), SampleFileShareSnapshots[0].FileShareId).Return(&SampleFileShares[0], nil)
+		mockClient.On("GetProfile", c.NewAdminContext(), fileshare.ProfileId).Return(&SampleFileShareProfiles[0], nil)
+		mockClient.On("CreateFileShare", c.NewAdminContext(), &fileshare).Return(nil, errors.New("db error"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/file/shares", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 500)
+	})
+}
 
 func TestListFileShares(t *testing.T) {
 
@@ -218,6 +286,49 @@ func TestUpdateFileShare(t *testing.T) {
 		r, _ := http.NewRequest("PUT", "/v1beta/file/shares/bd5b12a8-a101-11e7-941e-d77981b584d8", bytes.NewBuffer(jsonStr))
 		w := httptest.NewRecorder()
 		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 500)
+	})
+}
+
+func TestDeleteFileShare(t *testing.T) {
+
+	t.Run("Should return 202 if everything works well", func(t *testing.T) {
+		//var snapshot []*model.FileShareSnapshotSpec
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", c.NewAdminContext(), "d2975ebe-d82c-430f-b28e-f373746a71ca").Return(&SampleFileShares[0], nil)
+		mockClient.On("GetProfile", c.NewAdminContext(), SampleFileShares[0].ProfileId).Return(&SampleFileShareProfiles[0], nil)
+		mockClient.On("ListSnapshotsByShareId", c.NewAdminContext(), SampleFileShares[0].Id).Return(nil, nil)
+		mockClient.On("ListFileShareAclsByShareId", c.NewAdminContext(), SampleFileShares[0].Id).Return(nil, nil)
+		mockClient.On("UpdateFileShare", c.NewAdminContext(), &SampleFileShares[0]).Return(nil, nil)
+		mockClient.On("DeleteFileShare", c.NewAdminContext(), "d2975ebe-d82c-430f-b28e-f373746a71ca").Return(nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("DELETE",
+			"/v1beta/file/shares/d2975ebe-d82c-430f-b28e-f373746a71ca", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 202)
+	})
+
+	t.Run("Should return 500 if delete file share with bad request", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetFileShare", c.NewAdminContext(), "d2975ebe-d82c-430f-b28e-f373746a71ca").Return(&SampleFileShares[1], nil)
+		mockClient.On("GetProfile", c.NewAdminContext(), SampleFileShares[0].ProfileId).Return(&SampleFileShareProfiles[0], nil)
+		mockClient.On("ListSnapshotsByShareId", c.NewAdminContext(), SampleFileShares[1].Id).Return(nil, nil)
+		mockClient.On("ListFileShareAclsByShareId", c.NewAdminContext(), SampleFileShares[1].Id).Return(nil, nil)
+		mockClient.On("UpdateFileShare", c.NewAdminContext(), &SampleFileShares[1]).Return(nil, nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("DELETE",
+			"/v1beta/file/shares/d2975ebe-d82c-430f-b28e-f373746a71ca", nil)
+		w := httptest.NewRecorder()
 		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
 			httpCtx.Input.SetData("context", c.NewAdminContext())
 		})
