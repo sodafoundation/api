@@ -88,11 +88,11 @@ osds::opensds::install(){
 
     export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY
     export OPENSDS_ENDPOINT=http://localhost:50040
-    build/out/bin/osdsctl profile create '{"name": "default_block", "description": "default policy", "storageType": "block"}'
-    build/out/bin/osdsctl profile create '{"name": "default_file", "description": "default policy", "storageType": "file", "provisioningProperties":{"ioConnectivity": {"accessProtocol": "NFS"},"DataStorage":{"StorageAccessCapability":["Read","Write","Execute"]}}}'
+    ${OPENSDS_DIR}/build/out/bin/osdsctl profile create '{"name": "default_block", "description": "default policy", "storageType": "block"}'
+    ${OPENSDS_DIR}/build/out/bin/osdsctl profile create '{"name": "default_file", "description": "default policy", "storageType": "file", "provisioningProperties":{"ioConnectivity": {"accessProtocol": "NFS"},"DataStorage":{"StorageAccessCapability":["Read","Write","Execute"]}}}'
 
     if [ $? == 0 ]; then
-        osds::echo_summary devsds installed successfully !!
+        osds::echo_summary devsds installed successfully !! 
     fi
 )
 }
