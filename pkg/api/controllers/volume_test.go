@@ -19,9 +19,11 @@ import (
 	ctx "context"
 	"encoding/json"
 	"errors"
+	"github.com/sodafoundation/api/pkg/utils/constants"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
@@ -95,6 +97,64 @@ var (
 	}
 	fakeVolumes = []*model.VolumeSpec{fakeVolume}
 )
+
+func TestCreateVolume(t *testing.T) {
+	var jsonStr = []byte(`{
+		"id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		"name":"fake Vol",
+		"description":"fake Vol",
+		"size": 1,
+		"availabilityZone": "default",
+		"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+	}`)
+
+	t.Run("Should return 202 if everything works well", func(t *testing.T) {
+		volume := model.VolumeSpec{BaseModel: &model.BaseModel{
+			Id: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			CreatedAt: time.Now().Format(constants.TimeFormat),
+		},
+		Size: int64(1),
+		AvailabilityZone: "default",
+		ProfileId: "1106b972-66ef-11e7-b172-db03f3689c9c",
+		Status: "creating",
+		}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&volume)
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetDefaultProfile", c.NewAdminContext()).Return(&SampleProfiles[0], nil)
+		mockClient.On("GetProfile", c.NewAdminContext(), SampleVolumes[0].ProfileId).Return(&SampleProfiles[0], nil)
+		mockClient.On("CreateVolume", c.NewAdminContext(), &volume).Return(&SampleVolumes[0], nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/block/volumes", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output model.VolumeSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 202)
+		assertTestResult(t, &output, &SampleVolumes[0])
+	})
+
+	t.Run("Should return 500 if create volume with bad request", func(t *testing.T) {
+		volume := model.VolumeSpec{BaseModel: &model.BaseModel{}}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&volume)
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateVolume", c.NewAdminContext(), &volume).Return(nil, errors.New("db error"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/block/volumes", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 500)
+	})
+}
 
 func TestListVolumes(t *testing.T) {
 
@@ -292,9 +352,104 @@ func TestExtendVolume(t *testing.T) {
 	})
 }
 
+func TestDeleteVolume(t *testing.T) {
+
+	t.Run("Should return 202 if everything works well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[1], nil)
+		mockClient.On("GetProfile", c.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+		mockClient.On("ListSnapshotsByVolumeId", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(nil, nil)
+		mockClient.On("ListAttachmentsByVolumeId", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(nil, nil)
+		mockClient.On("UpdateVolume", c.NewAdminContext(), &SampleVolumes[1]).Return(nil, nil)
+		mockClient.On("DeleteVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[1], nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("DELETE", "/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 202)
+	})
+
+	t.Run("Should return 500 if delete volume with bad request", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("DeleteVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(nil, errors.New("db error"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("DELETE", "/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 500)
+	})
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //                         Tests for volume snapshot                          //
 ////////////////////////////////////////////////////////////////////////////////
+func TestCreateVolumeSnapshot(t *testing.T) {
+	var jsonStr = []byte(`{
+		"id": "3769855c-a102-11e7-b772-17b880d2f537",
+		"name":"fake snapshot",
+		"description":"fake snapshot",
+		"volumeId": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c"
+	}`)
+
+	t.Run("Should return 202 if everything works well", func(t *testing.T) {
+		snapshot := model.VolumeSnapshotSpec{BaseModel: &model.BaseModel{
+			Id: "3769855c-a102-11e7-b772-17b880d2f537",
+			CreatedAt: time.Now().Format(constants.TimeFormat),
+		},
+		VolumeId: "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		ProfileId: "1106b972-66ef-11e7-b172-db03f3689c9c",
+		Status: "creating",
+		Metadata: map[string]string{},
+		}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&snapshot)
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetProfile", c.NewAdminContext(), snapshot.ProfileId).Return(&SampleProfiles[0], nil)
+		mockClient.On("GetVolume", c.NewAdminContext(), snapshot.VolumeId).Return(&SampleVolumes[2], nil)
+		mockClient.On("CreateVolumeSnapshot", c.NewAdminContext(), &snapshot).
+			Return(&SampleSnapshots[0], nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/block/snapshots", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output model.VolumeSnapshotSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 202)
+		assertTestResult(t, &output, &SampleSnapshots[0])
+	})
+
+	t.Run("Should return 500 if create volume snapshot with bad request", func(t *testing.T) {
+		snapshot := model.VolumeSnapshotSpec{BaseModel: &model.BaseModel{}}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&snapshot)
+		mockClient := new(dbtest.Client)
+		mockClient.On("CreateVolumeSnapshot", c.NewAdminContext(), &snapshot).
+			Return(nil, errors.New("db error"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/block/snapshots", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 500)
+	})
+}
 
 func TestListVolumeSnapshots(t *testing.T) {
 
@@ -427,6 +582,42 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 		r, _ := http.NewRequest("PUT", "/v1beta/block/snapshots/3769855c-a102-11e7-b772-17b880d2f537", bytes.NewBuffer(jsonStr))
 		w := httptest.NewRecorder()
 		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 500)
+	})
+}
+
+func TestDeleteVolumeSnapshot(t *testing.T) {
+
+	t.Run("Should return 202 if everything works well", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetProfile", c.NewAdminContext(), SampleSnapshots[0].ProfileId).Return(&SampleProfiles[0], nil)
+		mockClient.On("GetVolumeSnapshot", c.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(&SampleSnapshots[0], nil)
+		mockClient.On("GetVolume", c.NewAdminContext(), SampleSnapshots[0].VolumeId).Return(&SampleVolumes[0], nil)
+		mockClient.On("UpdateVolumeSnapshot", c.NewAdminContext(), SampleSnapshots[0].Id, &SampleSnapshots[0]).Return(nil, nil)
+		mockClient.On("DeleteVolumeSnapshot", c.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(&SampleSnapshots[0], nil)
+
+		db.C = mockClient
+
+		r, _ := http.NewRequest("DELETE", "/v1beta/block/snapshots/3769855c-a102-11e7-b772-17b880d2f537", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 202)
+	})
+
+	t.Run("Should return 500 if delete volume snapshot with bad request", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("DeleteVolumeSnapshot", c.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(nil, errors.New("db error"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("DELETE", "/v1beta/block/snapshots/3769855c-a102-11e7-b772-17b880d2f537", nil)
+		w := httptest.NewRecorder()
 		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
 			httpCtx.Input.SetData("context", c.NewAdminContext())
 		})
