@@ -25,12 +25,13 @@ import (
 	"fmt"
 
 	log "github.com/golang/glog"
+	"github.com/sodafoundation/api/pkg/api/controllerclient"
 	"github.com/sodafoundation/api/pkg/api/policy"
 	"github.com/sodafoundation/api/pkg/api/util"
 	c "github.com/sodafoundation/api/pkg/context"
-	"github.com/sodafoundation/api/pkg/api/controllerclient"
 	"github.com/sodafoundation/api/pkg/db"
 	"github.com/sodafoundation/api/pkg/model"
+	csi "github.com/sodafoundation/api/pkg/model/csi"
 	pb "github.com/sodafoundation/api/pkg/model/proto"
 	. "github.com/sodafoundation/api/pkg/utils/config"
 )
@@ -110,31 +111,16 @@ func (v *VolumePortal) CreateVolume() {
 		return
 	}
 
-	opt := &pb.CreateVolumeOpts{
-		Id:               result.Id,
-		Name:             result.Name,
-		Description:      result.Description,
-		Size:             result.Size,
-		AvailabilityZone: result.AvailabilityZone,
-		// TODO: ProfileId will be removed later.
-		ProfileId:         result.ProfileId,
-		Profile:           prf.ToJson(),
-		PoolId:            result.PoolId,
-		SnapshotId:        result.SnapshotId,
-		Metadata:          result.Metadata,
-		SnapshotFromCloud: result.SnapshotFromCloud,
-		Context:           ctx.ToJson(),
+	csiOpt := &csi.CreateVolumeRequest{
+		Name: "Test-Name",
 	}
-	response, err := v.CtrClient.CreateVolume(context.Background(), opt)
+
+	response, err := v.CtrClient.CreateVolume(context.Background(), csiOpt)
 	if err != nil {
-		log.Error("create volume failed in controller service:", err)
+		log.Error("create volume failed in Dock service:", err)
 		return
 	}
-	if errorMsg := response.GetError(); errorMsg != nil {
-		log.Errorf("failed to create volume in controller, code: %v, message: %v",
-			errorMsg.GetCode(), errorMsg.GetDescription())
-		return
-	}
+	log.Info(response)
 
 	return
 }
@@ -316,12 +302,12 @@ func (v *VolumePortal) DeleteVolume() {
 		return
 	}
 
-	prf, err := db.C.GetProfile(ctx, volume.ProfileId)
-	if err != nil {
-		errMsg := fmt.Sprintf("delete volume failed: %v", err.Error())
-		v.ErrorHandle(model.ErrorBadRequest, errMsg)
-		return
-	}
+	//prf, err := db.C.GetProfile(ctx, volume.ProfileId)
+	//if err != nil {
+	//	errMsg := fmt.Sprintf("delete volume failed: %v", err.Error())
+	//	v.ErrorHandle(model.ErrorBadRequest, errMsg)
+	//	return
+	//}
 
 	// NOTE:It will update the the status of the volume waiting for deletion in
 	// the database to "deleting" and return the result immediately.
@@ -341,24 +327,28 @@ func (v *VolumePortal) DeleteVolume() {
 		return
 	}
 
-	opt := &pb.DeleteVolumeOpts{
-		Id:        volume.Id,
-		ProfileId: volume.ProfileId,
-		PoolId:    volume.PoolId,
-		Metadata:  volume.Metadata,
-		Context:   ctx.ToJson(),
-		Profile:   prf.ToJson(),
-	}
-	response, err := v.CtrClient.DeleteVolume(context.Background(), opt)
+	//opt := &pb.DeleteVolumeOpts{
+	//	Id:        volume.Id,
+	//	ProfileId: volume.ProfileId,
+	//	PoolId:    volume.PoolId,
+	//	Metadata:  volume.Metadata,
+	//	Context:   ctx.ToJson(),
+	//	Profile:   prf.ToJson(),
+	//}
+
+	csiOpt := &csi.DeleteVolumeRequest{}
+	response, err := v.CtrClient.DeleteVolume(context.Background(), csiOpt)
 	if err != nil {
 		log.Error("delete volume failed in controller service:", err)
 		return
 	}
-	if errorMsg := response.GetError(); errorMsg != nil {
-		log.Errorf("failed to delete volume in controller, code: %v, message: %v",
-			errorMsg.GetCode(), errorMsg.GetDescription())
-		return
-	}
+
+	log.Info(response)
+	//if errorMsg := response.GetError(); errorMsg != nil {
+	//	log.Errorf("failed to delete volume in controller, code: %v, message: %v",
+	//		errorMsg.GetCode(), errorMsg.GetDescription())
+	//	return
+	//}
 
 	return
 }

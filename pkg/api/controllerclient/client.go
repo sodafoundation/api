@@ -19,6 +19,7 @@ import (
 
 	log "github.com/golang/glog"
 	pb "github.com/sodafoundation/api/pkg/model/proto"
+	csi "github.com/sodafoundation/api/pkg/model/csi"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
@@ -30,8 +31,9 @@ import (
 // Client also exposes two methods: Connect() and Close(), for which callers
 // can easily open and close gRPC connection.
 type Client interface {
-	pb.ControllerClient
+	pb.ApiControllerClient
 	pb.FileShareControllerClient
+	csi.ControllerClient
 
 	Connect(edp string) error
 }
@@ -40,8 +42,9 @@ type Client interface {
 // called in real environment. There would be more other kind of connection
 // in the long run.
 type client struct {
-	pb.ControllerClient
+	pb.ApiControllerClient
 	pb.FileShareControllerClient
+	csi.ControllerClient
 	*grpc.ClientConn
 }
 
@@ -49,6 +52,7 @@ func NewClient() Client { return &client{} }
 
 func (c *client) Connect(edp string) error {
 	// Set up a connection to the Dock server.
+	log.Infof("i h here:%v")
 	if c.ClientConn != nil && c.ClientConn.GetState() == connectivity.Ready {
 		return nil
 	}
@@ -63,8 +67,9 @@ func (c *client) Connect(edp string) error {
 		return err
 	}
 	// Create controller client via the connection.
-	c.ControllerClient = pb.NewControllerClient(conn)
+	c.ApiControllerClient = pb.NewApiControllerClient(conn)
 	c.FileShareControllerClient = pb.NewFileShareControllerClient(conn)
+	c.ControllerClient = csi.NewControllerClient(conn)
 	c.ClientConn = conn
 
 	return nil
