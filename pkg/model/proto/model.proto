@@ -35,12 +35,12 @@ syntax = "proto3";
 package proto;
 
 
-service Controller {
+service ApiController {
     // Create a volume
-    rpc CreateVolume (CreateVolumeOpts) returns (GenericResponse){}
+    rpc CreateDockVolume (CreateVolumeOpts) returns (GenericResponse){}
 
     // Delete a volume
-    rpc DeleteVolume (DeleteVolumeOpts) returns (GenericResponse){}
+    rpc DeleteDockVolume (DeleteVolumeOpts) returns (GenericResponse){}
 
     // Extend a volume
     rpc ExtendVolume (ExtendVolumeOpts) returns (GenericResponse){}
@@ -97,10 +97,10 @@ service Controller {
 
 service ProvisionDock {
     // Create a volume
-    rpc CreateVolume (CreateVolumeOpts) returns (GenericResponse){}
+    rpc CreateDockVolume (CreateVolumeOpts) returns (GenericResponse){}
 
     // Delete a volume
-    rpc DeleteVolume (DeleteVolumeOpts) returns (GenericResponse){}
+    rpc DeleteDockVolume (DeleteVolumeOpts) returns (GenericResponse){}
 
     // Extend a volume
     rpc ExtendVolume (ExtendVolumeOpts) returns (GenericResponse){}
