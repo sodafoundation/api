@@ -4,7 +4,6 @@
 # 	docker run -d --net=host -v /etc/opensds:/etc/opensds sodafoundation/apiserver:latest
 
 FROM ubuntu:16.04
-MAINTAINER Leon Wang <wanghui71leon@gmail.com>
 
 COPY osdsapiserver /usr/bin
 
