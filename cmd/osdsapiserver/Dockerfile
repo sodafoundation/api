@@ -1,10 +1,9 @@
 # Docker build usage:
-# 	docker build . -t opensdsio/opensds-apiserver:latest
+# 	docker build . -t sodafoundation/apiserver:latest
 # Docker run usage:
-# 	docker run -d --net=host -v /etc/opensds:/etc/opensds opensdsio/opensds-apiserver:latest
+# 	docker run -d --net=host -v /etc/opensds:/etc/opensds sodafoundation/apiserver:latest
 
 FROM ubuntu:16.04
-MAINTAINER Leon Wang <wanghui71leon@gmail.com>
 
 COPY osdsapiserver /usr/bin
 
