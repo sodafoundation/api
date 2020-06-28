@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: apiserver
-        image: opensdsio/opensds-apiserver:latest
+        image: sodafoundation/apiserver:latest
         imagePullPolicy: IfNotPresent
         command: ["bin/sh"]
         args: ["-c", "/usr/bin/osdsapiserver -logtostderr"]
