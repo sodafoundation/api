@@ -50,7 +50,7 @@ metricexporter:
 
 docker: build
 	cp $(BUILD_DIR)/bin/osdsapiserver ./cmd/osdsapiserver
-	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:latest
+	docker build cmd/osdsapiserver -t sodafoundation/apiserver:latest
 
 test: build
 	install/CI/test

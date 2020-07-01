@@ -48,7 +48,7 @@ spec:
     spec:
       containers:
       - name: apiserver
-        image: opensdsio/opensds-apiserver:latest
+        image: sodafoundation/apiserver:latest
         imagePullPolicy: IfNotPresent
         command: ["bin/sh"]
         args: ["-c", "/usr/bin/osdsapiserver -logtostderr"]
@@ -99,7 +99,7 @@ spec:
     spec:
       containers:
       - name: controller
-        image: opensdsio/opensds-controller:latest
+        image: sodafoundation/controller:latest
         imagePullPolicy: IfNotPresent
         command: ["bin/sh"]
         args: ["-c", "/usr/bin/osdslet -logtostderr"]
@@ -155,7 +155,7 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-          image: opensdsio/opensds-dock:latest
+          image: sodafoundation/dock:latest
           imagePullPolicy: IfNotPresent
           command: ["bin/sh"]
           args: ["-c", "/usr/sbin/tgtd; /usr/bin/osdsdock -logtostderr"]
@@ -249,7 +249,7 @@ spec:
     spec:
       containers:
       - name: dashboard
-        image: opensdsio/dashboard:latest
+        image: sodafoundation/dashboard:latest
         env:
         - name: OPENSDS_AUTH_URL
           value: http://authchecker.opensds.svc.cluster.local/identity

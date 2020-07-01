@@ -32,6 +32,8 @@ matrix:
 
 
 install:
+  # TODO: Remove once source code is fixed for sodafoundation
+  - ln -s $GOPATH/src/sodafoundation $GOPATH/src/opensds
   # Build OpenSDS Controller source code
   - make osdsapiserver
   - make osdsctl

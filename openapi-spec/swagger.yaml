@@ -6,7 +6,7 @@ info:
   termsOfService: 'https://www.linuxfoundation.org/terms'
   contact:
     name: SODA Support
-    url: 'https://opensds.slack.com'
+    url: 'https://sodafoundation.io/slack'
     email: support@sodafoundation.io
   license:
     name: Apache 2.0

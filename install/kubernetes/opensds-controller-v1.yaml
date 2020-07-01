@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: controller
-        image: opensdsio/opensds-controller:latest
+        image: sodafoundation/controller:latest
         imagePullPolicy: IfNotPresent
         command: ["bin/sh"]
         args: ["-c", "/usr/bin/osdslet -logtostderr"]
