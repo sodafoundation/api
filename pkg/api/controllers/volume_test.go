@@ -138,10 +138,14 @@ func TestCreateVolume(t *testing.T) {
 		assertTestResult(t, &output, &SampleVolumes[0])
 	})
 
-	t.Run("Should return 500 if create volume with bad request", func(t *testing.T) {
-		volume := model.VolumeSpec{BaseModel: &model.BaseModel{}}
+	t.Run("Should return 400 if create volume with bad request", func(t *testing.T) {
+		volume := model.VolumeSpec{BaseModel: &model.BaseModel{
+			CreatedAt: time.Now().Format(constants.TimeFormat),
+		},
+			Status: "creating"}
 		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&volume)
 		mockClient := new(dbtest.Client)
+		mockClient.On("GetProfile", c.NewAdminContext(), volume.ProfileId).Return(&SampleProfiles[0], nil)
 		mockClient.On("CreateVolume", c.NewAdminContext(), &volume).Return(nil, errors.New("db error"))
 		db.C = mockClient
 
@@ -152,7 +156,7 @@ func TestCreateVolume(t *testing.T) {
 			httpCtx.Input.SetData("context", c.NewAdminContext())
 		})
 		beego.BeeApp.Handlers.ServeHTTP(w, r)
-		assertTestResult(t, w.Code, 500)
+		assertTestResult(t, w.Code, 400)
 	})
 }
 
@@ -223,7 +227,7 @@ func TestGetVolume(t *testing.T) {
 		assertTestResult(t, &output, &SampleVolumes[0])
 	})
 
-	t.Run("Should return 404 if get volume replication with bad request", func(t *testing.T) {
+	t.Run("Should return 404 if resource does not exist", func(t *testing.T) {
 		mockClient := new(dbtest.Client)
 		mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(nil, errors.New("db error"))
 		db.C = mockClient
@@ -241,6 +245,10 @@ func TestGetVolume(t *testing.T) {
 func TestUpdateVolume(t *testing.T) {
 	var jsonStr = []byte(`{
 		"id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		"name":"fake Vol",
+		"description":"fake Vol"
+	}`)
+	var badjsonStr = []byte(`{
 		"name":"fake Vol",
 		"description":"fake Vol"
 	}`)
@@ -276,14 +284,14 @@ func TestUpdateVolume(t *testing.T) {
 		assertTestResult(t, &output, &expected)
 	})
 
-	t.Run("Should return 500 if update volume with bad request", func(t *testing.T) {
+	t.Run("Should return 404 if update volume resource does not exist", func(t *testing.T) {
 		volume := model.VolumeSpec{BaseModel: &model.BaseModel{}}
-		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&volume)
+		json.NewDecoder(bytes.NewBuffer(badjsonStr)).Decode(&volume)
 		mockClient := new(dbtest.Client)
 		mockClient.On("UpdateVolume", c.NewAdminContext(), &volume).Return(nil, errors.New("db error"))
 		db.C = mockClient
 
-		r, _ := http.NewRequest("PUT", "/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8", bytes.NewBuffer(jsonStr))
+		r, _ := http.NewRequest("PUT", "/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d9", bytes.NewBuffer(jsonStr))
 		w := httptest.NewRecorder()
 		r.Header.Set("Content-Type", "application/JSON")
 		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
@@ -571,7 +579,7 @@ func TestUpdateVolumeSnapshot(t *testing.T) {
 		assertTestResult(t, &output, &expected)
 	})
 
-	t.Run("Should return 500 if update volume snapshot with bad request", func(t *testing.T) {
+	t.Run("Should return 400 if update volume snapshot with bad request", func(t *testing.T) {
 		snapshot := model.VolumeSnapshotSpec{BaseModel: &model.BaseModel{}}
 		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&snapshot)
 		mockClient := new(dbtest.Client)
@@ -613,8 +621,13 @@ func TestDeleteVolumeSnapshot(t *testing.T) {
 
 	t.Run("Should return 500 if delete volume snapshot with bad request", func(t *testing.T) {
 		mockClient := new(dbtest.Client)
+		mockClient.On("GetVolume", c.NewAdminContext(), SampleSnapshots[0].VolumeId).Return(nil, nil)
+		mockClient.On("GetProfile", c.NewAdminContext(), SampleSnapshots[0].ProfileId).Return(&SampleProfiles[0], nil)
+		mockClient.On("GetVolumeSnapshot", c.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(nil, nil)
+		mockClient.On("UpdateVolumeSnapshot", c.NewAdminContext(), SampleSnapshots[0].Id, &SampleSnapshots[0]).Return(nil, nil)
 		mockClient.On("DeleteVolumeSnapshot", c.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f537").Return(nil, errors.New("db error"))
 		db.C = mockClient
+		mockClient.On("Connect", "127.0.0.1")
 
 		r, _ := http.NewRequest("DELETE", "/v1beta/block/snapshots/3769855c-a102-11e7-b772-17b880d2f537", nil)
 		w := httptest.NewRecorder()
