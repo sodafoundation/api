@@ -1,7 +1,7 @@
 version: '2'
 services:
   osdsapiserver:
-    image: 'opensdsio/opensds-apiserver:latest'
+    image: 'sodafoundation/apiserver:latest'
     tty: true
     network_mode: "host"
     volumes:
@@ -12,7 +12,7 @@ services:
     restart: on-failure
     command: /bin/bash -c '/usr/bin/osdsapiserver -logtostderr'
   osdslet:
-    image: 'opensdsio/opensds-controller:latest'
+    image: 'sodafoundation/controller:latest'
     tty: true
     network_mode: "host"
     volumes:
@@ -22,7 +22,7 @@ services:
     restart: on-failure
     command: /bin/bash -c '/usr/bin/osdslet -logtostderr'
   osdsdock:
-    image: 'opensdsio/opensds-dock:latest'
+    image: 'sodafoundation/dock:latest'
     tty: true
     privileged: true
     volumes:
@@ -52,7 +52,7 @@ services:
     privileged: true
     restart: on-failure
   osdsdashboard:
-    image: 'opensdsio/dashboard:latest'
+    image: 'sodafoundation/dashboard:latest'
     tty: true
     network_mode: "host"
     restart: on-failure
