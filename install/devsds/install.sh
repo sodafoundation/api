@@ -163,7 +163,7 @@ else
 fi
 
 echo
-echo "Execute commands blow to set up ENVs which are needed by OpenSDS CLI:"
+echo "Execute commands below to set up ENVs which are needed by SODA CLI:"
 echo "------------------------------------------------------------------"
 echo "export OPENSDS_AUTH_STRATEGY=$OPENSDS_AUTH_STRATEGY"
 echo "export OPENSDS_ENDPOINT=http://localhost:50040"
