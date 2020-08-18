@@ -31,7 +31,7 @@ build: prebuild osdsapiserver osdsctl
 prebuild:
 	mkdir -p $(BUILD_DIR)
 
-.PHONY: osdsdock osdslet osdsapiserver osdsctl docker test protoc goimports
+.PHONY: osdsdock osdslet osdsapiserver osdsctl docker docker.arm64 test protoc goimports
 
 osdsdock:
 	go build -ldflags '-w -s' -o $(BUILD_DIR)/bin/osdsdock github.com/sodafoundation/dock/cmd/osdsdock
@@ -51,6 +51,14 @@ metricexporter:
 docker: build
 	cp $(BUILD_DIR)/bin/osdsapiserver ./cmd/osdsapiserver
 	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver:latest
+
+docker.arm64: build
+	cp $(BUILD_DIR)/bin/osdsdock ./cmd/osdsdock
+	cp $(BUILD_DIR)/bin/osdslet ./cmd/osdslet
+	cp $(BUILD_DIR)/bin/osdsapiserver ./cmd/osdsapiserver
+	docker build cmd/osdsdock -t opensdsio/opensds-dock-arm64:latest
+	docker build cmd/osdslet -t opensdsio/opensds-controller-arm64:latest
+	docker build cmd/osdsapiserver -t opensdsio/opensds-apiserver-arm64:latest
 
 test: build
 	install/CI/test
