@@ -17,6 +17,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -102,6 +103,56 @@ func TestCreateHost(t *testing.T) {
 		assertTestResult(t, &output, fakeHost)
 
 	})
+	t.Run("Should return 400 for invalid request - lists not found db error", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("ListHostsByName", c.NewAdminContext(), hostReq.HostName).Return(nil, errors.New("List hosts failed: "))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/host/hosts", bytes.NewBuffer(ByteHostReq))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+		assertTestResult(t, w.Code, 400)
+
+	})
+	t.Run("Should return 400 - for some db error while creating host", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("ListHostsByName", c.NewAdminContext(), hostReq.HostName).Return(nil, nil)
+		mockClient.On("CreateHost", c.NewAdminContext(), &hostReq).Return(nil, errors.New("db error"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/host/hosts", bytes.NewBuffer(ByteHostReq))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+		assertTestResult(t, w.Code, 400)
+	})
+	t.Run("Should return 400 - the host with same name already exists in the system", func(t *testing.T) {
+		fakeHost := []*model.HostSpec{&SampleHosts[0], &SampleHosts[1]}
+
+		mockClient := new(dbtest.Client)
+		mockClient.On("ListHostsByName", c.NewAdminContext(), hostReq.HostName).Return(fakeHost, nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/host/hosts", bytes.NewBuffer(ByteHostReq))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+		assertTestResult(t, w.Code, 400)
+
+	})
 }
 
 func TestListHosts(t *testing.T) {
@@ -114,11 +165,28 @@ func TestListHosts(t *testing.T) {
 
 		r, _ := http.NewRequest("GET", "/v1beta/host/hosts", nil)
 		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
 		beego.BeeApp.Handlers.ServeHTTP(w, r)
 		var output []*model.HostSpec
 		json.Unmarshal(w.Body.Bytes(), &output)
 		assertTestResult(t, w.Code, 200)
 		assertTestResult(t, output, fakeHosts)
+	})
+
+	t.Run("Should return 400 - when lists fails with db error", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("ListHosts", c.NewAdminContext(), map[string][]string{}).Return(nil, errors.New("When list hosts in db:"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("GET", "/v1beta/host/hosts", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 400)
 	})
 }
 
@@ -132,11 +200,29 @@ func TestGetHost(t *testing.T) {
 
 		r, _ := http.NewRequest("GET", "/v1beta/host/hosts/"+SampleHosts[0].Id, nil)
 		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
 		beego.BeeApp.Handlers.ServeHTTP(w, r)
 		var output model.HostSpec
 		json.Unmarshal(w.Body.Bytes(), &output)
 		assertTestResult(t, w.Code, 200)
 		assertTestResult(t, &output, fakeHost)
+	})
+
+	t.Run("Should return 404 - specified host id doesn't exists in db", func(t *testing.T) {
+		fakeHost := &SampleHosts[0]
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetHost", c.NewAdminContext(), fakeHost.Id).Return(nil, errors.New("specified host(202964b5-8e73-46fd-b41b-a8e403f3c30b) can't find"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("GET", "/v1beta/host/hosts/"+SampleHosts[0].Id, nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 404)
 	})
 }
 
@@ -167,6 +253,28 @@ func TestUpdateHost(t *testing.T) {
 		assertTestResult(t, w.Code, 200)
 		assertTestResult(t, &output, fakeHost)
 
+	})
+
+	t.Run("Should return 400 - update host failed with db error", func(t *testing.T) {
+		fakeHost := &SampleHosts[0]
+		var fakeHostUpdateReq model.HostSpec
+		tmp, _ := json.Marshal(&hostReq)
+		json.Unmarshal(tmp, &fakeHostUpdateReq)
+		fakeHostUpdateReq.Id = fakeHost.Id
+
+		mockClient := new(dbtest.Client)
+		mockClient.On("UpdateHost", c.NewAdminContext(), &fakeHostUpdateReq).Return(nil, errors.New("update host failed:"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("PUT", "/v1beta/host/hosts/"+fakeHost.Id, bytes.NewBuffer(ByteHostReq))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+		assertTestResult(t, w.Code, 400)
 	})
 }
 
