@@ -22,7 +22,7 @@ OPT_DIR=/opt/opensds
 mkdir -p $OPT_DIR
 
 # Golang version
-MINIMUM_GO_VERSION=${MINIMUM_GO_VERSION:-go1.11.1}
+MINIMUM_GO_VERSION=${MINIMUM_GO_VERSION:-go1.12.1}
 GOENV_PROFILE=${GOENV_PROFILE:-/etc/profile.d/goenv.sh}
 
 # Log file
