@@ -22,7 +22,8 @@ before_install:
   - sudo apt-get install -y librados-dev librbd-dev
   - sudo apt-get install -y lvm2 tgt open-iscsi
   - sudo docker pull p1c2u/openapi-spec-validator
-
+  - go get -v github.com/onsi/gomega
+  - go get -v github.com/onsi/ginkgo/ginkgo
 
 matrix:
   fast_finish: true
@@ -41,6 +42,11 @@ install:
 script:
   - ./install/CI/coverage
   - ./install/CI/test
+
+after_failure:
+  - for v in /var/log/opensds/*.log ; do
+    echo $v logtail ======================== ; tail -100 $v ;
+    done
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
