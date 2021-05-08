@@ -1,7 +1,7 @@
 # SODA API
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/sodafoundation/api?branch=master)](https://goreportcard.com/report/github.com/sodafoundation/api)
-[![Build Status](https://travis-ci.org/sodafoundation/api.svg?branch=master)](https://travis-ci.org/sodafoundation/api)
+[![Build Status](https://github.com/sodafoundation/api/actions/workflows/ci.yml/badge.svg)](https://github.com/sodafoundation/api/actions/workflows/ci.yml)
 [![codecov.io](https://codecov.io/github/sodafoundation/api/coverage.svg?branch=master)](https://codecov.io/github/sodafoundation/api?branch=master)
 [![Releases](https://img.shields.io/github/release/sodafoundation/api/all.svg?style=flat-square)](https://github.com/sodafoundation/api/releases)
 [![LICENSE](https://img.shields.io/github/license/sodafoundation/api.svg?style=flat-square)](https://github.com/sodafoundation/api/blob/master/LICENSE)
