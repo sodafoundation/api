@@ -7,15 +7,14 @@
 # Docker run usage:
 #   docker run -d --privileged=true --name opensds-authchecker opensdsio/opensds-authchecker:latest
 
-FROM ubuntu:16.04
-MAINTAINER Leon Wang <wanghui71leon@gmail.com>
+FROM ubuntu:18.04
 
 COPY keystone.sh /keystone.sh
 COPY entrypoint.sh /entrypoint.sh
 
 # Install some packages before running command.
 RUN apt-get update && apt-get install -y \
-    sudo nano git telnet net-tools iptables gnutls-bin ca-certificates && \
+    sudo nano git init telnet net-tools iptables gnutls-bin ca-certificates && \
     mkdir -p /opt/stack/
 
 RUN ["chmod", "+x", "/keystone.sh", "/entrypoint.sh"]

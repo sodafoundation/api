@@ -26,7 +26,7 @@ STACK_GIT_BASE=${STACK_GIT_BASE:-https://git.openstack.org}
 STACK_USER_NAME=${STACK_USER_NAME:-stack}
 STACK_PASSWORD=${STACK_PASSWORD:-opensds@123}
 STACK_HOME=${STACK_HOME:-/opt/stack}
-STACK_BRANCH=${STACK_BRANCH:-stable/queens}
+STACK_BRANCH=${STACK_BRANCH:-stable/train}
 DEV_STACK_DIR=$STACK_HOME/devstack
 
 # Multi-Cloud service name in keystone
@@ -39,6 +39,8 @@ osds::keystone::create_user(){
         return
     fi
     sudo useradd -s /bin/bash -d ${STACK_HOME} -m ${STACK_USER_NAME}
+    # To Grant permission to STACK_USER to access STACK_HOME
+    sudo chown -R ${STACK_USER_NAME}:${STACK_USER_NAME} ${STACK_HOME}
     echo "stack ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/stack
 }
 
@@ -121,7 +123,7 @@ osds::keystone::install(){
 
 	osds::keystone::devstack_local_conf
 	cd ${DEV_STACK_DIR}
-	su $STACK_USER_NAME -c ${DEV_STACK_DIR}/stack.sh
+	su $STACK_USER_NAME -c FORCE=yes ${DEV_STACK_DIR}/stack.sh
 	osds::keystone::create_user_and_endpoint
 	osds::keystone::delete_redundancy_data
 }
