@@ -20,7 +20,7 @@ echo "" > coverage.txt
 MODEL_PACKAGE=github.com/sodafoundation/api/pkg/model
 PROTOBUF_PACKAGE=github.com/sodafoundation/api/pkg/model/proto
 
-for testpkg in $(go list ./osdsctl/... ./client/... ./pkg/... ./contrib/...); do
+for testpkg in $(go list ./osdsctl/... ./client/... ./pkg/...); do
   test $testpkg == "$MODEL_PACKAGE" && continue
   test $testpkg == "$PROTOBUF_PACKAGE" && continue
   go test -race -covermode=atomic -coverprofile=profile.out "$testpkg"

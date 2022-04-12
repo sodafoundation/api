@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 	"testing"
 )
 
@@ -95,7 +96,7 @@ func writeToTestFile(t *testing.T, s string) {
 }
 
 func TestHelperProcess(t *testing.T) {
-	defer os.Exit(0)
+	defer syscall.Exit(0)
 	args := os.Args
 	for len(args) > 0 {
 		if args[0] == "--" {
@@ -106,7 +107,7 @@ func TestHelperProcess(t *testing.T) {
 	}
 	if len(args) == 0 {
 		fmt.Fprint(os.Stderr, "No command\n")
-		os.Exit(0)
+		syscall.Exit(0)
 	}
 
 	writeToTestFile(t, strings.Join(args, " "))

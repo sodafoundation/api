@@ -10,39 +10,25 @@ jobs:
         
     strategy:
       matrix:
-        go-version: [1.12.x, 1.13.x]
-        os: [ubuntu-16.04]
+        go-version: [1.18]
+        os: [ubuntu-18.04]
 
     runs-on: ${{ matrix.os }}
     steps:
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
         go-version: ${{ matrix.go-version }}
+        check-latest: true
 
     - name: Checkout project  
-      uses: actions/checkout@v2
-
-    - name: Symlink source into GOPATH for api
-      run: |
-        mkdir -p $(go env GOPATH)/src/github.com/sodafoundation/api
-        sudo ln -s $(pwd) $(go env GOPATH)/src/github.com/sodafoundation/api
-
-    - name: Create the Folder structure and symlink to opensds (TODO:-Fix vendor module from opensds to sodafoundation)
-      run: |
-        echo "Check current dir: \n" 
-        pwd
-        echo "GOPATH: $(go env GOPATH)"
-        sudo mkdir -p $(go env GOPATH)/src/github.com/opensds
-        sudo ln -s $(go env GOPATH)/src/github.com/sodafoundation $(go env GOPATH)/src/github.com/opensds
+      uses: actions/checkout@v3
       
     - name: Install Pre-requisites
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential gcc
-        sudo apt-get install -y librados-dev librbd-dev
-        sudo apt-get install -y lvm2 tgt open-iscsi
-        sudo docker pull p1c2u/openapi-spec-validator
+        sudo apt-get install -y build-essential gcc librados-dev librbd-dev lvm2 tgt open-iscsi
+        docker pull p1c2u/openapi-spec-validator
       
     - name: Build the binaries
       run: |
@@ -53,7 +39,7 @@ jobs:
       run: ./install/CI/coverage && ./install/CI/test
     
     - name: After success run Codecov Coverage tool.
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v2
     
     - name: Clean up the build
       run: |

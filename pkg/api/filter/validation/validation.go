@@ -24,24 +24,27 @@ import (
 	bctx "github.com/astaxie/beego/context"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
+	"github.com/getkin/kin-openapi/routers/gorillamux"
 	"github.com/golang/glog"
 	myctx "github.com/sodafoundation/api/pkg/context"
 )
 
 // Factory returns a fiter function of api request
 func Factory(filename string) beego.FilterFunc {
-	swagger, err := openapi3.NewSwaggerLoader().LoadSwaggerFromFile(filename)
+	swagger, err := openapi3.NewLoader().LoadFromFile(filename)
 	if err != nil {
 		glog.Warningf("error loading %s api swagger file: %s", filename, err)
 		return func(httpCtx *bctx.Context) {}
 	}
 
+	_ = swagger.Validate(context.TODO())
+
 	// Server is not required for finding route
 	swagger.Servers = nil
-	router := openapi3filter.NewRouter().WithSwagger(swagger)
+	router, _ := gorillamux.NewRouter(swagger)
 	return func(httpCtx *bctx.Context) {
 		req := httpCtx.Request
-		route, pathParams, err := router.FindRoute(req.Method, req.URL)
+		route, pathParams, err := router.FindRoute(req)
 		if err != nil {
 			glog.Errorf("failed to find route from swagger: %s", err)
 			myctx.HttpError(httpCtx, http.StatusBadRequest, "failed to find route %s:%s from swagger: %s", req.Method, req.URL, err)
