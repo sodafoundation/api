@@ -10,7 +10,7 @@
 
 ## Introduction
 
-SODA API is an open source implementation of SODA API Standards for Data and Storage Management. The effort is to provide a common unified data and storage interface to store, run any data anywhere.
+SODA API is an open source implementation of SODA API Standards for Data and Storage Management. The effort is to provide a common unified data and storage interface to store, run any data anywhere. It is part of SODA Terra (SDS Controller). There are other two repositories part of SODA Terra viz., [Controller](https://github.com/sodafoundation/controller) and [Dock](https://github.com/sodafoundation/dock)
 
 This project implements the API Server, Different API services, utilities and more. The implementation will be based on the API standards from The SODA Foundation.
 
