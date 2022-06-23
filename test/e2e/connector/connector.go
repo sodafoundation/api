@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sodafoundation/api/contrib/connector"
-	_ "github.com/sodafoundation/api/contrib/connector/iscsi"
-	_ "github.com/sodafoundation/api/contrib/connector/nvmeof"
+	"github.com/sodafoundation/dock/contrib/connector"
+	_ "github.com/sodafoundation/dock/contrib/connector/iscsi"
+	_ "github.com/sodafoundation/dock/contrib/connector/nvmeof"
 )
 
 const (
@@ -44,7 +44,7 @@ func main() {
 	}
 
 	accPro := os.Args[3]
-	fmt.Printf("accpro: %s",accPro)
+	fmt.Printf("accpro: %s", accPro)
 	switch os.Args[1] {
 	case attachCommand:
 		dev, err := connector.NewConnector(accPro).Attach(connData)

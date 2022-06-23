@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build integration
 // +build integration
 
 package integration
@@ -20,10 +21,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/sodafoundation/api/pkg/controller/volume"
 	"github.com/sodafoundation/api/pkg/model"
 	pb "github.com/sodafoundation/api/pkg/model/proto"
 	. "github.com/sodafoundation/api/testutils/collection"
+	"github.com/sodafoundation/controller/pkg/controller/volume"
 )
 
 var (

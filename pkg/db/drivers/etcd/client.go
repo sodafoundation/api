@@ -20,11 +20,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/pkg/transport"
 	"github.com/sodafoundation/api/pkg/utils/config"
 	"github.com/sodafoundation/api/pkg/utils/pwd"
+	"go.etcd.io/etcd/client/pkg/v3/transport"
+	clientv3 "go.etcd.io/etcd/client/v3"
 
-	"github.com/coreos/etcd/clientv3"
 	log "github.com/golang/glog"
 	"github.com/sodafoundation/api/pkg/utils"
 )
