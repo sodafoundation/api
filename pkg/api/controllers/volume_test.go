@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
@@ -29,6 +30,7 @@ import (
 	"github.com/sodafoundation/api/pkg/db"
 	"github.com/sodafoundation/api/pkg/model"
 	pb "github.com/sodafoundation/api/pkg/model/proto"
+	"github.com/sodafoundation/api/pkg/utils/constants"
 	. "github.com/sodafoundation/api/testutils/collection"
 	ctrtest "github.com/sodafoundation/api/testutils/controller/testing"
 	dbtest "github.com/sodafoundation/api/testutils/db/testing"
@@ -58,7 +60,16 @@ func NewFakeVolumePortal() *VolumePortal {
 	mockClient.On("Connect", "localhost:50049").Return(nil)
 	mockClient.On("Close").Return(nil)
 	mockClient.On("CreateVolume", ctx.Background(), &pb.CreateVolumeOpts{
-		Context: c.NewAdminContext().ToJson(),
+		Id:          "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		Name:        "sample-volume",
+		Size:        1,
+		Description: "This is a sample volume for testing",
+		//SnapshotId:            "",
+		AvailabilityZone: "default",
+		ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
+		PoolId:           "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Context:          c.NewAdminContext().ToJson(),
+		Profile:          SampleProfiles[0].ToJson(),
 	}).Return(&pb.GenericResponse{}, nil)
 	mockClient.On("ExtendVolume", ctx.Background(), &pb.ExtendVolumeOpts{
 		Id:      "bd5b12a8-a101-11e7-941e-d77981b584d8",
@@ -67,7 +78,11 @@ func NewFakeVolumePortal() *VolumePortal {
 		Profile: SampleProfiles[0].ToJson(),
 	}).Return(&pb.GenericResponse{}, nil)
 	mockClient.On("DeleteVolume", ctx.Background(), &pb.DeleteVolumeOpts{
-		Context: c.NewAdminContext().ToJson(),
+		Id:        "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		ProfileId: "1106b972-66ef-11e7-b172-db03f3689c9c",
+		PoolId:    "084bf71e-a102-11e7-88a8-e31fe6d52248",
+		Context:   c.NewAdminContext().ToJson(),
+		Profile:   SampleProfiles[0].ToJson(),
 	}).Return(&pb.GenericResponse{}, nil)
 
 	return &VolumePortal{
@@ -289,6 +304,150 @@ func TestExtendVolume(t *testing.T) {
 		})
 		beego.BeeApp.Handlers.ServeHTTP(w, r)
 		assertTestResult(t, w.Code, 400)
+	})
+}
+
+func TestCreateVolume(t *testing.T) {
+	var jsonStr = []byte(`{
+		"id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+		"name":"fake Vol",
+		"size": 1,
+		"description":"fake Vol"
+	}`)
+
+	t.Run("Should return 202 if everything works well", func(t *testing.T) {
+		volume := model.VolumeSpec{BaseModel: &model.BaseModel{}}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&volume)
+		volume.CreatedAt = time.Now().Format(constants.TimeFormat)
+		volume.AvailabilityZone = "default"
+		volume.Status = "creating"
+		volume.ProfileId = "1106b972-66ef-11e7-b172-db03f3689c9c"
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetDefaultProfile", c.NewAdminContext()).Return(&SampleProfiles[0], nil)
+		mockClient.On("CreateVolume", c.NewAdminContext(), &volume).Return(&SampleVolumes[0], nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/block/volumes", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		var output model.VolumeSpec
+		json.Unmarshal(w.Body.Bytes(), &output)
+		assertTestResult(t, w.Code, 202)
+		assertTestResult(t, &output, &SampleVolumes[0])
+	})
+
+	t.Run("Should return 400 - get default profile failed: db error", func(t *testing.T) {
+		volume := model.VolumeSpec{BaseModel: &model.BaseModel{}}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&volume)
+		volume.CreatedAt = time.Now().Format(constants.TimeFormat)
+		volume.AvailabilityZone = "default"
+		volume.Status = "creating"
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetDefaultProfile", c.NewAdminContext()).Return(nil, errors.New("get default profile failed:"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/block/volumes", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 400)
+	})
+
+	t.Run("Should return 400 - get profile failed: db error", func(t *testing.T) {
+		var testjsonStr = []byte(`{
+			"id": "bd5b12a8-a101-11e7-941e-d77981b584d8",
+			"name":"fake Vol",
+			"size": 1,
+			"profileId": "1106b972-66ef-11e7-b172-db03f3689c9c",
+			"description":"fake Vol"
+		}`)
+		volume := model.VolumeSpec{BaseModel: &model.BaseModel{}}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&volume)
+		volume.CreatedAt = time.Now().Format(constants.TimeFormat)
+		volume.AvailabilityZone = "default"
+		volume.Status = "creating"
+		volume.ProfileId = "1106b972-66ef-11e7-b172-db03f3689c9c"
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetProfile", c.NewAdminContext(), volume.ProfileId).Return(nil, errors.New("get profile failed:"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/block/volumes", bytes.NewBuffer(testjsonStr))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 400)
+	})
+
+	t.Run("Should return 400 - get default profile failed: db error", func(t *testing.T) {
+		volume := model.VolumeSpec{BaseModel: &model.BaseModel{}}
+		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&volume)
+		volume.CreatedAt = time.Now().Format(constants.TimeFormat)
+		volume.AvailabilityZone = "default"
+		volume.Status = "creating"
+		volume.ProfileId = "1106b972-66ef-11e7-b172-db03f3689c9c"
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetDefaultProfile", c.NewAdminContext()).Return(&SampleProfiles[0], nil)
+		mockClient.On("CreateVolume", c.NewAdminContext(), &volume).Return(nil, errors.New("create volume failed:"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("POST", "/v1beta/block/volumes", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 400)
+	})
+}
+
+func TestDeleteVolume(t *testing.T) {
+
+	t.Run("Should return 202 if everything works well", func(t *testing.T) {
+		SampleVolumes[0].Status = "available"
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(&SampleVolumes[0], nil)
+		mockClient.On("GetProfile", c.NewAdminContext(), "1106b972-66ef-11e7-b172-db03f3689c9c").Return(&SampleProfiles[0], nil)
+		mockClient.On("ListSnapshotsByVolumeId", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(nil, nil)
+		mockClient.On("ListAttachmentsByVolumeId", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(nil, nil)
+		mockClient.On("UpdateVolume", c.NewAdminContext(), &SampleVolumes[0]).Return(nil, nil)
+		mockClient.On("DeleteVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(nil)
+		db.C = mockClient
+
+		r, _ := http.NewRequest("DELETE", "/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+		assertTestResult(t, w.Code, 202)
+	})
+
+	t.Run("Should return 404 - Get volume id failed: db error ", func(t *testing.T) {
+		SampleVolumes[0].Status = "available"
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetVolume", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(nil, errors.New("specified volume(bd5b12a8-a101-11e7-941e-d77981b584d8) can't find"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("DELETE", "/v1beta/block/volumes/bd5b12a8-a101-11e7-941e-d77981b584d8", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+		assertTestResult(t, w.Code, 404)
 	})
 }
 

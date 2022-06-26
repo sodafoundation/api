@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/context"
 	c "github.com/sodafoundation/api/pkg/context"
 	"github.com/sodafoundation/api/pkg/db"
 	"github.com/sodafoundation/api/pkg/model"
@@ -45,11 +46,29 @@ func TestListAvailabilityZones(t *testing.T) {
 
 		r, _ := http.NewRequest("GET", "/v1beta/availabilityZones", nil)
 		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
 		beego.BeeApp.Handlers.ServeHTTP(w, r)
 		var output []string
 		json.Unmarshal(w.Body.Bytes(), &output)
 		assertTestResult(t, w.Code, 200)
 		assertTestResult(t, output, SampleAvailabilityZones)
+	})
+
+	t.Run("Should return 500 - get AvailabilityZones for pools failed as db error", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("ListAvailabilityZones", c.NewAdminContext()).Return(nil, errors.New("get AvailabilityZones for pools failed:"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("GET", "/v1beta/availabilityZones", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+
+		assertTestResult(t, w.Code, 500)
 	})
 }
 

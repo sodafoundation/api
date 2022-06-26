@@ -49,9 +49,14 @@ func NewFakeVolumeGroupPortal() *VolumeGroupPortal {
 	mockClient.On("Connect", "localhost:50049").Return(nil)
 	mockClient.On("Close").Return(nil)
 	mockClient.On("CreateVolumeGroup", ctx.Background(), &pb.CreateVolumeGroupOpts{
-		Context: c.NewAdminContext().ToJson(),
+		Id:          "3769855c-a102-11e7-b772-17b880d2f555",
+		Name:        "sample-group-01",
+		Description: "This is the first sample group for testing",
+		Context:     c.NewAdminContext().ToJson(),
 	}).Return(&pb.GenericResponse{}, nil)
 	mockClient.On("DeleteVolumeGroup", ctx.Background(), &pb.DeleteVolumeGroupOpts{
+		Id:      "3769855c-a102-11e7-b772-17b880d2f555",
+		PoolId:  "084bf71e-a102-11e7-88a8-e31fe6d52248",
 		Context: c.NewAdminContext().ToJson(),
 	}).Return(&pb.GenericResponse{}, nil)
 
@@ -63,8 +68,9 @@ func NewFakeVolumeGroupPortal() *VolumeGroupPortal {
 func TestCreateVolumeGroup(t *testing.T) {
 	var jsonStr = []byte(`{
 		"id": "3769855c-a102-11e7-b772-17b880d2f555",
-		"name": "volumeGroup-demo",
-  		"description": "volume group test",
+		"name": "sample-group-01",
+  		"description": "This is the first sample group for testing",
+		"poolId":      "084bf71e-a102-11e7-88a8-e31fe6d52248",
   		"profiles": [
     		"993c87dc-1928-498b-9767-9da8f901d6ce",
     		"90d667f0-e9a9-427c-8a7f-cc714217c7bd"
@@ -98,11 +104,11 @@ func TestCreateVolumeGroup(t *testing.T) {
 	})
 	t.Run("Should return 400 if create volume group with bad request", func(t *testing.T) {
 		vg := model.VolumeGroupSpec{BaseModel: &model.BaseModel{
-			Id: "3769855c-a102-11e7-b772-17b880d2f555",
+			Id:        "3769855c-a102-11e7-b772-17b880d2f555",
 			CreatedAt: time.Now().Format(constants.TimeFormat),
 		},
-		Status: "creating",
-		AvailabilityZone: "default",
+			Status:           "creating",
+			AvailabilityZone: "default",
 		}
 		json.NewDecoder(bytes.NewBuffer(jsonStr)).Decode(&vg)
 		mockClient := new(dbtest.Client)
@@ -242,6 +248,21 @@ func TestUpdateVolumeGroup(t *testing.T) {
 		beego.BeeApp.Handlers.ServeHTTP(w, r)
 		assertTestResult(t, w.Code, 400)
 	})
+
+	t.Run("Should return 400 if update volume fails with bad request - volume group not found", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetVolumeGroup", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(nil, errors.New("volume group bd5b12a8-a101-11e7-941e-d77981b584d8 not found:"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("PUT", "/v1beta/block/volumeGroups/bd5b12a8-a101-11e7-941e-d77981b584d8", bytes.NewBuffer(jsonStr))
+		w := httptest.NewRecorder()
+		r.Header.Set("Content-Type", "application/JSON")
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 400)
+	})
 }
 
 func TestDeleteVolumeGroup(t *testing.T) {
@@ -251,15 +272,32 @@ func TestDeleteVolumeGroup(t *testing.T) {
 		mockClient.On("GetVolumeGroup", c.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f555").Return(&SampleVolumeGroups[0], nil)
 		mockClient.On("GetDockByPoolId", c.NewAdminContext(), SampleVolumeGroups[0].PoolId).Return(&SampleDocks[0], nil)
 		mockClient.On("ListVolumesByGroupId", c.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f555").Return(nil, nil)
-		mockClient.On("ListSnapshotsByVolumeId", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return( nil, nil)
-		mockClient.On("UpdateStatus", c.NewAdminContext(), volumesUpdate, "").Return( nil)
-		mockClient.On("UpdateStatus", c.NewAdminContext(), &SampleVolumeGroups[0], "deleting").Return( nil)
+		mockClient.On("ListSnapshotsByVolumeId", c.NewAdminContext(), "bd5b12a8-a101-11e7-941e-d77981b584d8").Return(nil, nil)
+		mockClient.On("UpdateStatus", c.NewAdminContext(), volumesUpdate, "").Return(nil)
+		mockClient.On("UpdateStatus", c.NewAdminContext(), &SampleVolumeGroups[0], "deleting").Return(nil)
 		mockClient.On("DeleteVolumeGroup", c.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f555").Return(nil)
 		db.C = mockClient
 
 		r, _ := http.NewRequest("DELETE", "/v1beta/block/volumeGroups/3769855c-a102-11e7-b772-17b880d2f555", nil)
 		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
 		beego.BeeApp.Handlers.ServeHTTP(w, r)
 		assertTestResult(t, w.Code, 202)
+	})
+
+	t.Run("Should return 404 - specified volume group id can't find in db", func(t *testing.T) {
+		mockClient := new(dbtest.Client)
+		mockClient.On("GetVolumeGroup", c.NewAdminContext(), "3769855c-a102-11e7-b772-17b880d2f555").Return(nil, errors.New("volume group 3769855c-a102-11e7-b772-17b880d2f555 not found: When get volume group in db"))
+		db.C = mockClient
+
+		r, _ := http.NewRequest("DELETE", "/v1beta/block/volumeGroups/3769855c-a102-11e7-b772-17b880d2f555", nil)
+		w := httptest.NewRecorder()
+		beego.InsertFilter("*", beego.BeforeExec, func(httpCtx *context.Context) {
+			httpCtx.Input.SetData("context", c.NewAdminContext())
+		})
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		assertTestResult(t, w.Code, 404)
 	})
 }
