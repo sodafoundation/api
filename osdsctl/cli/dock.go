@@ -20,8 +20,13 @@ This module implements a entry into the OpenSDS service.
 package cli
 
 import (
+	"fmt"
+	"io/ioutil"
 	"os"
+	"os/exec"
+	"strings"
 
+	"github.com/opensds/opensds/pkg/utils/constants"
 	"github.com/spf13/cobra"
 )
 
@@ -43,18 +48,25 @@ var dockListCommand = &cobra.Command{
 	Run:   dockListAction,
 }
 
+var dockImportCommand = &cobra.Command{
+	Use:   "import <storage type> <dock config file>",
+	Short: "import dock to opensds",
+	Run:   dockImportAction,
+}
+
 var (
-	dockLimit       string
-	dockOffset      string
-	dockSortDir     string
-	dockSortKey     string
-	dockId          string
-	dockName        string
-	dockDescription string
-	dockStatus      string
-	dockStorageType string
-	dockEndpoint    string
-	dockDriverName  string
+	dockLimit          string
+	dockOffset         string
+	dockSortDir        string
+	dockSortKey        string
+	dockId             string
+	dockName           string
+	dockDescription    string
+	dockStatus         string
+	dockStorageType    string
+	dockEndpoint       string
+	dockDriverName     string
+	poolConfigFilePath string
 )
 
 func init() {
@@ -69,10 +81,11 @@ func init() {
 	dockListCommand.Flags().StringVarP(&dockStorageType, "storageType", "", "", "list docks by storage type")
 	dockListCommand.Flags().StringVarP(&dockEndpoint, "endpoint", "", "", "list docks by endpoint")
 	dockListCommand.Flags().StringVarP(&dockDriverName, "driverName", "", "", "list docks by driver name")
+	dockImportCommand.Flags().StringVarP(&poolConfigFilePath, "poolConfig", "p", "", "indicate the pool config file")
 
 	dockCommand.AddCommand(dockShowCommand)
 	dockCommand.AddCommand(dockListCommand)
-
+	dockCommand.AddCommand(dockImportCommand)
 }
 
 func dockAction(cmd *cobra.Command, args []string) {
@@ -106,4 +119,77 @@ func dockListAction(cmd *cobra.Command, args []string) {
 	}
 	keys := KeyList{"Id", "Name", "Description", "Endpoint", "DriverName"}
 	PrintList(resp, keys, dockFormatters)
+}
+
+func dockImportAction(cmd *cobra.Command, args []string) {
+	ArgsNumCheck(cmd, args, 2)
+	storageType := args[0]
+	dockConfigFilePath := args[1]
+
+	importDockConfig(storageType, dockConfigFilePath)
+	if poolConfigFilePath != "" {
+		importPoolConfig(storageType, poolConfigFilePath)
+	}
+}
+
+func importDockConfig(storageType, dockConfigFilePath string) {
+	addEnabledBackendType(storageType)
+	addEnabledBackendInfo(dockConfigFilePath)
+}
+
+func addEnabledBackendType(backendType string) {
+	// Read contents from file
+	config, err := ioutil.ReadFile(constants.OpensdsConfigPath)
+	if err != nil {
+		Errorln("open ", constants.OpensdsConfigPath, " failed")
+		os.Exit(1)
+	}
+	// Add storage type to line "enabled_backends"
+	lines := strings.Split(string(config), "\n")
+	for i, line := range lines {
+		if strings.Contains(line, "enabled_backends") {
+			lines[i] = lines[i] + "," + backendType
+		}
+	}
+	output := strings.Join(lines, "\n")
+	// Write contents back to file
+	fileStat, err := os.Lstat(constants.OpensdsConfigPath)
+	if err != nil {
+		Errorln("open ", constants.OpensdsConfigPath, " failed")
+		os.Exit(1)
+	}
+	err = ioutil.WriteFile(constants.OpensdsConfigPath, []byte(output), fileStat.Mode().Perm())
+	if err != nil {
+		Errorln("write ", constants.OpensdsConfigPath, " failed")
+		os.Exit(1)
+	}
+}
+
+func addEnabledBackendInfo(backendConfig string) {
+	dockConfig, err := ioutil.ReadFile(backendConfig)
+	if err != nil {
+		Errorln(backendConfig, " is not exist")
+		os.Exit(1)
+	}
+	importDockCmd := fmt.Sprintf("cat>>%s<<EOF\n%sEOF", constants.OpensdsConfigPath, string(dockConfig))
+	_, err = exec.Command("bash", "-c", importDockCmd).CombinedOutput()
+	if err != nil {
+		Errorln("write config file failed, ", err)
+		os.Exit(1)
+	}
+}
+
+func importPoolConfig(storageType string, driverConfig string) {
+	poolConfig, err := ioutil.ReadFile(driverConfig)
+	if err != nil {
+		Errorln("open ", driverConfig, " failed")
+		os.Exit(1)
+	}
+	driverPath := fmt.Sprintf("/etc/opensds/driver/%s.yaml", storageType)
+	importPoolCmd := fmt.Sprintf("cat>>%s<<EOF\n%sEOF", driverPath, poolConfig)
+	_, err = exec.Command("bash", "-c", importPoolCmd).CombinedOutput()
+	if err != nil {
+		Errorln("write config file failed, ", err)
+		os.Exit(1)
+	}
 }
