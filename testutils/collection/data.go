@@ -285,6 +285,34 @@ var (
 			AvailabilityZone: "default",
 			ExportLocations:  []string{"192.168.100.101"},
 		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			},
+			Name:             "sample-fileshare-01",
+			Description:      "This is first sample fileshare for testing",
+			Size:             int64(1),
+			Status:           "available",
+			PoolId:           "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			ProfileId:        "b3585ebe-c42c-120g-b28e-f373746a71ca",
+			SnapshotId:       "b7602e18-771e-11e7-8f38-dbd6d291f4eg",
+			AvailabilityZone: "default",
+			ExportLocations:  []string{"192.168.100.100"},
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "d2975ebe-d82c-430f-b28e-f373746a71cb",
+			},
+			Name:             "sample-fileshare-01",
+			Description:      "This is first sample fileshare for testing",
+			Size:             int64(1),
+			Status:           "available",
+			PoolId:           "a5965ebe-dg2c-434t-b28e-f373746a71ca",
+			ProfileId:        "b3585ebe-c42c-120g-b28e-f373746a71ca",
+			SnapshotId:       "b7602e18-771e-11e7-8f38-dbd6d291f4eg",
+			AvailabilityZone: "default",
+			ExportLocations:  []string{"192.168.100.100"},
+		},
 	}
 
 	SampleFileSharesAcl = []model.FileShareAclSpec{
@@ -310,6 +338,7 @@ var (
 			AccessCapability: []string{"Read", "Write"},
 			AccessTo:         "10.32.109.15",
 			FileShareId:      "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			Status: "available",
 		},
 		{
 			BaseModel: &model.BaseModel{
@@ -321,6 +350,19 @@ var (
 			AccessCapability: []string{"Read", "Write"},
 			AccessTo:         "10.32.109.151",
 			FileShareId:      "d2975ebe-d82c-430f-b28e-f373746a71ca",
+			Status: "available",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "6ad25d59-a160-45b2-8920-211be282e2df",
+			},
+			Description:      "This is a sample Acl for testing",
+			ProfileId:        "1106b972-66ef-11e7-b172-db03f3689c9c",
+			Type:             "ip",
+			AccessCapability: []string{"Read", "Write"},
+			AccessTo:         "10.32.109.15",
+			FileShareId:      "d2975ebe-d82c-430f-b28e-f373746a71cb",
+			Status: "available",
 		},
 	}
 
@@ -342,6 +384,16 @@ var (
 			Name:         "sample-snapshot-02",
 			Description:  "This is the second sample snapshot for testing",
 			SnapshotSize: int64(1),
+			Status:       "available",
+		},
+		{
+			BaseModel: &model.BaseModel{
+				Id: "3769855c-a102-11e7-b772-17b880d2f538",
+			},
+			Name:         "sample-snapshot-03",
+			Description:  "This is the first sample snapshot for testing",
+			SnapshotSize: int64(1),
+			FileShareId:  "d2975ebe-d82c-430f-b28e-f373746a71ca",
 			Status:       "available",
 		},
 	}
